@@ -7,8 +7,6 @@
 
 #include "Client.h"
 
-const int READ_DATA_SIZE = 2048;
-
 Client::Client(std::string ip, int port)
 { 
     struct sockaddr_in serv_addr; 

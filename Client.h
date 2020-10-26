@@ -1,5 +1,7 @@
 #include <string>
 
+const int READ_DATA_SIZE = 2048;
+
 class Client {
 public:
   Client(std::string ip, int port);
@@ -10,5 +12,5 @@ public:
 
 private:
   int sock;
-  char buffer[2048] = {0}; 
+  char buffer[READ_DATA_SIZE] = {0}; 
 };
