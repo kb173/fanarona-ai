@@ -22,5 +22,6 @@ public:
 
   void parse(std::string boardContent);
 
+private:
   Node cells[BOARD_HEIGHT][BOARD_WIDTH];
 };
