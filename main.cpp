@@ -2,7 +2,7 @@
 #include <iostream>
 
 int main() {
-    std::cout << "Fanarona" << std::endl;
+    std::cout << "Fanorona" << std::endl;
 
     return 0;
 }
