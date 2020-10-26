@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "*.make": "makefile",
+    "*.lua.dc": "lua",
+    "string": "cpp"
+  }
+}
