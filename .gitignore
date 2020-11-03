@@ -31,3 +31,9 @@
 *.out
 *.app
 funorona
+
+# VS project files
+*.vs
+Fanorona-a.vcxproj*
+Fanorona-a.sln
+*x64
