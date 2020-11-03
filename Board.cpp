@@ -22,7 +22,7 @@ void Board::parse(std::string boardContent) {
         lines.push_back(str);
     }
 
-    for (int i = 0; i < lines.size(); i++) {
+    for (size_t i = 0; i < lines.size(); i++) {
         std::cout << lines[i] << std::endl;
     }
 }
