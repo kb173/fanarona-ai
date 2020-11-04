@@ -28,10 +28,7 @@ Client::Client(std::string ip, int port)
 #endif
 
 #ifdef _WIN32
-    // WSADATA wsaData; // if this doesn't work
-    WSAData wsaData; // then try this instead
-
-    // MAKEWORD(1,1) for Winsock 1.1, MAKEWORD(2,0) for Winsock 2.0
+    WSAData wsaData;
     if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
     {
         fprintf(stderr, "WSAStartup failed.\n");
@@ -84,15 +81,18 @@ Client::~Client()
 
 std::string Client::readString()
 {
+    memset(buffer, 0, READ_DATA_SIZE);
 #ifdef _WIN32
-    recv(sock, buffer, READ_DATA_SIZE, 0);
+    if (recv(sock, buffer, READ_DATA_SIZE, 0) < 0)
 #else
-    read(sock, buffer, READ_DATA_SIZE);
+    if (read(sock, buffer, READ_DATA_SIZE) < 0)
 #endif
+        throw "Receive Failed";
     return std::string(buffer);
 }
 
 void Client::writeString(std::string input)
 {
-    send(sock, input.c_str(), input.length(), 0);
+    if (send(sock, input.c_str(), input.length(), 0) < 0)
+        throw "Send Failed";
 }
