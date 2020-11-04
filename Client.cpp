@@ -28,7 +28,7 @@ Client::Client(std::string ip, int port) {
 #endif
 
 #ifdef _WIN32
-    //WSADATA wsaData;   // if this doesn't work
+    //WSADATA wsaData; // if this doesn't work
     WSAData wsaData; // then try this instead
 
     // MAKEWORD(1,1) for Winsock 1.1, MAKEWORD(2,0) for Winsock 2.0
@@ -68,6 +68,8 @@ Client::Client(std::string ip, int port) {
 #endif
         throw "Connection Failed";
     }
+
+    std::cout << "Connected!" << std::endl;
 }
 
 Client::~Client() {
