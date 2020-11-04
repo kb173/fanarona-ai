@@ -4,7 +4,9 @@
 #include "Board.h"
 
 int main() {
-    Client client("10.64.99.107", 4455);
+
+    //Client client("10.64.99.107", 4455);
+    Client client("127.0.0.1", 8888); // Test server
     std::string recv = client.readString();
     std::cout << "received: " << recv << std::endl;
 
