@@ -1,38 +1,39 @@
 #define DEBUG_OUTPUT
 
 #ifdef _WIN32
-    // link with Ws2_32.lib
-    #pragma comment(lib,"Ws2_32.lib")
+// link with Ws2_32.lib
+#pragma comment(lib, "Ws2_32.lib")
 
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #else
-    #include <sys/socket.h>
-    #include <arpa/inet.h>
-    #include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <unistd.h>
 #endif
 #include <stdio.h>
 #include <string.h>
 #include <string>
 #ifdef DEBUG_OUTPUT
-    #include <iostream>
+#include <iostream>
 #endif
 
 #include "Client.h"
 
-
-Client::Client(std::string ip, int port) {
+Client::Client(std::string ip, int port)
+{
 
 #ifdef DEBUG_OUTPUT
     std::cout << "init listening socket on " << ip << " port " << port << std::endl;
 #endif
 
 #ifdef _WIN32
-    //WSADATA wsaData;   // if this doesn't work
+    // WSADATA wsaData;   // if this doesn't work
     WSAData wsaData; // then try this instead
 
     // MAKEWORD(1,1) for Winsock 1.1, MAKEWORD(2,0) for Winsock 2.0
-    if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0) {
+    if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
+    {
         fprintf(stderr, "WSAStartup failed.\n");
         exit(1);
     }
@@ -49,7 +50,7 @@ Client::Client(std::string ip, int port) {
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = port;
-    //serv_addr.sin_addr.s_addr = inet_addr(ip.c_str()); // deprecated -> use inet_pton instead
+    // serv_addr.sin_addr.s_addr = inet_addr(ip.c_str()); // deprecated -> use inet_pton instead
 
     // Convert IPv4 and IPv6 addresses from text to binary form
     int status = 0;
@@ -70,7 +71,8 @@ Client::Client(std::string ip, int port) {
     }
 }
 
-Client::~Client() {
+Client::~Client()
+{
 #ifdef _WIN32
     closesocket(sock);
 #else
@@ -78,7 +80,8 @@ Client::~Client() {
 #endif
 }
 
-std::string Client::readString() {
+std::string Client::readString()
+{
 #ifdef _WIN32
     recv(sock, buffer, READ_DATA_SIZE, 0);
 #else
@@ -87,6 +90,7 @@ std::string Client::readString() {
     return std::string(buffer);
 }
 
-void Client::writeString(std::string input) {
+void Client::writeString(std::string input)
+{
     send(sock, input.c_str(), input.length(), 0);
 }

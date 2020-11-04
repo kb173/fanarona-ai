@@ -1,27 +1,30 @@
-#include <string>
 #include <array>
+#include <string>
 
 const int BOARD_WIDTH = 9;
 const int BOARD_HEIGHT = 5;
 
-enum class State : char {
-  EMPTY,
-  WHITE,
-  BLACK,
+enum class State : char
+{
+    EMPTY,
+    WHITE,
+    BLACK,
 };
 
-struct Node {
-  State state = State::EMPTY;
-  std::array<Node*, 8> neighbours;
+struct Node
+{
+    State state = State::EMPTY;
+    std::array<Node *, 8> neighbours;
 };
 
-class Board {
-public:
-  Board();
-  ~Board();
+class Board
+{
+  public:
+    Board();
+    ~Board();
 
-  void parse(std::string boardContent);
+    void parse(std::string boardContent);
 
-private:
-  Node cells[BOARD_HEIGHT][BOARD_WIDTH];
+  private:
+    Node cells[BOARD_HEIGHT][BOARD_WIDTH];
 };
