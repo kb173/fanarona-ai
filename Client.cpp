@@ -49,7 +49,7 @@ Client::Client(std::string ip, int port)
     }
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = port;
+    serv_addr.sin_port = htons(port);
     // serv_addr.sin_addr.s_addr = inet_addr(ip.c_str()); // deprecated -> use inet_pton instead
 
     // Convert IPv4 and IPv6 addresses from text to binary form
