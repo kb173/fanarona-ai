@@ -29,3 +29,23 @@ void Board::parse(std::string boardContent)
         std::cout << lines[i] << std::endl;
     }
 }
+
+void Board::print()
+{
+}
+
+// temp implementation for stdin input by user: TODO add logic implementation here
+std::string Board::getPosition (int mode)
+{
+    if (mode == 0)
+        std::cout << "select stone: ";
+    else if (mode == 1)
+        std::cout << "select location: ";
+
+    std::string input;
+    //std::cin >> input; // does not parse whitespaces!
+    std::getline(std::cin, input);
+
+    // TODO: validate input (for user)
+    return input;
+}

@@ -1,3 +1,6 @@
+#ifndef BOARD_H
+#define BOARD_H
+
 #include <array>
 #include <string>
 
@@ -19,12 +22,15 @@ struct Node
 
 class Board
 {
-  public:
+public:
     Board();
     ~Board();
 
     void parse(std::string boardContent);
+    void print();
+    std::string getPosition(int); // returns next position, depending on mode: 0 = stone; 1 = free space -> TODO: use enums or whatever...; TODO: return type string?
 
-  private:
+private:
     Node cells[BOARD_HEIGHT][BOARD_WIDTH];
 };
+#endif // BOARD_H

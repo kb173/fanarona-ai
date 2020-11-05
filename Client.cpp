@@ -1,4 +1,5 @@
 #define DEBUG_OUTPUT
+#define SHOW_RAW_MSG
 
 #ifdef _WIN32
 // link with Ws2_32.lib
@@ -95,4 +96,46 @@ void Client::writeString(std::string input)
 {
     if (send(sock, input.c_str(), input.length(), 0) < 0)
         throw "Send Failed";
+}
+
+void Client::setBoard(Board &i_board)
+{
+    board = i_board;
+}
+
+void Client::start()
+{
+    while (true)
+    {
+        std::string recv = readString();
+#ifdef SHOW_RAW_MSG
+        std::cout << "### RAW\r\n" << recv << "\r\n###\r\n";
+#endif
+
+        // TODO: define keywords
+        size_t pos = std::string::npos;
+        if ((pos = recv.rfind("  0 1 2 3 4 5 6 7 8")) != std::string::npos)
+        {
+            std::string field = recv.substr(pos, 201); // TODO: make const for fixed size length
+            board.parse(field);
+        }
+
+        if (recv.find("select stone: ") != std::string::npos ||
+            recv.find("select stone to take:") != std::string::npos) // TODO: fix missing whitespace on server
+        {
+            std::string input = board.getPosition(0);
+            writeString(input + "\n");
+        }
+        else if (recv.find("select location to move: ") != std::string::npos)
+        {
+            std::string input = board.getPosition(1);
+            writeString(input + "\n");
+        }
+        else
+        {
+#ifdef DEBUG_OUTPUT
+            std::cout << "/// unhandled text:\n'" << recv << "'" << std::endl;
+#endif
+        }
+    }
 }
