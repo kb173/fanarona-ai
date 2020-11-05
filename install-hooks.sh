@@ -7,7 +7,7 @@ if [[ $? -ne 0 ]]; then
     brew install clang-format
   fi
   if [[ "$OSTYPE" == "linux"* ]]; then
-    apt install build-essential
+    apt update && apt install build-essential
   fi
 fi
 
