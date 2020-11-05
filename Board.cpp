@@ -19,14 +19,17 @@ void Board::parse(std::string boardContent)
     std::string str;
 
     std::vector<std::string> lines;
+    int line = 0; // used to skip every second line
     while (getline(stream, str))
     {
-        lines.push_back(str);
+        if (line++ % 2 == 1) lines.push_back(str);
     }
 
-    for (size_t y = 0; y < lines.size(); y++)
+    for (line = 0; line < lines.size(); line++)
     {
-        int inputRow = y * 2 + 1;
+        //int inputRow = y * 2 + 1;
+        int inputRow = line;
+        int y = line;
         auto line = lines[inputRow];
         for (size_t x = 0; x < line.size(); x++)
         {
@@ -37,8 +40,8 @@ void Board::parse(std::string boardContent)
             {
                 break;
             }
-            auto& cell = getCell(x, y);
 
+            auto& cell = getCell(x, y);
             if (character == 'O')
             {
                 cell.state = State::WHITE;
@@ -49,37 +52,43 @@ void Board::parse(std::string boardContent)
             }
 
             std::vector<Node*> neighbours;
-            if (lines[inputRow - 1][inputColumn - 1] == '\\')
-            {
-                neighbours.push_back(&getCell(x - 1, y - 1));
-            }
-            if (lines[inputRow][inputColumn - 1] == '-')
-            {
-                neighbours.push_back(&getCell(x - 1, y));
-            }
-            if (lines[inputRow + 1][inputColumn - 1] == '/')
-            {
-                neighbours.push_back(&getCell(x - 1, y + 1));
-            }
-            if (lines[inputRow - 1][inputColumn] == '|')
-            {
-                neighbours.push_back(&getCell(x, y - 1));
-            }
-            if (lines[inputRow + 1][inputColumn] == '|')
+            // temp fix to ignore over bounds
+            bool minRow = inputRow > 0;
+            bool minCol = inputColumn > 0;
+            bool maxRow = inputRow + 1 < BOARD_HEIGHT;
+            bool maxCol = inputColumn + 1 < BOARD_WIDTH;
+
+            if (maxRow && lines[inputRow + 1][inputColumn] == '|')
             {
                 neighbours.push_back(&getCell(x, y + 1));
             }
-            if (lines[inputRow - 1][inputColumn + 1] == '/')
-            {
-                neighbours.push_back(&getCell(x + 1, y - 1));
-            }
-            if (lines[inputRow][inputColumn + 1] == '-')
+            if (maxCol && lines[inputRow][inputColumn + 1] == '-')
             {
                 neighbours.push_back(&getCell(x + 1, y));
             }
-            if (lines[inputRow + 1][inputColumn + 1] == '\\')
+            if (maxCol && maxRow && lines[inputRow + 1][inputColumn + 1] == '\\')
             {
                 neighbours.push_back(&getCell(x + 1, y + 1));
+            }
+            if (minCol && minRow && lines[inputRow - 1][inputColumn - 1] == '\\')
+            {
+                neighbours.push_back(&getCell(x - 1, y - 1));
+            }
+            if (minCol && lines[inputRow][inputColumn - 1] == '-')
+            {
+                neighbours.push_back(&getCell(x - 1, y));
+            }
+            if (maxRow && minCol && lines[inputRow + 1][inputColumn - 1] == '/')
+            {
+                neighbours.push_back(&getCell(x - 1, y + 1));
+            }
+            if (minRow && maxCol && lines[inputRow - 1][inputColumn + 1] == '/')
+            {
+                neighbours.push_back(&getCell(x + 1, y - 1));
+            }
+            if (minRow && lines[inputRow - 1][inputColumn] == '|')
+            {
+                neighbours.push_back(&getCell(x, y - 1));
             }
 
             cell.neighbours = neighbours;
