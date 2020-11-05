@@ -4,7 +4,7 @@ CXXFLAGS = -Wall --std=c++11
 funorona: main.o Client.o Board.o
 	$(CXX) $(CXXFLAGS) -o funorona main.o Client.o Board.o
 
-main.o: main.cpp
+main.o: main.cpp Client.o Board.o
 	$(CXX) $(CXXFLAGS) -c main.cpp
 
 Client.o: Client.cpp

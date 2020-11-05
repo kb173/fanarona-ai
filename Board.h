@@ -1,8 +1,7 @@
-#ifndef BOARD_H
-#define BOARD_H
+#pragma once
 
-#include <array>
 #include <string>
+#include <vector>
 
 const int BOARD_WIDTH = 9;
 const int BOARD_HEIGHT = 5;
@@ -17,20 +16,30 @@ enum class State : char
 struct Node
 {
     State state = State::EMPTY;
-    std::array<Node *, 8> neighbours;
+    std::vector<Node*> neighbours;
 };
 
 class Board
 {
-public:
+  public:
     Board();
     ~Board();
 
     void parse(std::string boardContent);
     void print();
-    std::string getPosition(int); // returns next position, depending on mode: 0 = stone; 1 = free space -> TODO: use enums or whatever...; TODO: return type string?
+    std::string getPosition(int); // returns next position, depending on mode: 0 = stone; 1 = free space -> TODO: use
+                                  // enums or whatever...; TODO: return type string?
 
-private:
+  private:
+    Node cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
+
+    inline Node& getCell(int x, int y)
+    {
+        return cells[y][x];
+    }
+    std::vector<Node*> getNeighbours(int x, int y);
+    bool isPositionInBounds(int x, int y);
+
+  private:
     Node cells[BOARD_HEIGHT][BOARD_WIDTH];
 };
-#endif // BOARD_H

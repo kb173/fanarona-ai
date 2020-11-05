@@ -1,5 +1,4 @@
-#ifndef CLIENT_H
-#define CLIENT_H
+#pragma once
 
 #include <string>
 
@@ -16,7 +15,7 @@ class Client
     std::string readString();
     void writeString(std::string input);
 
-    void setBoard(Board &);
+    void setBoard(Board&);
     void start();
 
   private:
@@ -25,4 +24,3 @@ class Client
 
     Board board;
 };
-#endif // CLIENT_H
