@@ -39,7 +39,4 @@ class Board
     }
     std::vector<Node*> getNeighbours(int x, int y);
     bool isPositionInBounds(int x, int y);
-
-  private:
-    Node cells[BOARD_HEIGHT][BOARD_WIDTH];
 };
