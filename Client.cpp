@@ -116,7 +116,8 @@ void Client::start()
         size_t pos = std::string::npos;
         if ((pos = recv.rfind("  0 1 2 3 4 5 6 7 8")) != std::string::npos)
         {
-            std::string field = recv.substr(pos, 201); // TODO: make const for fixed size length
+            //std::string field = recv.substr(pos, 201); // TODO: make const for fixed size length
+            std::string field = recv.substr(pos, 209); // TODO: make const for fixed size length
             board.parse(field);
         }
 
