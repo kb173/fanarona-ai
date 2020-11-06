@@ -13,9 +13,6 @@ jobs:
           sudo apt-get install clang-format-11
       - shell: bash
         run: |
-          clang-format-11 --version
-      - shell: bash
-        run: |
           ! clang-format-11 *.h *.cpp -style=file --output-replacements-xml | grep "<replacement "
   build:
     runs-on: ubuntu-latest

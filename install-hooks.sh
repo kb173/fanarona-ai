@@ -7,7 +7,7 @@ if [[ $? -ne 0 ]]; then
     brew install clang-format
   fi
   if [[ "$OSTYPE" == "linux"* ]]; then
-    apt update && apt install build-essential
+    apt-get update && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" && sudo apt-get install -y clang-format-11
   fi
 fi
 

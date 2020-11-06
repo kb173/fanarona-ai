@@ -16,7 +16,7 @@ enum class State : char
 struct Node
 {
     State state = State::EMPTY;
-    std::array<Node*, 8> neighbours;
+    std::array<Node*, 8> neighbours = {};
 };
 
 class Board
@@ -33,9 +33,6 @@ class Board
   private:
     Node cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
 
-    inline Node& getCell(int x, int y)
-    {
-        return cells[y][x];
-    }
-    bool isPositionInBounds(int x, int y);
+    inline Node* getCell(int x, int y);
+    inline bool isPositionInBounds(int x, int y);
 };

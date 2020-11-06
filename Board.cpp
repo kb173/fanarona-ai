@@ -19,25 +19,26 @@ void Board::parse(std::string boardContent)
     std::string str;
 
     std::vector<std::string> lines;
-    int line = 0; // used to skip every second line
     while (getline(stream, str))
     {
-        if (line++ % 2 == 1)
-            lines.push_back(str);
+        // Remove carriage return if a server with Windows line endings is used
+        if (str[0] == '\r' && str.length() > 0)
+        {
+            str = str.substr(1);
+        }
+        lines.push_back(str);
     }
 
-    for (line = 0; line < lines.size(); line++)
+    for (int y = 0;; y++)
     {
-        // int inputRow = y * 2 + 1;
-        int inputRow = line;
-        int y = line;
+        int inputRow = y * 2 + 1;
         auto line = lines[inputRow];
 
-        // Remove carriage return if a server with Windows line endings is used
-        if (line[0] == '\r' && line.length() > 0)
+        if (inputRow >= lines.size())
         {
-            line = line.substr(1);
+            break;
         }
+
         std::cout << line << std::endl;
 
         for (size_t x = 0; x < line.size(); x++)
@@ -50,56 +51,59 @@ void Board::parse(std::string boardContent)
                 break;
             }
 
-            auto& cell = getCell(x, y);
+            auto cell = getCell(x, y);
             if (character == 'O')
             {
-                cell.state = State::WHITE;
+                cell->state = State::WHITE;
             }
             else if (character == '#')
             {
-                cell.state = State::BLACK;
+                cell->state = State::BLACK;
             }
 
-            // temp fix to ignore over bounds
-            bool minRow = inputRow > 0;
-            bool minCol = inputColumn > 0;
-            bool maxRow = inputRow + 1 < BOARD_HEIGHT;
-            bool maxCol = inputColumn + 1 < BOARD_WIDTH;
-
-            if (minCol && minRow && lines[inputRow - 1][inputColumn - 1] == '\\')
+            if (isPositionInBounds(x - 1, y - 1) && lines[inputRow - 1][inputColumn - 1] == '\\')
             {
-                cell.neighbours[0] = &getCell(x - 1, y - 1);
+                cell->neighbours[0] = getCell(x - 1, y - 1);
             }
-            if (minRow && lines[inputRow - 1][inputColumn] == '|')
+            if (isPositionInBounds(x, y - 1) && lines[inputRow - 1][inputColumn] == '|')
             {
-                cell.neighbours[1] = &getCell(x, y - 1);
+                cell->neighbours[1] = getCell(x, y - 1);
             }
-            if (minRow && maxCol && lines[inputRow - 1][inputColumn + 1] == '/')
+            if (isPositionInBounds(x + 1, y - 1) && lines[inputRow - 1][inputColumn + 1] == '/')
             {
-                cell.neighbours[2] = &getCell(x + 1, y - 1);
+                cell->neighbours[2] = getCell(x + 1, y - 1);
             }
-            if (minCol && lines[inputRow][inputColumn - 1] == '-')
+            if (isPositionInBounds(x - 1, y) && lines[inputRow][inputColumn - 1] == '-')
             {
-                cell.neighbours[3] = &getCell(x - 1, y);
+                cell->neighbours[3] = getCell(x - 1, y);
             }
-            if (maxCol && lines[inputRow][inputColumn + 1] == '-')
+            if (isPositionInBounds(x + 1, y) && lines[inputRow][inputColumn + 1] == '-')
             {
-                cell.neighbours[4] = &getCell(x + 1, y);
+                cell->neighbours[4] = getCell(x + 1, y);
             }
-            if (maxRow && minCol && lines[inputRow + 1][inputColumn - 1] == '/')
+            if (isPositionInBounds(x - 1, y + 1) && lines[inputRow + 1][inputColumn - 1] == '/')
             {
-                cell.neighbours[5] = &getCell(x - 1, y + 1);
+                cell->neighbours[5] = getCell(x - 1, y + 1);
             }
-            if (maxRow && lines[inputRow + 1][inputColumn] == '|')
+            if (isPositionInBounds(x, y + 1) && lines[inputRow + 1][inputColumn] == '|')
             {
-                cell.neighbours[6] = &getCell(x, y + 1);
+                cell->neighbours[6] = getCell(x, y + 1);
             }
-            if (maxCol && maxRow && lines[inputRow + 1][inputColumn + 1] == '\\')
+            if (isPositionInBounds(x + 1, y + 1) && lines[inputRow + 1][inputColumn + 1] == '\\')
             {
-                cell.neighbours[7] = &getCell(x + 1, y + 1);
+                cell->neighbours[7] = getCell(x + 1, y + 1);
             }
         }
     }
+}
+
+Node* Board::getCell(int x, int y)
+{
+    if (!isPositionInBounds(x, y))
+    {
+        return nullptr;
+    }
+    return &cells[y][x];
 }
 
 bool Board::isPositionInBounds(int x, int y)
