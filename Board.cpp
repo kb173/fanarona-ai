@@ -22,15 +22,24 @@ void Board::parse(std::string boardContent)
     int line = 0; // used to skip every second line
     while (getline(stream, str))
     {
-        if (line++ % 2 == 1) lines.push_back(str);
+        if (line++ % 2 == 1)
+            lines.push_back(str);
     }
 
     for (line = 0; line < lines.size(); line++)
     {
-        //int inputRow = y * 2 + 1;
+        // int inputRow = y * 2 + 1;
         int inputRow = line;
         int y = line;
         auto line = lines[inputRow];
+
+        // Remove carriage return if a server with Windows line endings is used
+        if (line[0] == '\r' && line.length() > 0)
+        {
+            line = line.substr(1);
+        }
+        std::cout << line << std::endl;
+
         for (size_t x = 0; x < line.size(); x++)
         {
             int inputColumn = x * 2 + 2;
@@ -51,47 +60,44 @@ void Board::parse(std::string boardContent)
                 cell.state = State::BLACK;
             }
 
-            std::vector<Node*> neighbours;
             // temp fix to ignore over bounds
             bool minRow = inputRow > 0;
             bool minCol = inputColumn > 0;
             bool maxRow = inputRow + 1 < BOARD_HEIGHT;
             bool maxCol = inputColumn + 1 < BOARD_WIDTH;
 
-            if (maxRow && lines[inputRow + 1][inputColumn] == '|')
-            {
-                neighbours.push_back(&getCell(x, y + 1));
-            }
-            if (maxCol && lines[inputRow][inputColumn + 1] == '-')
-            {
-                neighbours.push_back(&getCell(x + 1, y));
-            }
-            if (maxCol && maxRow && lines[inputRow + 1][inputColumn + 1] == '\\')
-            {
-                neighbours.push_back(&getCell(x + 1, y + 1));
-            }
             if (minCol && minRow && lines[inputRow - 1][inputColumn - 1] == '\\')
             {
-                neighbours.push_back(&getCell(x - 1, y - 1));
-            }
-            if (minCol && lines[inputRow][inputColumn - 1] == '-')
-            {
-                neighbours.push_back(&getCell(x - 1, y));
-            }
-            if (maxRow && minCol && lines[inputRow + 1][inputColumn - 1] == '/')
-            {
-                neighbours.push_back(&getCell(x - 1, y + 1));
-            }
-            if (minRow && maxCol && lines[inputRow - 1][inputColumn + 1] == '/')
-            {
-                neighbours.push_back(&getCell(x + 1, y - 1));
+                cell.neighbours[0] = &getCell(x - 1, y - 1);
             }
             if (minRow && lines[inputRow - 1][inputColumn] == '|')
             {
-                neighbours.push_back(&getCell(x, y - 1));
+                cell.neighbours[1] = &getCell(x, y - 1);
             }
-
-            cell.neighbours = neighbours;
+            if (minRow && maxCol && lines[inputRow - 1][inputColumn + 1] == '/')
+            {
+                cell.neighbours[2] = &getCell(x + 1, y - 1);
+            }
+            if (minCol && lines[inputRow][inputColumn - 1] == '-')
+            {
+                cell.neighbours[3] = &getCell(x - 1, y);
+            }
+            if (maxCol && lines[inputRow][inputColumn + 1] == '-')
+            {
+                cell.neighbours[4] = &getCell(x + 1, y);
+            }
+            if (maxRow && minCol && lines[inputRow + 1][inputColumn - 1] == '/')
+            {
+                cell.neighbours[5] = &getCell(x - 1, y + 1);
+            }
+            if (maxRow && lines[inputRow + 1][inputColumn] == '|')
+            {
+                cell.neighbours[6] = &getCell(x, y + 1);
+            }
+            if (maxCol && maxRow && lines[inputRow + 1][inputColumn + 1] == '\\')
+            {
+                cell.neighbours[7] = &getCell(x + 1, y + 1);
+            }
         }
     }
 }

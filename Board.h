@@ -1,7 +1,7 @@
 #pragma once
 
+#include <array>
 #include <string>
-#include <vector>
 
 const int BOARD_WIDTH = 9;
 const int BOARD_HEIGHT = 5;
@@ -16,7 +16,7 @@ enum class State : char
 struct Node
 {
     State state = State::EMPTY;
-    std::vector<Node*> neighbours;
+    std::array<Node*, 8> neighbours;
 };
 
 class Board
@@ -37,6 +37,5 @@ class Board
     {
         return cells[y][x];
     }
-    std::vector<Node*> getNeighbours(int x, int y);
     bool isPositionInBounds(int x, int y);
 };
