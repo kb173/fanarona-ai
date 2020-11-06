@@ -1,9 +1,9 @@
 #include <iostream>
 #include <sstream>
-#include <string>
-#include <vector>
 
 #include "Board.h"
+
+
 
 Board::Board()
 {
@@ -39,8 +39,6 @@ void Board::parse(std::string boardContent)
             break;
         }
 
-        std::cout << line << std::endl;
-
         for (size_t x = 0; x < line.size(); x++)
         {
             int inputColumn = x * 2 + 2;
@@ -60,7 +58,10 @@ void Board::parse(std::string boardContent)
             {
                 cell->state = State::BLACK;
             }
-
+            else{
+                cell->state = State::EMPTY;
+            }
+            //TODO: only setup neighbour connections during first parsing phase @rene
             if (isPositionInBounds(x - 1, y - 1) && lines[inputRow - 1][inputColumn - 1] == '\\')
             {
                 cell->neighbours[0] = getCell(x - 1, y - 1);
@@ -115,7 +116,14 @@ bool Board::isPositionInBounds(int x, int y)
 std::string Board::getPosition(int mode)
 {
     if (mode == 0)
+    {
+        auto moves = findMoves(true);
+        std::cout<<"Available Moves: \r\n";
+        for(auto move :moves){
+            std::cout<<moveToString(move)<<"\r\n";
+        }
         std::cout << "select stone: ";
+    }
     else if (mode == 1)
         std::cout << "select location: ";
 
@@ -125,4 +133,135 @@ std::string Board::getPosition(int mode)
 
     // TODO: validate input (for user)
     return input;
+}
+
+
+const std::string Board::moveToString(const move & move){
+    std::string moveString = nodeToPositionString(move.first) + " can move " + indexToDirectionString(move.second) +" ("+nodeToPositionString(move.first->neighbours[move.second])+")";
+    return moveString;
+}
+const std::string Board::nodeToPositionString(const Node* node)
+{
+    std::string position = "Not Found";
+     for (int y = 0; y < BOARD_HEIGHT; y++)
+    {   
+        for (int x = 0; x < BOARD_WIDTH; x++)
+        {
+            if(getCell(x,y)==node){
+                position = std::to_string(x)+" "+std::to_string(y);
+            }
+        }
+    }
+    return position; 
+}
+const std::string Board::indexToDirectionString(const int & index){
+    switch(index) 
+    {
+    case 0:
+        return "north west";
+    case 1:
+        return "north";
+    case 2:
+        return "north east";
+    case 3:
+        return "west";
+    case 4:
+        return "east";
+    case 5:
+        return "southwest";
+    case 6:
+        return "south";
+    case 7:
+        return "southeast";
+    default:
+        return "invalid index";
+    }
+
+}
+
+//returns movable pieces for desired color, and integer denoting in which direction it can move
+//this means pieces can occur twice in the returned vector if they can move in two or more directions
+const std::vector<move> Board::findMoves(const bool & white)
+{
+    //if we have no moving piece its a normal turn else we continue moving that piece
+    return movingPiece!=nullptr?findContinuingMoves():findFirstMoves(white);
+}
+
+const std::vector<move> Board::findFirstMoves(const bool & white)
+{
+    std::vector<move> nonCapturingMoves;
+    std::vector<move> capturingMoves;
+    State myState = white ? State::WHITE : State::BLACK;
+    //iterate over board
+    for (int y = 0; y < BOARD_HEIGHT; y++)
+    {
+        for (int x = 0; x < BOARD_WIDTH; x++)
+        {
+            auto cell = getCell(x,y);
+            //if we find a stone of my color
+            if (cell->state == myState)
+            {
+                //iterate over neighbors
+                for (int i = 0; i < 8; i++)
+                {
+                    auto neighbour = cell->neighbours[i];
+                    //if neighbor node is empty
+                    if (neighbour!= nullptr && neighbour->state == State::EMPTY)
+                    {
+                        move move (cell,i);
+                        //check if move captures and add to corresponding vector
+                        if (captureCount(move)>=1)
+                        {
+                            capturingMoves.push_back(move);
+                        }
+                        else
+                        {
+                            nonCapturingMoves.push_back(move);
+                        }
+                    }
+               }
+            }
+        }
+    }
+    //capture is mandatory thus only return those moves if available
+    return capturingMoves.size()>0?capturingMoves:nonCapturingMoves;
+}
+const std::vector<move> Board::findContinuingMoves()
+{
+    std::vector<move> nonCapturingMoves;
+    std::vector<move> capturingMoves;
+    //iterate over neighbors of current moving piece
+    for (int i = 0; i < 8; i++)
+    {
+        auto neighbour = movingPiece->neighbours[i];
+        //if neighbor is empty
+        if (neighbour != nullptr && neighbour->state == State::EMPTY)
+        {
+            move move (movingPiece,i);
+            //check for captures and add to corresponding vector
+            if(captureCount(move)>=1){
+            capturingMoves.push_back(move);
+            }
+            else{
+            nonCapturingMoves.push_back(move);
+            }
+        }
+    }
+    //capture is mandatory thus only return those moves if available
+    return capturingMoves.size()>0?capturingMoves:nonCapturingMoves;
+}
+
+const int Board::captureCount(const move & move){
+
+    State myState = move.first->state;
+    //get neighbor of node we move to in the direction we moved
+    Node* curNeighbour = move.first->neighbours[move.second]->neighbours[move.second];
+    int count = 0;
+    //if there is a field, and on that field is a stone of the other color count up
+    while(curNeighbour!=nullptr && curNeighbour->state!=State::EMPTY && curNeighbour->state!=myState){
+        count++;
+        //continue with next neighbor
+        curNeighbour = curNeighbour->neighbours[move.second];
+    }
+    return count;    
 }
