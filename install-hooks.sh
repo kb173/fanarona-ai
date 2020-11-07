@@ -1,12 +1,18 @@
 #!/bin/bash
 
-command -v clang-format
-if [[ $? -ne 0 ]]; then
-  echo "Attempting to install clang-format..."
-  if [[ "$OSTYPE" == "darwin"* ]]; then
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  clang_format_command="clang-format"
+  command -v $clang_format_command
+  if [[ $? -ne 0 ]]; then
+    echo "Attempting to install clang-format..."
     brew install clang-format
   fi
-  if [[ "$OSTYPE" == "linux"* ]]; then
+fi
+if [[ "$OSTYPE" == "linux"* ]]; then
+  clang_format_command="clang-format-11"
+  command -v $clang_format_command
+  if [[ $? -ne 0 ]]; then
+    echo "Attempting to install clang-format..."
     apt-get update && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" && sudo apt-get install -y clang-format-11
   fi
 fi
@@ -20,7 +26,7 @@ FILES=\$(git diff --cached --name-only --diff-filter=ACMR "*.h" "*.cpp" | sed 's
 echo "Applying auto formatting..."
 
 # Format all changed files
-echo "\$FILES" | xargs clang-format -i -style=file
+echo "\$FILES" | xargs $clang_format_command -i -style=file
 
 # Add back the modified files to staging
 echo "\$FILES" | xargs git add
