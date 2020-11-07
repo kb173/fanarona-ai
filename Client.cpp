@@ -20,6 +20,7 @@
 #endif
 
 #include "Client.h"
+#include "Board.h"
 
 Client::Client(std::string ip, int port)
 {
@@ -98,7 +99,7 @@ void Client::writeString(std::string input)
         throw "Send Failed";
 }
 
-void Client::setBoard(Board& i_board)
+void Client::setBoard(Board *i_board)
 {
     board = i_board;
 }
@@ -118,18 +119,18 @@ void Client::start()
         {
             // std::string field = recv.substr(pos, 201); // TODO: make const for fixed size length
             std::string field = recv.substr(pos, 209); // TODO: make const for fixed size length
-            board.parse(field);
+            board->parse(field);
         }
 
         if (recv.find("select stone: ") != std::string::npos ||
             recv.find("select stone to take:") != std::string::npos) // TODO: fix missing whitespace on server
         {
-            std::string input = board.getPosition(0);
+            std::string input = board->getPosition(0);
             writeString(input + "\n");
         }
         else if (recv.find("select location to move: ") != std::string::npos)
         {
-            std::string input = board.getPosition(1);
+            std::string input = board->getPosition(1);
             writeString(input + "\n");
         }
         else
