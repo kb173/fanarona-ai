@@ -34,9 +34,12 @@ funorona
 
 # VS project files
 *.vs
-Fanorona-a.vcxproj*
-Fanorona-a.sln
+Fanorona-ai.vcxproj*
+Fanorona-ai.sln
 *x64
 Server
 client
 *enc_temp_folder
+
+# VSCode
+*.vscode
