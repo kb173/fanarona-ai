@@ -3,6 +3,16 @@
 
 #include "Board.h"
 
+Node* Move::from() const
+{
+    return origin;
+}
+
+Node* Move::to() const
+{
+    return origin->neighbours[direction];
+}
+
 Board::Board()
 {
 }
@@ -135,10 +145,10 @@ std::string Board::getPosition(int mode)
     return input;
 }
 
-const std::string Board::moveToString(const move& move)
+const std::string Board::moveToString(const Move& move)
 {
-    std::string moveString = nodeToPositionString(move.first) + " can move " + indexToDirectionString(move.second) +
-                             " (" + nodeToPositionString(move.first->neighbours[move.second]) + ")";
+    std::string moveString = nodeToPositionString(move.from()) + " can move " + indexToDirectionString(move.direction) +
+                             " (" + nodeToPositionString(move.to()) + ")";
     return moveString;
 }
 const std::string Board::nodeToPositionString(const Node* node)
@@ -183,16 +193,16 @@ const std::string Board::indexToDirectionString(const int& index)
 
 // returns movable pieces for desired color, and integer denoting in which direction it can move
 // this means pieces can occur twice in the returned vector if they can move in two or more directions
-const std::vector<move> Board::findMoves(const bool& white)
+const std::vector<Move> Board::findMoves(const bool& white)
 {
     // if we have no moving piece its a normal turn else we continue moving that piece
     return movingPiece != nullptr ? findContinuingMoves() : findFirstMoves(white);
 }
 
-const std::vector<move> Board::findFirstMoves(const bool& white)
+const std::vector<Move> Board::findFirstMoves(const bool& white)
 {
-    std::vector<move> nonCapturingMoves;
-    std::vector<move> capturingMoves;
+    std::vector<Move> nonCapturingMoves;
+    std::vector<Move> capturingMoves;
     State myState = white ? State::WHITE : State::BLACK;
     // iterate over board
     for (int y = 0; y < BOARD_HEIGHT; y++)
@@ -210,7 +220,7 @@ const std::vector<move> Board::findFirstMoves(const bool& white)
                     // if neighbor node is empty
                     if (neighbour != nullptr && neighbour->state == State::EMPTY)
                     {
-                        move move(cell, i);
+                        Move move(cell, i);
                         // check if move captures and add to corresponding vector
                         if (captureCount(move) >= 1)
                         {
@@ -228,10 +238,10 @@ const std::vector<move> Board::findFirstMoves(const bool& white)
     // capture is mandatory thus only return those moves if available
     return capturingMoves.size() > 0 ? capturingMoves : nonCapturingMoves;
 }
-const std::vector<move> Board::findContinuingMoves()
+const std::vector<Move> Board::findContinuingMoves()
 {
-    std::vector<move> nonCapturingMoves;
-    std::vector<move> capturingMoves;
+    std::vector<Move> nonCapturingMoves;
+    std::vector<Move> capturingMoves;
     // iterate over neighbors of current moving piece
     for (int i = 0; i < 8; i++)
     {
@@ -239,7 +249,7 @@ const std::vector<move> Board::findContinuingMoves()
         // if neighbor is empty
         if (neighbour != nullptr && neighbour->state == State::EMPTY)
         {
-            move move(movingPiece, i);
+            Move move(movingPiece, i);
             // check for captures and add to corresponding vector
             if (captureCount(move) >= 1)
             {
@@ -255,12 +265,12 @@ const std::vector<move> Board::findContinuingMoves()
     return capturingMoves.size() > 0 ? capturingMoves : nonCapturingMoves;
 }
 
-const int Board::captureCount(const move& move)
+const int Board::captureCount(const Move& move)
 {
-    State myState = move.first->state;
+    State myState = move.from()->state;
 
     // get neighbor of node we move to in the direction we moved
-    Node* curNeighbour = move.first->neighbours[move.second]->neighbours[move.second];
+    Node* curNeighbour = move.to()->neighbours[move.direction];
 
     int count = 0;
 
@@ -269,7 +279,7 @@ const int Board::captureCount(const move& move)
     {
         count++;
         // continue with next neighbor
-        curNeighbour = curNeighbour->neighbours[move.second];
+        curNeighbour = curNeighbour->neighbours[move.direction];
     }
 
     return count;
