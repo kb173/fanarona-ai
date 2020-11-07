@@ -126,7 +126,7 @@ std::string Board::getPosition(int mode)
 {
     if (mode == 0)
     {
-        auto moves = findMoves(true);
+        auto moves = findMoves(State::WHITE);
         std::cout << "Available Moves: \r\n";
         for (auto move : moves)
         {
@@ -193,17 +193,17 @@ const std::string Board::indexToDirectionString(const int& index)
 
 // returns movable pieces for desired color, and integer denoting in which direction it can move
 // this means pieces can occur twice in the returned vector if they can move in two or more directions
-const std::vector<Move> Board::findMoves(const bool& white)
+const std::vector<Move> Board::findMoves(State movingState)
 {
     // if we have no moving piece its a normal turn else we continue moving that piece
-    return movingPiece != nullptr ? findContinuingMoves() : findFirstMoves(white);
+    return movingPiece != nullptr ? findContinuingMoves() : findFirstMoves(movingState);
 }
 
-const std::vector<Move> Board::findFirstMoves(const bool& white)
+const std::vector<Move> Board::findFirstMoves(State movingState)
 {
     std::vector<Move> nonCapturingMoves;
     std::vector<Move> capturingMoves;
-    State myState = white ? State::WHITE : State::BLACK;
+
     // iterate over board
     for (int y = 0; y < BOARD_HEIGHT; y++)
     {
@@ -211,7 +211,7 @@ const std::vector<Move> Board::findFirstMoves(const bool& white)
         {
             auto cell = getCell(x, y);
             // if we find a stone of my color
-            if (cell->state == myState)
+            if (cell->state == movingState)
             {
                 // iterate over neighbors
                 for (int i = 0; i < 8; i++)
@@ -238,14 +238,17 @@ const std::vector<Move> Board::findFirstMoves(const bool& white)
     // capture is mandatory thus only return those moves if available
     return capturingMoves.size() > 0 ? capturingMoves : nonCapturingMoves;
 }
+
 const std::vector<Move> Board::findContinuingMoves()
 {
     std::vector<Move> nonCapturingMoves;
     std::vector<Move> capturingMoves;
+
     // iterate over neighbors of current moving piece
     for (int i = 0; i < 8; i++)
     {
         auto neighbour = movingPiece->neighbours[i];
+
         // if neighbor is empty
         if (neighbour != nullptr && neighbour->state == State::EMPTY)
         {

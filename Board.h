@@ -65,11 +65,11 @@ class Board
     // this means the vector can contain the same node multiple times if it can move in different directions
     // always call findMoves, it decides which of the secondary functions to call
     // bool parameter determines for which color we're finding moves
-    const std::vector<Move> findMoves(const bool& white);
+    const std::vector<Move> findMoves(State);
 
     // secondary find functions because there are two kinds of selection behaviours: normal and continuing moves (after
     // a capture)
-    const std::vector<Move> findFirstMoves(const bool& white);
+    const std::vector<Move> findFirstMoves(State);
     const std::vector<Move> findContinuingMoves();
 
     // counts how many piece will be captured by the passed move
