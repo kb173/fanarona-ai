@@ -72,10 +72,10 @@ class Board
     const std::vector<Move> findFirstMoves(State);
     const std::vector<Move> findContinuingMoves();
 
-    // counts how many piece will be captured by the passed move
-    // only checks forward for now
-    // TODO: also check backward, decide which one is better @carl
-    // think about maybe storing capture direction in move (maybe make it an extra class), because we have to be able to
-    // reverse moves so backtracking is possible later
-    const int captureCount(const Move& move);
+    // returns all pieces captured by a move, either in the direction of the move or behind the move.
+    const std::vector<Node*> getCapturesInDirection(const Move& move, bool reverse_direction);
+
+    // returns all pieces captured by a move in a certain direction.
+    // checks forwards and backwards and returns the pieces in the better direction.
+    const std::vector<Node*> getBestCaptures(const Move& move);
 };

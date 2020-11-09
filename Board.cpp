@@ -222,7 +222,7 @@ const std::vector<Move> Board::findFirstMoves(State movingState)
                     {
                         Move move(cell, i);
                         // check if move captures and add to corresponding vector
-                        if (captureCount(move) >= 1)
+                        if (getBestCaptures(move).size() >= 1)
                         {
                             capturingMoves.push_back(move);
                         }
@@ -254,7 +254,7 @@ const std::vector<Move> Board::findContinuingMoves()
         {
             Move move(movingPiece, i);
             // check for captures and add to corresponding vector
-            if (captureCount(move) >= 1)
+            if (getBestCaptures(move).size() >= 1)
             {
                 capturingMoves.push_back(move);
             }
@@ -268,22 +268,42 @@ const std::vector<Move> Board::findContinuingMoves()
     return capturingMoves.size() > 0 ? capturingMoves : nonCapturingMoves;
 }
 
-const int Board::captureCount(const Move& move)
+const std::vector<Node*> Board::getCapturesInDirection(const Move& move, bool reverse_direction)
 {
+    std::vector<Node*> captures;
+
     State myState = move.from()->state;
 
-    // get neighbor of node we move to in the direction we moved
-    Node* curNeighbour = move.to()->neighbours[move.direction];
+    int direction;
+    Node* currentNeighbour;
 
-    int count = 0;
-
-    // if there is a field, and on that field is a stone of the other color count up
-    while (curNeighbour != nullptr && curNeighbour->state != State::EMPTY && curNeighbour->state != myState)
+    if (reverse_direction)
     {
-        count++;
-        // continue with next neighbor
-        curNeighbour = curNeighbour->neighbours[move.direction];
+        direction = 7 - move.direction;
+        currentNeighbour = move.from()->neighbours[direction];
+    }
+    else
+    {
+        direction = move.direction;
+        currentNeighbour = move.to()->neighbours[direction];
     }
 
-    return count;
+    // if there is a field, and on that field is a stone of the other color count up
+    while (currentNeighbour != nullptr && currentNeighbour->state != State::EMPTY && currentNeighbour->state != myState)
+    {
+        captures.emplace_back(currentNeighbour);
+
+        // continue with next neighbor
+        currentNeighbour = currentNeighbour->neighbours[direction];
+    }
+
+    return captures;
+}
+
+const std::vector<Node*> Board::getBestCaptures(const Move& move)
+{
+    auto captures_forwards = getCapturesInDirection(move, false);
+    auto captures_backwards = getCapturesInDirection(move, true);
+
+    return captures_forwards.size() > captures_backwards.size() ? captures_forwards : captures_backwards;
 }
