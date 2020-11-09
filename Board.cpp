@@ -122,9 +122,9 @@ bool Board::isPositionInBounds(int x, int y)
 }
 
 // temp implementation for stdin input by user: TODO add logic implementation here
-std::string Board::getPosition(int mode)
+std::string Board::getPosition(Mode mode)
 {
-    if (mode == 0)
+    if (mode == Mode::SELECT_STONE)
     {
         auto moves = findMoves(State::WHITE);
         std::cout << "Available Moves: \r\n";
@@ -134,7 +134,7 @@ std::string Board::getPosition(int mode)
         }
         std::cout << "select stone: ";
     }
-    else if (mode == 1)
+    else if (mode == Mode::SELECT_MOVEMENT)
         std::cout << "select location: ";
 
     std::string input;

@@ -14,6 +14,13 @@ enum class State : char
     BLACK,
 };
 
+enum class Mode : char
+{
+    SELECT_STONE,
+    SELECT_MOVEMENT,
+    SELECT_CAPTURE,
+};
+
 struct Node
 {
     State state = State::EMPTY;
@@ -44,8 +51,11 @@ class Board
 
     void parse(std::string boardContent);
     void print();
-    std::string getPosition(int); // returns next position, depending on mode: 0 = stone; 1 = free space -> TODO: use
-                                  // enums or whatever...; TODO: return type string?
+
+    // returns the next position to send to the server, depending on the mode (picking a stone, specifying movement,
+    // etc.)
+    // TODO: return type string?
+    std::string getPosition(Mode);
 
   private:
     Node cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
