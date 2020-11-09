@@ -122,8 +122,7 @@ void Client::start()
             board->parse(field);
         }
 
-        if (recv.find("select stone: ") != std::string::npos ||
-            recv.find("select stone to take:") != std::string::npos) // TODO: fix missing whitespace on server
+        if (recv.find("select stone: ") != std::string::npos) // TODO: fix missing whitespace on server
         {
             std::string input = board->getPosition(Mode::SELECT_STONE);
             writeString(input + "\n");
@@ -131,6 +130,11 @@ void Client::start()
         else if (recv.find("select location to move: ") != std::string::npos)
         {
             std::string input = board->getPosition(Mode::SELECT_MOVEMENT);
+            writeString(input + "\n");
+        }
+        else if (recv.find("select stone to take:") != std::string::npos)
+        {
+            std::string input = board->getPosition(Mode::SELECT_CAPTURE);
             writeString(input + "\n");
         }
         else

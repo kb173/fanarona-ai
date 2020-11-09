@@ -136,6 +136,8 @@ std::string Board::getPosition(Mode mode)
     }
     else if (mode == Mode::SELECT_MOVEMENT)
         std::cout << "select location: ";
+    else if (mode == Mode::SELECT_CAPTURE)
+        std::cout << "select capture: ";
 
     std::string input;
     // std::cin >> input; // does not parse whitespaces!
