@@ -40,22 +40,21 @@ void Board::parse(std::string boardContent)
     for (int y = 0;; y++)
     {
         int inputRow = y * 2 + 1;
-        auto line = lines[inputRow];
-
         if (inputRow >= lines.size())
         {
             break;
         }
 
+        auto line = lines[inputRow];
         for (size_t x = 0; x < line.size(); x++)
         {
-            int inputColumn = x * 2 + 2;
-            char character = line[inputColumn];
-
             if (!isPositionInBounds(x, y))
             {
                 break;
             }
+
+            int inputColumn = x * 2 + 2;
+            char character = line[inputColumn];
 
             auto cell = getCell(x, y);
             if (character == 'O')
@@ -66,10 +65,12 @@ void Board::parse(std::string boardContent)
             {
                 cell->state = State::BLACK;
             }
+            //else if (character == '*') // current cell -> needed?
             else
             {
                 cell->state = State::EMPTY;
             }
+
             // TODO: only setup neighbour connections during first parsing phase @rene
             if (isPositionInBounds(x - 1, y - 1) && lines[inputRow - 1][inputColumn - 1] == '\\')
             {

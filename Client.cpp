@@ -22,6 +22,12 @@
 #include "Board.h"
 #include "Client.h"
 
+#define MSG_BOARD_HEADER        "  0 1 2 3 4 5 6 7 8"       // start of server message for current board state
+#define MSG_SELECT_STONE        "select stone:"             // message to select stone
+#define MSG_SELECT_LOCATION     "select location to move:"  // message to select location for current stone
+#define MSG_SELECT_CAPTURE      "select stone to take: "    // message to select stone to capture for multiple choices
+
+
 Client::Client(std::string ip, int port)
 {
 
@@ -113,35 +119,38 @@ void Client::start()
         std::cout << "### RAW\r\n" << recv << "\r\n###\r\n";
 #endif
 
-        // TODO: define keywords
         size_t pos = std::string::npos;
-        if ((pos = recv.rfind("  0 1 2 3 4 5 6 7 8")) != std::string::npos)
+        if ((pos = recv.rfind(MSG_BOARD_HEADER)) != std::string::npos)
         {
             // std::string field = recv.substr(pos, 201); // TODO: make const for fixed size length
             std::string field = recv.substr(pos, 209); // TODO: make const for fixed size length
             board->parse(field);
         }
 
-        if (recv.find("select stone: ") != std::string::npos) // TODO: fix missing whitespace on server
+        Mode mode = Mode::SELECT_INVALID;
+        if (recv.find(MSG_SELECT_STONE) != std::string::npos)
         {
-            std::string input = board->getPosition(Mode::SELECT_STONE);
-            writeString(input + "\n");
+            mode = Mode::SELECT_STONE;
         }
-        else if (recv.find("select location to move: ") != std::string::npos)
+        else if (recv.find(MSG_SELECT_LOCATION) != std::string::npos)
         {
-            std::string input = board->getPosition(Mode::SELECT_MOVEMENT);
-            writeString(input + "\n");
+            mode = Mode::SELECT_MOVEMENT;
         }
-        else if (recv.find("select stone to take:") != std::string::npos)
+        else if (recv.find(MSG_SELECT_CAPTURE) != std::string::npos)
         {
-            std::string input = board->getPosition(Mode::SELECT_CAPTURE);
-            writeString(input + "\n");
+            mode = Mode::SELECT_CAPTURE;
         }
         else
         {
 #ifdef DEBUG_OUTPUT
             std::cout << "/// unhandled text:\n'" << recv << "'" << std::endl;
 #endif
+        }
+
+        if (mode != Mode::SELECT_INVALID)
+        {
+            std::string input = board->getPosition(mode);
+            writeString(input + "\n");
         }
     }
 }
