@@ -16,6 +16,7 @@ enum class State : char
 
 enum class Mode : char
 {
+    SELECT_INVALID,
     SELECT_STONE,
     SELECT_MOVEMENT,
     SELECT_CAPTURE,
