@@ -103,10 +103,6 @@ class Board
     // TODO: set this correctly after capturing, so we know which piece we have to use to continue @Bella
     Node* movingPiece = nullptr;
 
-    // utility string functions, should probably be deleted for final build
-    const std::string moveToString(const Move& move);
-    const std::string indexToDirectionString(const int& index);
-
     // find possible moves and returns a vector of it, moves are pairs of nodes pointer and int denoting direction
     // this means the vector can contain the same node multiple times if it can move in different directions
     // always call findMoves, it decides which of the secondary functions to call

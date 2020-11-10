@@ -169,37 +169,6 @@ std::string Board::getPosition(Mode mode)
     return input;
 }
 
-const std::string Board::moveToString(const Move& move)
-{
-    std::string moveString = move.from()->toString() + " can move " + indexToDirectionString(move.direction) + " (" +
-                             move.to()->toString() + ")";
-    return moveString;
-}
-const std::string Board::indexToDirectionString(const int& index)
-{
-    switch (index)
-    {
-    case 0:
-        return "north west";
-    case 1:
-        return "north";
-    case 2:
-        return "north east";
-    case 3:
-        return "west";
-    case 4:
-        return "east";
-    case 5:
-        return "southwest";
-    case 6:
-        return "south";
-    case 7:
-        return "southeast";
-    default:
-        return "invalid index";
-    }
-}
-
 const std::vector<Turn> Board::findTurns(State movingState)
 {
     std::vector<Turn> turns;
