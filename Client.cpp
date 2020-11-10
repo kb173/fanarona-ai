@@ -22,11 +22,10 @@
 #include "Board.h"
 #include "Client.h"
 
-#define MSG_BOARD_HEADER        "  0 1 2 3 4 5 6 7 8"       // start of server message for current board state
-#define MSG_SELECT_STONE        "select stone:"             // message to select stone
-#define MSG_SELECT_LOCATION     "select location to move:"  // message to select location for current stone
-#define MSG_SELECT_CAPTURE      "select stone to take: "    // message to select stone to capture for multiple choices
-
+#define MSG_BOARD_HEADER "  0 1 2 3 4 5 6 7 8"         // start of server message for current board state
+#define MSG_SELECT_STONE "select stone:"               // message to select stone
+#define MSG_SELECT_LOCATION "select location to move:" // message to select location for current stone
+#define MSG_SELECT_CAPTURE "select stone to take: "    // message to select stone to capture for multiple choices
 
 Client::Client(std::string ip, int port)
 {

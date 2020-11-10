@@ -65,7 +65,7 @@ void Board::parse(std::string boardContent)
             {
                 cell->state = State::BLACK;
             }
-            //else if (character == '*') // current cell -> needed?
+            // else if (character == '*') // current cell -> needed?
             else
             {
                 cell->state = State::EMPTY;
