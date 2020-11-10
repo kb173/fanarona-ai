@@ -23,5 +23,5 @@ class Client
     int sock;
     char buffer[READ_DATA_SIZE] = {0};
 
-    Board *board;
+    Board* board;
 };
