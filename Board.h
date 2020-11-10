@@ -33,10 +33,10 @@ struct Node
     {
     }
 
-    std::string Node::toString() const;
+    std::string toString() const;
 };
 
-class Move
+struct Move
 {
   private:
     Node* origin;
@@ -46,10 +46,36 @@ class Move
     {
     }
 
+    std::string toString() const;
+
     Node* from() const;
     Node* to() const;
 
     int direction;
+};
+
+struct Capture
+{
+    Capture(std::vector<Node*> capturedNodes) : capturedNodes(capturedNodes)
+    {
+    }
+
+    std::string toString() const;
+
+    std::vector<Node*> capturedNodes;
+};
+
+struct Turn
+{
+    Turn(Move* move, Capture* capture) : move(move), capture(capture), nextTurn(nullptr)
+    {
+    }
+
+    std::string toString() const;
+
+    Move* move;
+    Capture* capture;
+    Turn* nextTurn;
 };
 
 class Board
@@ -65,6 +91,8 @@ class Board
     // etc.)
     // TODO: return type string?
     std::string getPosition(Mode);
+
+    const std::vector<Turn> findTurns(State);
 
   private:
     Node cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
