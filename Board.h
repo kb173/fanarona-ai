@@ -24,8 +24,16 @@ enum class Mode : char
 
 struct Node
 {
+    int x, y;
     State state = State::EMPTY;
     std::array<Node*, 8> neighbours = {};
+
+    Node() = default;
+    Node(int x, int y) : x(x), y(y)
+    {
+    }
+
+    std::string Node::toString() const;
 };
 
 class Move
@@ -69,7 +77,6 @@ class Board
 
     // utility string functions, should probably be deleted for final build
     const std::string moveToString(const Move& move);
-    const std::string nodeToPositionString(const Node* node);
     const std::string indexToDirectionString(const int& index);
 
     // find possible moves and returns a vector of it, moves are pairs of nodes pointer and int denoting direction

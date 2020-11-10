@@ -3,6 +3,11 @@
 
 #include "Board.h"
 
+std::string Node::toString() const
+{
+    return std::to_string(x) + " " + std::to_string(y);
+}
+
 Node* Move::from() const
 {
     return origin;
@@ -150,24 +155,9 @@ std::string Board::getPosition(Mode mode)
 
 const std::string Board::moveToString(const Move& move)
 {
-    std::string moveString = nodeToPositionString(move.from()) + " can move " + indexToDirectionString(move.direction) +
-                             " (" + nodeToPositionString(move.to()) + ")";
+    std::string moveString = move.from()->toString() + " can move " + indexToDirectionString(move.direction) + " (" +
+                             move.to()->toString() + ")";
     return moveString;
-}
-const std::string Board::nodeToPositionString(const Node* node)
-{
-    std::string position = "Not Found";
-    for (int y = 0; y < BOARD_HEIGHT; y++)
-    {
-        for (int x = 0; x < BOARD_WIDTH; x++)
-        {
-            if (getCell(x, y) == node)
-            {
-                position = std::to_string(x) + " " + std::to_string(y);
-            }
-        }
-    }
-    return position;
 }
 const std::string Board::indexToDirectionString(const int& index)
 {
