@@ -13,7 +13,7 @@ if [[ "$OSTYPE" == "linux"* ]]; then
   command -v $clang_format_command
   if [[ $? -ne 0 ]]; then
     echo "Attempting to install clang-format..."
-    apt-get update && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" && sudo apt-get install -y clang-format-11
+    sudo apt-get update && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" && sudo apt-get install -y clang-format-11
   fi
 fi
 
