@@ -12,7 +12,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   command -v clang_tidy_command
   if [[ $? -ne 0 ]]; then
     echo "Attempting to install clang-tidy..."
-    brew install clang-tidy
+    brew install llvm
   fi
 
   command -v "bear"

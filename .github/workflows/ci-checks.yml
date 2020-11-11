@@ -14,6 +14,19 @@ jobs:
       - shell: bash
         run: |
           ! clang-format-11 *.h *.cpp -style=file --output-replacements-xml | grep "<replacement "
+    check-tidiness:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - shell: bash
+          run: |
+            sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+        - shell: bash
+          run: |
+            sudo apt-get install clang-tidy-11
+        - shell: bash
+          run: |
+            [ $(run-clang-tidy-11 -quiet | grep "warning:" | wc -l) -gt 0 ] || (echo "Linting errors found:" && run-clang-tidy-11 && exit 1)
   build:
     runs-on: ubuntu-latest
     steps:
