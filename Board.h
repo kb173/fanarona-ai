@@ -14,7 +14,7 @@ enum class EState : char
     BLACK,
 };
 
-enum class EMode : char
+enum class Mode : char
 {
     SELECT_INVALID,
     SELECT_STONE,
