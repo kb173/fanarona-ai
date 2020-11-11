@@ -23,7 +23,10 @@ jobs:
           sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
       - shell: bash
         run: |
-          sudo apt-get install clang-tidy-11
+          sudo apt-get install clang-tidy-11 && sudo apt-get install bear
+      - shell: bash
+        run: |
+          bear make
       - shell: bash
         run: |
           [ $(run-clang-tidy-11 -quiet | grep "warning:" | wc -l) -gt 0 ] || (echo "Linting errors found:" && run-clang-tidy-11 && exit 1)
