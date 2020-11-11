@@ -108,7 +108,7 @@ void Client::WriteString(std::string input)
     }
 }
 
-void Client::SetBoard(Board* i_board)
+void Client::setBoard(Board* i_board)
 {
     board = i_board;
 }
