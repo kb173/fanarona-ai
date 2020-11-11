@@ -14,6 +14,11 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     echo "Attempting to install clang-tidy..."
     brew install clang-tidy
   fi
+
+  command -v "bear"
+  if [[ $? -ne 0 ]]; then
+    brew install bear;
+  fi
 fi
 if [[ "$OSTYPE" == "linux"* ]]; then
   clang_format_command="clang-format-11"
@@ -34,7 +39,14 @@ if [[ "$OSTYPE" == "linux"* ]]; then
       sudo apt-get update && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" && sudo apt-get install -y clang-tidy-11
     fi
   fi
+    command -v "bear"
+    if [[ $? -ne 0 ]]; then
+      sudo apt-get update;
+      sudo apt-get install bear;
+    fi
 fi
+make clean
+bear make
 
 cat <<EOF > .git/hooks/pre-commit
 #!/bin/sh
