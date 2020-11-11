@@ -8,7 +8,7 @@ Checks:          'readability-isolate-declaration,
                   readability-simplify-boolean-expr,
                   clang-diagnostic-*,
                   clang-analyzer-*'
-WarningsAsErrors: ''
+WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
 AnalyzeTemporaryDtors: false
 FormatStyle:     file
