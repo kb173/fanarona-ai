@@ -43,3 +43,6 @@ client
 
 # VSCode
 *.vscode
+
+# Clang-Tidy
+*compile_commands.json

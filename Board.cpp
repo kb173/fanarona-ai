@@ -3,6 +3,11 @@
 
 #include "Board.h"
 
+std::string Node::ToString() const
+{
+    return std::to_string(x) + " " + std::to_string(y);
+}
+
 Node* Move::From() const
 {
     return origin;
@@ -11,6 +16,17 @@ Node* Move::From() const
 Node* Move::To() const
 {
     return origin->neighbours[direction];
+}
+
+std::string Capture::ToString() const
+{
+    return "Capturing " + std::to_string(capturedNodes.size()) + " nodes";
+}
+
+std::string Turn::ToString() const
+{
+    std::string nextTurnString = nextTurn ? "\n" + nextTurn->ToString() : "\n";
+    return move->ToString() + "\n" + capture->ToString() + nextTurnString;
 }
 
 Board::Board()
@@ -57,6 +73,11 @@ void Board::Parse(std::string boardContent)
             char character = line[inputColumn];
 
             auto cell = GetCell(x, y);
+
+            // TODO: Assign this earlier?
+            cell->x = x;
+            cell->y = y;
+
             if (character == 'O')
             {
                 cell->state = EState::WHITE;
@@ -127,11 +148,11 @@ std::string Board::GetPosition(EMode mode)
 {
     if (mode == EMode::SELECT_STONE)
     {
-        auto moves = FindMoves(EState::WHITE);
-        std::cout << "Available Moves: \r\n";
-        for (auto move : moves)
+        auto turns = FindTurns(EState::WHITE);
+        std::cout << turns.size() << " available Turns: \n";
+        for (auto turn : turns)
         {
-            std::cout << MoveToString(move) << "\r\n";
+            std::cout << turn.ToString() << "\n";
         }
         std::cout << "select stone: ";
     }
@@ -152,50 +173,43 @@ std::string Board::GetPosition(EMode mode)
     return input;
 }
 
-const std::string Board::MoveToString(const Move& move)
+const std::vector<Turn> Board::FindTurns(EState movingState)
 {
-    std::string moveString = NodeToPositionString(move.From()) + " can move " + IndexToDirectionString(move.direction) +
-                             " (" + NodeToPositionString(move.To()) + ")";
-    return moveString;
-}
-const std::string Board::NodeToPositionString(const Node* node)
-{
-    std::string position = "Not Found";
+    std::vector<Turn> turns;
+
+    // iterate over board
     for (int y = 0; y < BOARD_HEIGHT; y++)
     {
         for (int x = 0; x < BOARD_WIDTH; x++)
         {
-            if (GetCell(x, y) == node)
+            auto cell = GetCell(x, y);
+
+            // if we find a stone of my color
+            if (cell->state == movingState)
             {
-                position = std::to_string(x) + " " + std::to_string(y);
+                // iterate over neighbors
+                for (int i = 0; i < 8; i++)
+                {
+                    auto neighbour = cell->neighbours[i];
+
+                    // if neighbor node is empty
+                    if (neighbour != nullptr && neighbour->state == EState::EMPTY)
+                    {
+                        // this is a possible turn!
+
+                        Move* move = new Move(cell, i);
+                        Capture* captureForward = new Capture(GetCapturesInDirection(*move, false));
+                        Capture* captureBackward = new Capture(GetCapturesInDirection(*move, true));
+
+                        turns.emplace_back(Turn(move, captureForward));
+                        turns.emplace_back(Turn(move, captureBackward));
+                    }
+                }
             }
         }
     }
-    return position;
-}
-const std::string Board::IndexToDirectionString(const int& index)
-{
-    switch (index)
-    {
-    case 0:
-        return "north west";
-    case 1:
-        return "north";
-    case 2:
-        return "north east";
-    case 3:
-        return "west";
-    case 4:
-        return "east";
-    case 5:
-        return "southwest";
-    case 6:
-        return "south";
-    case 7:
-        return "southeast";
-    default:
-        return "invalid index";
-    }
+
+    return turns;
 }
 
 // returns movable pieces for desired color, and integer denoting in which direction it can move
@@ -314,4 +328,9 @@ const std::vector<Node*> Board::GetBestCaptures(const Move& move)
     auto captures_backwards = GetCapturesInDirection(move, true);
 
     return captures_forwards.size() > captures_backwards.size() ? captures_forwards : captures_backwards;
+}
+
+std::string Move::ToString() const
+{
+    return "From " + From()->ToString() + " to " + To()->ToString();
 }

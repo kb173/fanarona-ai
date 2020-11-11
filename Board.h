@@ -24,11 +24,19 @@ enum class Mode : char
 
 struct Node
 {
+    int x, y;
     EState state = EState::EMPTY;
     std::array<Node*, 8> neighbours = {};
+
+    Node() = default;
+    Node(int x, int y) : x(x), y(y)
+    {
+    }
+
+    std::string ToString() const;
 };
 
-class Move
+struct Move
 {
   private:
     Node* origin;
@@ -38,10 +46,36 @@ class Move
     {
     }
 
+    std::string ToString() const;
+
     Node* From() const;
     Node* To() const;
 
     int direction;
+};
+
+struct Capture
+{
+    Capture(std::vector<Node*> capturedNodes) : capturedNodes(capturedNodes)
+    {
+    }
+
+    std::string ToString() const;
+
+    std::vector<Node*> capturedNodes;
+};
+
+struct Turn
+{
+    Turn(Move* move, Capture* capture) : move(move), capture(capture), nextTurn(nullptr)
+    {
+    }
+
+    std::string ToString() const;
+
+    Move* move;
+    Capture* capture;
+    Turn* nextTurn;
 };
 
 class Board
@@ -58,6 +92,8 @@ class Board
     // TODO: return type string?
     std::string GetPosition(EMode);
 
+    const std::vector<Turn> FindTurns(EState);
+
   private:
     Node cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
 
@@ -66,11 +102,6 @@ class Board
 
     // TODO: set this correctly after capturing, so we know which piece we have to use to continue @Bella
     Node* movingPiece = nullptr;
-
-    // utility string functions, should probably be deleted for final build
-    const std::string MoveToString(const Move& move);
-    const std::string NodeToPositionString(const Node* node);
-    const std::string IndexToDirectionString(const int& index);
 
     // find possible moves and returns a vector of it, moves are pairs of nodes pointer and int denoting direction
     // this means the vector can contain the same node multiple times if it can move in different directions
