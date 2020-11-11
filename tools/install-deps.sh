@@ -60,8 +60,11 @@ echo "Applying auto formatting..."
 echo "\$FILES" | xargs $clang_format_command -i -style=file
 
 # Check all files for non white space formatting
-$clang_tidy_command
-
+if [ \$($clang_tidy_command -quiet | grep "warning:" | wc -l ) -ne  0 ]; then
+   echo "ERROR: Code does not match clang-tidy formating. Please run run-clang-tidy-11 -fix or fix by hand if necessary"
+   eval "$clang_tidy_command"
+   exit 1
+fi
 # Add back the modified files to staging
 echo "\$FILES" | xargs git add
 EOF

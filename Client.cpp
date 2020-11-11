@@ -108,7 +108,7 @@ void Client::WriteString(std::string input)
     }
 }
 
-void Client::setBoard(Board* i_board)
+void Client::SetBoard(Board* i_board)
 {
     board = i_board;
 }
@@ -124,7 +124,6 @@ void Client::Start()
         std::cout << "### RAW\r\n" << recv << "\r\n###\r\n";
 #endif
 
-        pos = std::string::npos;
         EMode mode = EMode::SELECT_INVALID;
         if (recv.find(MSG_SELECT_STONE) != std::string::npos)
         {

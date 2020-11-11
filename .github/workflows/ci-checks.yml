@@ -14,7 +14,7 @@ jobs:
       - shell: bash
         run: |
           ! clang-format-11 *.h *.cpp -style=file --output-replacements-xml | grep "<replacement "
-  check-tidiness:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

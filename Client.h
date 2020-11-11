@@ -16,7 +16,7 @@ class Client
     std::string ReadString();
     void WriteString(std::string input);
 
-    void setBoard(Board*);
+    void SetBoard(Board*);
     void Start();
 
   private:
