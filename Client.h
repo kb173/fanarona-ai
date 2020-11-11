@@ -13,11 +13,11 @@ class Client
     Client(std::string ip, int port);
     ~Client();
 
-    std::string readString();
-    void writeString(std::string input);
+    std::string ReadString();
+    void WriteString(std::string input);
 
-    void setBoard(Board*);
-    void start();
+    void SetBoard(Board*);
+    void Start();
 
   private:
     int sock;

@@ -8,12 +8,12 @@ std::string Node::toString() const
     return std::to_string(x) + " " + std::to_string(y);
 }
 
-Node* Move::from() const
+Node* Move::From() const
 {
     return origin;
 }
 
-Node* Move::to() const
+Node* Move::To() const
 {
     return origin->neighbours[direction];
 }
@@ -37,7 +37,7 @@ Board::~Board()
 {
 }
 
-void Board::parse(std::string boardContent)
+void Board::Parse(std::string boardContent)
 {
     std::istringstream stream(boardContent);
     std::string str;
@@ -64,7 +64,7 @@ void Board::parse(std::string boardContent)
         auto line = lines[inputRow];
         for (size_t x = 0; x < line.size(); x++)
         {
-            if (!isPositionInBounds(x, y))
+            if (!IsPositionInBounds(x, y))
             {
                 break;
             }
@@ -72,7 +72,7 @@ void Board::parse(std::string boardContent)
             int inputColumn = x * 2 + 2;
             char character = line[inputColumn];
 
-            auto cell = getCell(x, y);
+            auto cell = GetCell(x, y);
 
             // TODO: Assign this earlier?
             cell->x = x;
@@ -80,75 +80,75 @@ void Board::parse(std::string boardContent)
 
             if (character == 'O')
             {
-                cell->state = State::WHITE;
+                cell->state = EState::WHITE;
             }
             else if (character == '#')
             {
-                cell->state = State::BLACK;
+                cell->state = EState::BLACK;
             }
             // else if (character == '*') // current cell -> needed?
             else
             {
-                cell->state = State::EMPTY;
+                cell->state = EState::EMPTY;
             }
 
             // TODO: only setup neighbour connections during first parsing phase @rene
-            if (isPositionInBounds(x - 1, y - 1) && lines[inputRow - 1][inputColumn - 1] == '\\')
+            if (IsPositionInBounds(x - 1, y - 1) && lines[inputRow - 1][inputColumn - 1] == '\\')
             {
-                cell->neighbours[0] = getCell(x - 1, y - 1);
+                cell->neighbours[0] = GetCell(x - 1, y - 1);
             }
-            if (isPositionInBounds(x, y - 1) && lines[inputRow - 1][inputColumn] == '|')
+            if (IsPositionInBounds(x, y - 1) && lines[inputRow - 1][inputColumn] == '|')
             {
-                cell->neighbours[1] = getCell(x, y - 1);
+                cell->neighbours[1] = GetCell(x, y - 1);
             }
-            if (isPositionInBounds(x + 1, y - 1) && lines[inputRow - 1][inputColumn + 1] == '/')
+            if (IsPositionInBounds(x + 1, y - 1) && lines[inputRow - 1][inputColumn + 1] == '/')
             {
-                cell->neighbours[2] = getCell(x + 1, y - 1);
+                cell->neighbours[2] = GetCell(x + 1, y - 1);
             }
-            if (isPositionInBounds(x - 1, y) && lines[inputRow][inputColumn - 1] == '-')
+            if (IsPositionInBounds(x - 1, y) && lines[inputRow][inputColumn - 1] == '-')
             {
-                cell->neighbours[3] = getCell(x - 1, y);
+                cell->neighbours[3] = GetCell(x - 1, y);
             }
-            if (isPositionInBounds(x + 1, y) && lines[inputRow][inputColumn + 1] == '-')
+            if (IsPositionInBounds(x + 1, y) && lines[inputRow][inputColumn + 1] == '-')
             {
-                cell->neighbours[4] = getCell(x + 1, y);
+                cell->neighbours[4] = GetCell(x + 1, y);
             }
-            if (isPositionInBounds(x - 1, y + 1) && lines[inputRow + 1][inputColumn - 1] == '/')
+            if (IsPositionInBounds(x - 1, y + 1) && lines[inputRow + 1][inputColumn - 1] == '/')
             {
-                cell->neighbours[5] = getCell(x - 1, y + 1);
+                cell->neighbours[5] = GetCell(x - 1, y + 1);
             }
-            if (isPositionInBounds(x, y + 1) && lines[inputRow + 1][inputColumn] == '|')
+            if (IsPositionInBounds(x, y + 1) && lines[inputRow + 1][inputColumn] == '|')
             {
-                cell->neighbours[6] = getCell(x, y + 1);
+                cell->neighbours[6] = GetCell(x, y + 1);
             }
-            if (isPositionInBounds(x + 1, y + 1) && lines[inputRow + 1][inputColumn + 1] == '\\')
+            if (IsPositionInBounds(x + 1, y + 1) && lines[inputRow + 1][inputColumn + 1] == '\\')
             {
-                cell->neighbours[7] = getCell(x + 1, y + 1);
+                cell->neighbours[7] = GetCell(x + 1, y + 1);
             }
         }
     }
 }
 
-Node* Board::getCell(int x, int y)
+Node* Board::GetCell(int x, int y)
 {
-    if (!isPositionInBounds(x, y))
+    if (!IsPositionInBounds(x, y))
     {
         return nullptr;
     }
     return &cells[y][x];
 }
 
-bool Board::isPositionInBounds(int x, int y)
+bool Board::IsPositionInBounds(int x, int y)
 {
     return x >= 0 && x < BOARD_WIDTH && y >= 0 && y < BOARD_HEIGHT;
 }
 
 // temp implementation for stdin input by user: TODO add logic implementation here
-std::string Board::getPosition(Mode mode)
+std::string Board::GetPosition(EMode mode)
 {
-    if (mode == Mode::SELECT_STONE)
+    if (mode == EMode::SELECT_STONE)
     {
-        auto turns = findTurns(State::WHITE);
+        auto turns = findTurns(EState::WHITE);
         std::cout << turns.size() << " available Turns: \n";
         for (auto turn : turns)
         {
@@ -156,10 +156,14 @@ std::string Board::getPosition(Mode mode)
         }
         std::cout << "select stone: ";
     }
-    else if (mode == Mode::SELECT_MOVEMENT)
+    else if (mode == EMode::SELECT_MOVEMENT)
+    {
         std::cout << "select location: ";
-    else if (mode == Mode::SELECT_CAPTURE)
+    }
+    else if (mode == EMode::SELECT_CAPTURE)
+    {
         std::cout << "select capture: ";
+    }
 
     std::string input;
     // std::cin >> input; // does not parse whitespaces!
@@ -169,7 +173,7 @@ std::string Board::getPosition(Mode mode)
     return input;
 }
 
-const std::vector<Turn> Board::findTurns(State movingState)
+const std::vector<Turn> Board::findTurns(EState movingState)
 {
     std::vector<Turn> turns;
 
@@ -178,7 +182,8 @@ const std::vector<Turn> Board::findTurns(State movingState)
     {
         for (int x = 0; x < BOARD_WIDTH; x++)
         {
-            auto cell = getCell(x, y);
+            auto cell = GetCell(x, y);
+
             // if we find a stone of my color
             if (cell->state == movingState)
             {
@@ -188,13 +193,13 @@ const std::vector<Turn> Board::findTurns(State movingState)
                     auto neighbour = cell->neighbours[i];
 
                     // if neighbor node is empty
-                    if (neighbour != nullptr && neighbour->state == State::EMPTY)
+                    if (neighbour != nullptr && neighbour->state == EState::EMPTY)
                     {
                         // this is a possible turn!
 
                         Move* move = new Move(cell, i);
-                        Capture* captureForward = new Capture(getCapturesInDirection(*move, false));
-                        Capture* captureBackward = new Capture(getCapturesInDirection(*move, true));
+                        Capture* captureForward = new Capture(GetCapturesInDirection(*move, false));
+                        Capture* captureBackward = new Capture(GetCapturesInDirection(*move, true));
 
                         turns.emplace_back(Turn(move, captureForward));
                         turns.emplace_back(Turn(move, captureBackward));
@@ -209,13 +214,13 @@ const std::vector<Turn> Board::findTurns(State movingState)
 
 // returns movable pieces for desired color, and integer denoting in which direction it can move
 // this means pieces can occur twice in the returned vector if they can move in two or more directions
-const std::vector<Move> Board::findMoves(State movingState)
+const std::vector<Move> Board::FindMoves(EState movingState)
 {
     // if we have no moving piece its a normal turn else we continue moving that piece
-    return movingPiece != nullptr ? findContinuingMoves() : findFirstMoves(movingState);
+    return movingPiece != nullptr ? FindContinuingMoves() : FindFirstMoves(movingState);
 }
 
-const std::vector<Move> Board::findFirstMoves(State movingState)
+const std::vector<Move> Board::FindFirstMoves(EState movingState)
 {
     std::vector<Move> nonCapturingMoves;
     std::vector<Move> capturingMoves;
@@ -225,7 +230,7 @@ const std::vector<Move> Board::findFirstMoves(State movingState)
     {
         for (int x = 0; x < BOARD_WIDTH; x++)
         {
-            auto cell = getCell(x, y);
+            auto cell = GetCell(x, y);
             // if we find a stone of my color
             if (cell->state == movingState)
             {
@@ -234,11 +239,11 @@ const std::vector<Move> Board::findFirstMoves(State movingState)
                 {
                     auto neighbour = cell->neighbours[i];
                     // if neighbor node is empty
-                    if (neighbour != nullptr && neighbour->state == State::EMPTY)
+                    if (neighbour != nullptr && neighbour->state == EState::EMPTY)
                     {
                         Move move(cell, i);
                         // check if move captures and add to corresponding vector
-                        if (getBestCaptures(move).size() >= 1)
+                        if (GetBestCaptures(move).size() >= 1)
                         {
                             capturingMoves.push_back(move);
                         }
@@ -255,7 +260,7 @@ const std::vector<Move> Board::findFirstMoves(State movingState)
     return capturingMoves.size() > 0 ? capturingMoves : nonCapturingMoves;
 }
 
-const std::vector<Move> Board::findContinuingMoves()
+const std::vector<Move> Board::FindContinuingMoves()
 {
     std::vector<Move> nonCapturingMoves;
     std::vector<Move> capturingMoves;
@@ -266,11 +271,11 @@ const std::vector<Move> Board::findContinuingMoves()
         auto neighbour = movingPiece->neighbours[i];
 
         // if neighbor is empty
-        if (neighbour != nullptr && neighbour->state == State::EMPTY)
+        if (neighbour != nullptr && neighbour->state == EState::EMPTY)
         {
             Move move(movingPiece, i);
             // check for captures and add to corresponding vector
-            if (getBestCaptures(move).size() >= 1)
+            if (GetBestCaptures(move).size() >= 1)
             {
                 capturingMoves.push_back(move);
             }
@@ -284,11 +289,11 @@ const std::vector<Move> Board::findContinuingMoves()
     return capturingMoves.size() > 0 ? capturingMoves : nonCapturingMoves;
 }
 
-const std::vector<Node*> Board::getCapturesInDirection(const Move& move, bool reverse_direction)
+const std::vector<Node*> Board::GetCapturesInDirection(const Move& move, bool reverse_direction)
 {
     std::vector<Node*> captures;
 
-    State myState = move.from()->state;
+    EState myState = move.From()->state;
 
     int direction;
     Node* currentNeighbour;
@@ -296,16 +301,17 @@ const std::vector<Node*> Board::getCapturesInDirection(const Move& move, bool re
     if (reverse_direction)
     {
         direction = 7 - move.direction;
-        currentNeighbour = move.from()->neighbours[direction];
+        currentNeighbour = move.From()->neighbours[direction];
     }
     else
     {
         direction = move.direction;
-        currentNeighbour = move.to()->neighbours[direction];
+        currentNeighbour = move.To()->neighbours[direction];
     }
 
     // if there is a field, and on that field is a stone of the other color count up
-    while (currentNeighbour != nullptr && currentNeighbour->state != State::EMPTY && currentNeighbour->state != myState)
+    while (currentNeighbour != nullptr && currentNeighbour->state != EState::EMPTY &&
+           currentNeighbour->state != myState)
     {
         captures.emplace_back(currentNeighbour);
 
@@ -316,15 +322,15 @@ const std::vector<Node*> Board::getCapturesInDirection(const Move& move, bool re
     return captures;
 }
 
-const std::vector<Node*> Board::getBestCaptures(const Move& move)
+const std::vector<Node*> Board::GetBestCaptures(const Move& move)
 {
-    auto captures_forwards = getCapturesInDirection(move, false);
-    auto captures_backwards = getCapturesInDirection(move, true);
+    auto captures_forwards = GetCapturesInDirection(move, false);
+    auto captures_backwards = GetCapturesInDirection(move, true);
 
     return captures_forwards.size() > captures_backwards.size() ? captures_forwards : captures_backwards;
 }
 
 std::string Move::toString() const
 {
-    return "From " + from()->toString() + " to " + to()->toString();
+    return "From " + From()->toString() + " to " + To()->toString();
 }
