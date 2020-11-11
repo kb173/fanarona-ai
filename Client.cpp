@@ -86,53 +86,57 @@ Client::~Client()
 #endif
 }
 
-std::string Client::readString()
+std::string Client::ReadString()
 {
     memset(buffer, 0, READ_DATA_SIZE);
 #ifdef _WIN32
     if (recv(sock, buffer, READ_DATA_SIZE, 0) < 0)
 #else
     if (read(sock, buffer, READ_DATA_SIZE) < 0)
+    {
 #endif
         throw "Receive Failed";
-    return std::string(buffer);
+}
+return std::string(buffer);
 }
 
-void Client::writeString(std::string input)
+void Client::WriteString(std::string input)
 {
     if (send(sock, input.c_str(), (int)input.length(), 0) < 0)
+    {
         throw "Send Failed";
+    }
 }
 
-void Client::setBoard(Board* i_board)
+void Client::SetBoard(Board* i_board)
 {
     board = i_board;
 }
 
-void Client::start()
+void Client::Start()
 {
     size_t pos = std::string::npos;
     std::string recv = "";
     while (true)
     {
-        recv.append(readString());
+        recv.append(ReadString());
 #ifdef SHOW_RAW_MSG
         std::cout << "### RAW\r\n" << recv << "\r\n###\r\n";
 #endif
 
         pos = std::string::npos;
-        Mode mode = Mode::SELECT_INVALID;
+        EMode mode = EMode::SELECT_INVALID;
         if (recv.find(MSG_SELECT_STONE) != std::string::npos)
         {
-            mode = Mode::SELECT_STONE;
+            mode = EMode::SELECT_STONE;
         }
         else if (recv.find(MSG_SELECT_LOCATION) != std::string::npos)
         {
-            mode = Mode::SELECT_MOVEMENT;
+            mode = EMode::SELECT_MOVEMENT;
         }
         else if (recv.find(MSG_SELECT_CAPTURE) != std::string::npos)
         {
-            mode = Mode::SELECT_CAPTURE;
+            mode = EMode::SELECT_CAPTURE;
         }
         else
         {
@@ -141,17 +145,17 @@ void Client::start()
 #endif
         }
 
-        if (mode != Mode::SELECT_INVALID)
+        if (mode != EMode::SELECT_INVALID)
         {
             if ((pos = recv.rfind(MSG_BOARD_HEADER)) != std::string::npos)
             {
                 // std::string field = recv.substr(pos, 201); // TODO: make const for fixed size length
                 std::string field = recv.substr(pos, 209); // TODO: make const for fixed size length
-                board->parse(field);
+                board->Parse(field);
             }
 
-            std::string input = board->getPosition(mode);
-            writeString(input + "\n");
+            std::string input = board->GetPosition(mode);
+            WriteString(input + "\n");
 
             recv.clear();
         }
