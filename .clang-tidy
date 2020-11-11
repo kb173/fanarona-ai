@@ -1,0 +1,70 @@
+---
+Checks:          'readability-isolate-declaration, 
+                  readability-static-accessed-through-instance, 
+                  readability-string-compare,
+                  readability-braces-around-statements,
+                  readability-redundant-control-flow,
+                  readability-identifier-naming,
+                  readability-simplify-boolean-expr,
+                  clang-diagnostic-*,
+                  clang-analyzer-*'
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*'
+AnalyzeTemporaryDtors: false
+FormatStyle:     file
+User:            funorona
+CheckOptions:
+  - key:             readability-identifier-naming.ClassCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.GlobalConstCase
+    value:           'UPPER_CASE'
+  - key:             readability-identifier-naming.GlobalConstPointerCase
+    value:           'UPPER_CASE'
+  - key:             readability-identifier-naming.LocalConstCase
+    value:           'UPPER_CASE'
+  - key:             readability-identifier-naming.LocalConstPointerCase
+    value:           'UPPER_CASE'
+  - key:             readability-identifier-naming.StaticConstantCase 
+    value:           'UPPER_CASE'
+  - key:             readability-identifier-naming.ConstantMemberCase 
+    value:           'UPPER_CASE'
+  - key:             readability-identifier-naming.ClassConstantCase  
+    value:           'UPPER_CASE'
+  - key:             readability-identifier-naming.ConstantPointerParameterPrefix  
+    value:           'p'
+  - key:             readability-identifier-naming.GlobalConstantPointerPrefix  
+    value:           'p'
+  - key:             readability-identifier-naming. GlobalPointerPrefix  
+    value:           'p'
+  - key:             readability-identifier-naming. LocalConstantPointerPrefix  
+    value:           'p'
+  - key:             readability-identifier-naming. LocalPointerPrefix  
+    value:           'p'
+  - key:             readability-identifier-naming. PointerParameterPrefix  
+    value:           'p'
+  - key:             readability-identifier-naming.EnumPrefix
+    value:           'E'
+  - key:             readability-identifier-naming.EnumCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.EnumConstant
+    value:           'UPPER_CASE'
+  - key:             readability-identifier-naming.ScopedEnumConstant
+    value:           'UPPER_CASE'
+  - key:             readability-identifier-naming.NamespaceCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.InlineNamespaceCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.MethodCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.ClassMethodCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.PrivateMethodCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.ProtectedMethodCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.PublicMethodCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.VirtualMethodCase
+    value:           'CamelCase'
+  - key:             readability-identifier-naming.ConstexprMethodCase
+    value:           'CamelCase'
