@@ -3,7 +3,7 @@
 
 #include "Board.h"
 
-std::string Node::toString() const
+std::string Node::ToString() const
 {
     return std::to_string(x) + " " + std::to_string(y);
 }
@@ -18,15 +18,15 @@ Node* Move::To() const
     return origin->neighbours[direction];
 }
 
-std::string Capture::toString() const
+std::string Capture::ToString() const
 {
     return "Capturing " + std::to_string(capturedNodes.size()) + " nodes";
 }
 
-std::string Turn::toString() const
+std::string Turn::ToString() const
 {
-    std::string nextTurnString = nextTurn ? "\n" + nextTurn->toString() : "\n";
-    return move->toString() + "\n" + capture->toString() + nextTurnString;
+    std::string nextTurnString = nextTurn ? "\n" + nextTurn->ToString() : "\n";
+    return move->ToString() + "\n" + capture->ToString() + nextTurnString;
 }
 
 Board::Board()
@@ -148,11 +148,11 @@ std::string Board::GetPosition(EMode mode)
 {
     if (mode == EMode::SELECT_STONE)
     {
-        auto turns = findTurns(EState::WHITE);
+        auto turns = FindTurns(EState::WHITE);
         std::cout << turns.size() << " available Turns: \n";
         for (auto turn : turns)
         {
-            std::cout << turn.toString() << "\n";
+            std::cout << turn.ToString() << "\n";
         }
         std::cout << "select stone: ";
     }
@@ -173,7 +173,7 @@ std::string Board::GetPosition(EMode mode)
     return input;
 }
 
-const std::vector<Turn> Board::findTurns(EState movingState)
+const std::vector<Turn> Board::FindTurns(EState movingState)
 {
     std::vector<Turn> turns;
 
@@ -330,7 +330,7 @@ const std::vector<Node*> Board::GetBestCaptures(const Move& move)
     return captures_forwards.size() > captures_backwards.size() ? captures_forwards : captures_backwards;
 }
 
-std::string Move::toString() const
+std::string Move::ToString() const
 {
-    return "From " + From()->toString() + " to " + To()->toString();
+    return "From " + From()->ToString() + " to " + To()->ToString();
 }

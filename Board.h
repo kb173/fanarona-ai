@@ -33,7 +33,7 @@ struct Node
     {
     }
 
-    std::string toString() const;
+    std::string ToString() const;
 };
 
 struct Move
@@ -46,7 +46,7 @@ struct Move
     {
     }
 
-    std::string toString() const;
+    std::string ToString() const;
 
     Node* From() const;
     Node* To() const;
@@ -60,7 +60,7 @@ struct Capture
     {
     }
 
-    std::string toString() const;
+    std::string ToString() const;
 
     std::vector<Node*> capturedNodes;
 };
@@ -71,7 +71,7 @@ struct Turn
     {
     }
 
-    std::string toString() const;
+    std::string ToString() const;
 
     Move* move;
     Capture* capture;
@@ -92,7 +92,7 @@ class Board
     // TODO: return type string?
     std::string GetPosition(EMode);
 
-    const std::vector<Turn> findTurns(EState);
+    const std::vector<Turn> FindTurns(EState);
 
   private:
     Node cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
