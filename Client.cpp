@@ -93,11 +93,11 @@ std::string Client::ReadString()
     if (recv(sock, buffer, READ_DATA_SIZE, 0) < 0)
 #else
     if (read(sock, buffer, READ_DATA_SIZE) < 0)
-    {
 #endif
+    {
         throw "Receive Failed";
-}
-return std::string(buffer);
+    }
+    return std::string(buffer);
 }
 
 void Client::WriteString(std::string input)
