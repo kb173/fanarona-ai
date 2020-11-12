@@ -12,6 +12,7 @@ enum class EState : char
     EMPTY,
     WHITE,
     BLACK,
+    CURRENT,
 };
 
 enum class EMove : char

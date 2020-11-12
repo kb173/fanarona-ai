@@ -25,8 +25,9 @@ std::string Capture::ToString() const
 
 std::string Turn::ToString() const
 {
-    std::string nextTurnString = nextTurn ? "\n" + nextTurn->ToString() : "\n";
-    return move->ToString() + "\n" + capture->ToString() + nextTurnString;
+    //std::string nextTurnString = nextTurn ? "\n" + nextTurn->ToString() : "\n";
+    //return move->ToString() + "\n" + capture->ToString() + nextTurnString;
+    return move->ToString() + " " + capture->ToString();
 }
 
 Board::Board(EMode mode) : mode(mode)
@@ -84,19 +85,29 @@ void Board::Parse(std::string boardContent)
             cell->x = x;
             cell->y = y;
 
-            // TODO: set "colors" as constants
-            if (character == '1' || character == '#')
+            if (movingPiece && movingPiece->x == x && movingPiece->y == y)
             {
-                cell->state = EState::WHITE;
+                // dont override valid current stone selection
             }
-            else if (character == '2' || character == 'O')
-            {
-                cell->state = EState::BLACK;
-            }
-            // else if (character == '*') // current cell -> needed?
             else
             {
-                cell->state = EState::EMPTY;
+                // TODO: set "colors" as constants
+                if (character == '1' || character == '#')
+                {
+                    cell->state = EState::WHITE;
+                }
+                else if (character == '2' || character == 'O')
+                {
+                    cell->state = EState::BLACK;
+                }
+                else if (character == '*') // current cell -> needed?
+                {
+                    cell->state = EState::CURRENT;
+                }
+                else
+                {
+                    cell->state = EState::EMPTY;
+                }
             }
 
             // TODO: only setup neighbour connections during first parsing phase @rene
@@ -156,6 +167,7 @@ void Board::Parse(std::string boardContent)
                 EState state = (&cells[y][x])->state;
                 if (state == EState::WHITE) std::cout << "# ";
                 else if (state == EState::BLACK) std::cout << "O ";
+                else if (state == EState::CURRENT) std::cout << "* ";
                 else std::cout << ". ";
             }
             std::cout << std::endl;
@@ -207,6 +219,17 @@ std::string Board::GetPosition(EMove move)
         std::getline(std::cin, input);
 
         // TODO: validate input (for user)
+
+        // select current moving piece
+        if (move == EMove::STONE || move == EMove::LOCATION)
+        {
+            if (input.length() > 2)
+            {
+                Node* cell = GetCell((input[0] - '0'), (input[2] - '0'));
+                cell->state = EState::CURRENT;
+                movingPiece = cell;
+            }
+        }
     }
     else // TODO: check if valid mode or just assume correct value?
     {

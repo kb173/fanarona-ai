@@ -1,5 +1,5 @@
-//#define DEBUG_OUTPUT
-//#define SHOW_RAW_MSG
+#define DEBUG_OUTPUT
+#define SHOW_RAW_MSG
 
 #ifdef _WIN32
 // link with Ws2_32.lib
@@ -104,7 +104,7 @@ std::string Client::ReadString()
         throw "Receive Failed";
     }
 #ifdef SHOW_RAW_MSG
-    std::cout << "<<< received RAW string:\r\n" << buffer << "\r\n###\r\n";
+    std::cout << "<<< received RAW string:\r\n" << buffer << "\r\n ### end RAW ###\r\n";
 #endif
     return std::string(buffer);
 }
@@ -118,7 +118,7 @@ void Client::WriteString(std::string input)
     }
 
 #ifdef SHOW_RAW_MSG
-    std::cout << ">>> sending string:\r\n" << input << "\r\n###\r\n";
+    std::cout << ">>> sending string: " << input << "### end send ###\r\n";
 #endif
     if (send(sock, input.c_str(), (int)input.length(), 0) < 0)
     {
@@ -140,23 +140,23 @@ void Client::Start()
         strRecv.append(ReadString());
 
         EMove mode = EMove::NONE;
-        if (strRecv.find(MSG_CONTINUE) != std::string::npos)
+        if (strRecv.rfind(MSG_CONTINUE) != std::string::npos)
         {
             WriteString("Y"); // never give up, never surrender!
         }
-        else if (strRecv.find(MSG_CAPTURE) != std::string::npos)
-        {
-            mode = EMove::CAPTURE;
-        }
-        else if (strRecv.find(MSG_SELECT_LOCATION) != std::string::npos)
+        else if (strRecv.rfind(MSG_SELECT_LOCATION) != std::string::npos)
         {
             mode = EMove::LOCATION;
         }
-        else if (strRecv.find(MSG_STONE) != std::string::npos)
+        else if (strRecv.rfind(MSG_STONE) != std::string::npos)
         {
             mode = EMove::STONE;
         }
-        else if (strRecv.find(MSG_PLAYMODE) != std::string::npos)
+        else if (strRecv.rfind(MSG_CAPTURE) != std::string::npos)
+        {
+            mode = EMove::CAPTURE;
+        }
+        else if (strRecv.rfind(MSG_PLAYMODE) != std::string::npos)
         {
             static int type = 0;
             if (type == 0)
@@ -169,7 +169,7 @@ void Client::Start()
                 WriteString("1");
             }
         }
-        else if (strRecv.find(MSG_PLAYERSTART) != std::string::npos)
+        else if (strRecv.rfind(MSG_PLAYERSTART) != std::string::npos)
         {
             WriteString("1"); // we go always second... if not -> TODO: configure as param/property
         }
