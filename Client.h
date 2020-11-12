@@ -22,6 +22,7 @@ class Client
   private:
     int sock;
     char buffer[READ_DATA_SIZE] = {0};
+    std::string strRecv = "";
 
     Board* board;
 };

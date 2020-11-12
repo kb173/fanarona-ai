@@ -25,11 +25,12 @@ std::string Capture::ToString() const
 
 std::string Turn::ToString() const
 {
-    std::string nextTurnString = nextTurn ? "\n" + nextTurn->ToString() : "\n";
-    return move->ToString() + "\n" + capture->ToString() + nextTurnString;
+    // std::string nextTurnString = nextTurn ? "\n" + nextTurn->ToString() : "\n";
+    // return move->ToString() + "\n" + capture->ToString() + nextTurnString;
+    return move->ToString() + " " + capture->ToString();
 }
 
-Board::Board()
+Board::Board(EMode mode) : mode(mode)
 {
 }
 
@@ -50,7 +51,12 @@ void Board::Parse(std::string boardContent)
         {
             str = str.substr(1);
         }
-        lines.push_back(str);
+
+        // don't add empty lines
+        if (str.length() != 0)
+        {
+            lines.push_back(str);
+        }
     }
 
     for (int y = 0;; y++)
@@ -69,7 +75,8 @@ void Board::Parse(std::string boardContent)
                 break;
             }
 
-            int inputColumn = x * 2 + 2;
+            // int inputColumn = x * 2 + 2;
+            int inputColumn = x * 2 + (inputRow % 2);
             char character = line[inputColumn];
 
             auto cell = GetCell(x, y);
@@ -78,18 +85,29 @@ void Board::Parse(std::string boardContent)
             cell->x = x;
             cell->y = y;
 
-            if (character == 'O')
+            if (movingPiece && movingPiece->x == x && movingPiece->y == y)
             {
-                cell->state = EState::WHITE;
+                // dont override valid current stone selection
             }
-            else if (character == '#')
-            {
-                cell->state = EState::BLACK;
-            }
-            // else if (character == '*') // current cell -> needed?
             else
             {
-                cell->state = EState::EMPTY;
+                // TODO: set "colors" as constants
+                if (character == '1' || character == '#')
+                {
+                    cell->state = EState::WHITE;
+                }
+                else if (character == '2' || character == 'O')
+                {
+                    cell->state = EState::BLACK;
+                }
+                else if (character == '*') // current cell -> needed?
+                {
+                    cell->state = EState::CURRENT;
+                }
+                else
+                {
+                    cell->state = EState::EMPTY;
+                }
             }
 
             // TODO: only setup neighbour connections during first parsing phase @rene
@@ -127,6 +145,52 @@ void Board::Parse(std::string boardContent)
             }
         }
     }
+
+    // print board for human player after successful parse
+    if (mode == EMode::HUMAN)
+    {
+        for (int y = 0; y < BOARD_HEIGHT; y++)
+        {
+            if (y % 2 == 0)
+            {
+                if (y == 0)
+                {
+                    std::cout << "  0 1 2 3 4 5 6 7 8" << std::endl;
+                }
+                else
+                {
+                    std::cout << "  |/|\\|/|\\|/|\\|/|\\|" << std::endl;
+                }
+            }
+            else
+            {
+                std::cout << "  |\\|/|\\|/|\\|/|\\|/|" << std::endl;
+            }
+
+            std::cout << y << " ";
+            for (int x = 0; x < BOARD_WIDTH; x++)
+            {
+                EState state = (&cells[y][x])->state;
+                if (state == EState::WHITE)
+                {
+                    std::cout << "# ";
+                }
+                else if (state == EState::BLACK)
+                {
+                    std::cout << "O ";
+                }
+                else if (state == EState::CURRENT)
+                {
+                    std::cout << "* ";
+                }
+                else
+                {
+                    std::cout << ". ";
+                }
+            }
+            std::cout << std::endl;
+        }
+    }
 }
 
 Node* Board::GetCell(int x, int y)
@@ -144,32 +208,63 @@ bool Board::IsPositionInBounds(int x, int y)
 }
 
 // temp implementation for stdin input by user: TODO add logic implementation here
-std::string Board::GetPosition(EMode mode)
+std::string Board::GetPosition(EMove move)
 {
-    if (mode == EMode::SELECT_STONE)
-    {
-        auto turns = FindTurns(EState::WHITE);
-        std::cout << turns.size() << " available Turns: \n";
-        for (auto turn : turns)
-        {
-            std::cout << turn.ToString() << "\n";
-        }
-        std::cout << "select stone: ";
-    }
-    else if (mode == EMode::SELECT_MOVEMENT)
-    {
-        std::cout << "select location: ";
-    }
-    else if (mode == EMode::SELECT_CAPTURE)
-    {
-        std::cout << "select capture: ";
-    }
-
+    // TODO: own implementation for human, AI player
     std::string input;
-    // std::cin >> input; // does not parse whitespaces!
-    std::getline(std::cin, input);
+    if (mode == EMode::HUMAN)
+    {
+        if (move == EMove::STONE)
+        {
+            auto turns = FindTurns(EState::WHITE);
+            std::cout << turns.size() << " available Turns: \n";
+            for (auto turn : turns)
+            {
+                std::cout << turn.ToString() << "\n";
+            }
+            std::cout << "select stone: ";
+        }
+        else if (move == EMove::LOCATION)
+        {
+            std::cout << "select location: ";
+        }
+        else if (move == EMove::CAPTURE)
+        {
+            std::cout << "select capture: ";
+        }
 
-    // TODO: validate input (for user)
+        // std::cin >> input; // does not parse whitespaces!
+        std::getline(std::cin, input);
+
+        // TODO: validate input (for user)
+
+        // select current moving piece
+        if (move == EMove::STONE || move == EMove::LOCATION)
+        {
+            if (input.length() > 2)
+            {
+                Node* cell = GetCell((input[0] - '0'), (input[2] - '0'));
+                cell->state = EState::CURRENT;
+                movingPiece = cell;
+            }
+        }
+    }
+    else // TODO: check if valid mode or just assume correct value?
+    {
+        input = "TODO: AI finds best option";
+        if (move == EMove::STONE)
+        {
+            // TODO: AI finds best option
+        }
+        else if (move == EMove::LOCATION)
+        {
+            // TODO: AI finds best option
+        }
+        else if (move == EMove::CAPTURE)
+        {
+            // TODO: AI finds best option
+        }
+    }
     return input;
 }
 
