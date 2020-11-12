@@ -153,8 +153,14 @@ void Board::Parse(std::string boardContent)
         {
             if (y % 2 == 0)
             {
-                if (y == 0) std::cout << "  0 1 2 3 4 5 6 7 8" << std::endl;
-                else std::cout << "  |/|\\|/|\\|/|\\|/|\\|" << std::endl;
+                if (y == 0)
+                {
+                    std::cout << "  0 1 2 3 4 5 6 7 8" << std::endl;
+                }
+                else
+                {
+                    std::cout << "  |/|\\|/|\\|/|\\|/|\\|" << std::endl;
+                }
             }
             else
             {
@@ -165,10 +171,22 @@ void Board::Parse(std::string boardContent)
             for (int x = 0; x < BOARD_WIDTH; x++)
             {
                 EState state = (&cells[y][x])->state;
-                if (state == EState::WHITE) std::cout << "# ";
-                else if (state == EState::BLACK) std::cout << "O ";
-                else if (state == EState::CURRENT) std::cout << "* ";
-                else std::cout << ". ";
+                if (state == EState::WHITE)
+                {
+                    std::cout << "# ";
+                }
+                else if (state == EState::BLACK)
+                {
+                    std::cout << "O ";
+                }
+                else if (state == EState::CURRENT)
+                {
+                    std::cout << "* ";
+                }
+                else
+                {
+                    std::cout << ". ";
+                }
             }
             std::cout << std::endl;
         }
