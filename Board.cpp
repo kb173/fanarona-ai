@@ -62,13 +62,14 @@ void Board::Parse(std::string boardContent)
     for (int y = 0;; y++)
     {
         int inputRow = y * 2 + 1;
-        if (inputRow >= lines.size())
+        if (inputRow >= (int)lines.size())
         {
             break;
         }
 
         auto line = lines[inputRow];
-        for (size_t x = 0; x < line.size(); x++)
+        int iLineSize = (int)line.size();
+        for (int x = 0; x < iLineSize; x++)
         {
             if (!IsPositionInBounds(x, y))
             {
@@ -85,29 +86,25 @@ void Board::Parse(std::string boardContent)
             cell->x = x;
             cell->y = y;
 
-            if (movingPiece && movingPiece->x == x && movingPiece->y == y)
+            // TODO: dont override valid current stone selection
+            // if (movingPiece && movingPiece->x == x && movingPiece->y == y)
+
+            // TODO: define "colors" as constants, add property playerColor
+            if (character == '1' || character == '#')
             {
-                // dont override valid current stone selection
+                cell->state = EState::BLACK;
+            }
+            else if (character == '2' || character == 'O')
+            {
+                cell->state = EState::WHITE;
+            }
+            else if (character == '*') // current cell -> needed?
+            {
+                cell->state = EState::CURRENT;
             }
             else
             {
-                // TODO: set "colors" as constants
-                if (character == '1' || character == '#')
-                {
-                    cell->state = EState::WHITE;
-                }
-                else if (character == '2' || character == 'O')
-                {
-                    cell->state = EState::BLACK;
-                }
-                else if (character == '*') // current cell -> needed?
-                {
-                    cell->state = EState::CURRENT;
-                }
-                else
-                {
-                    cell->state = EState::EMPTY;
-                }
+                cell->state = EState::EMPTY;
             }
 
             // TODO: only setup neighbour connections during first parsing phase @rene
@@ -149,47 +146,52 @@ void Board::Parse(std::string boardContent)
     // print board for human player after successful parse
     if (mode == EMode::HUMAN)
     {
-        for (int y = 0; y < BOARD_HEIGHT; y++)
+        Print();
+    }
+}
+
+void Board::Print()
+{
+    for (int y = 0; y < BOARD_HEIGHT; y++)
+    {
+        if (y % 2 == 0)
         {
-            if (y % 2 == 0)
+            if (y == 0)
             {
-                if (y == 0)
-                {
-                    std::cout << "  0 1 2 3 4 5 6 7 8" << std::endl;
-                }
-                else
-                {
-                    std::cout << "  |/|\\|/|\\|/|\\|/|\\|" << std::endl;
-                }
+                std::cout << "  0 1 2 3 4 5 6 7 8" << std::endl;
             }
             else
             {
-                std::cout << "  |\\|/|\\|/|\\|/|\\|/|" << std::endl;
+                std::cout << "  |/|\\|/|\\|/|\\|/|\\|" << std::endl;
             }
-
-            std::cout << y << " ";
-            for (int x = 0; x < BOARD_WIDTH; x++)
-            {
-                EState state = (&cells[y][x])->state;
-                if (state == EState::WHITE)
-                {
-                    std::cout << "# ";
-                }
-                else if (state == EState::BLACK)
-                {
-                    std::cout << "O ";
-                }
-                else if (state == EState::CURRENT)
-                {
-                    std::cout << "* ";
-                }
-                else
-                {
-                    std::cout << ". ";
-                }
-            }
-            std::cout << std::endl;
         }
+        else
+        {
+            std::cout << "  |\\|/|\\|/|\\|/|\\|/|" << std::endl;
+        }
+
+        std::cout << y << " ";
+        for (int x = 0; x < BOARD_WIDTH; x++)
+        {
+            EState state = (&cells[y][x])->state;
+            if (state == EState::WHITE)
+            {
+                std::cout << "O ";
+            }
+            else if (state == EState::BLACK)
+            {
+                std::cout << "# ";
+            }
+            else if (state == EState::CURRENT)
+            {
+                std::cout << "* ";
+            }
+            else
+            {
+                std::cout << ". ";
+            }
+        }
+        std::cout << std::endl;
     }
 }
 

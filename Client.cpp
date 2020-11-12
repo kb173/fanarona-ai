@@ -57,7 +57,7 @@ Client::Client(std::string ip, int port)
 #endif
 
     struct sockaddr_in serv_addr;
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    if ((sock = (int)socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         std::cout << "Socket creation error: " << sock << std::endl;
         throw "Socket creation error.";
