@@ -25,8 +25,8 @@ std::string Capture::ToString() const
 
 std::string Turn::ToString() const
 {
-    //std::string nextTurnString = nextTurn ? "\n" + nextTurn->ToString() : "\n";
-    //return move->ToString() + "\n" + capture->ToString() + nextTurnString;
+    // std::string nextTurnString = nextTurn ? "\n" + nextTurn->ToString() : "\n";
+    // return move->ToString() + "\n" + capture->ToString() + nextTurnString;
     return move->ToString() + " " + capture->ToString();
 }
 
@@ -75,8 +75,8 @@ void Board::Parse(std::string boardContent)
                 break;
             }
 
-            //int inputColumn = x * 2 + 2;
-            int inputColumn = x * 2 + (inputRow%2);
+            // int inputColumn = x * 2 + 2;
+            int inputColumn = x * 2 + (inputRow % 2);
             char character = line[inputColumn];
 
             auto cell = GetCell(x, y);

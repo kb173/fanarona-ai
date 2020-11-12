@@ -12,11 +12,11 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #endif
+#include <algorithm>
+#include <iostream>
 #include <stdio.h>
 #include <string.h>
 #include <string>
-#include <iostream>
-#include <algorithm>
 
 #include "Board.h"
 #include "Client.h"
@@ -26,18 +26,18 @@
 
 #define SERVER_VERSION SERVER_V2
 #if SERVER_VERSION == SERVER_V1
-#define MSG_BOARD_HEADER "  0 1 2 3 4 5 6 7 8"          // start of server message for current board state
-#define MSG_STONE "select stone:"                       // select stone
-#define MSG_SELECT_LOCATION "select location to move:"  // location for current stone
-#define MSG_CAPTURE "select stone to take: "            // stone to capture for multiple choices
-#elif  SERVER_VERSION == SERVER_V2
+#define MSG_BOARD_HEADER "  0 1 2 3 4 5 6 7 8"         // start of server message for current board state
+#define MSG_STONE "select stone:"                      // select stone
+#define MSG_SELECT_LOCATION "select location to move:" // location for current stone
+#define MSG_CAPTURE "select stone to take: "           // stone to capture for multiple choices
+#elif SERVER_VERSION == SERVER_V2
 #define MSG_BOARD_HEADER "   0   1   2   3   4   5   6   7   8"
-#define MSG_STONE "Please enter origin"                 // x - axis, y-axis
-#define MSG_SELECT_LOCATION "Please enter destination"  // x - axis, y-axis
+#define MSG_STONE "Please enter origin"                // x - axis, y-axis
+#define MSG_SELECT_LOCATION "Please enter destination" // x - axis, y-axis
 #define MSG_CAPTURE "Please enter wether you want to Withdraw or Approach [W/A]"
-#define MSG_PLAYMODE "Please choose your mode [0-2]"    // select Start, rules, exit and AI or HUMAN player
-#define MSG_PLAYERSTART "Please choose wether you want the AI to start or not [0-1]"    // select starting player
-#define MSG_CONTINUE "Do you want to continue with your turn [Y/N]?" // make another turn?
+#define MSG_PLAYMODE "Please choose your mode [0-2]" // select Start, rules, exit and AI or HUMAN player
+#define MSG_PLAYERSTART "Please choose wether you want the AI to start or not [0-1]" // select starting player
+#define MSG_CONTINUE "Do you want to continue with your turn [Y/N]?"                 // make another turn?
 #endif
 
 Client::Client(std::string ip, int port)

@@ -94,7 +94,8 @@ class Board
     void Parse(std::string boardContent);
     void Print();
 
-    // returns the next position to send to the server, depending on the mode (picking a stone, specifying movement, etc.)
+    // returns the next position to send to the server, depending on the mode (picking a stone, specifying movement,
+    // etc.)
     // TODO: return type string?
     std::string GetPosition(EMove);
 
