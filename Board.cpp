@@ -84,26 +84,15 @@ void Board::Parse(std::string boardContent)
             cell->x = x;
             cell->y = y;
 
-// TODO: set "colors" as constants
-#ifdef SERVER_VERSION == SERVER_V1
-            if (character == '1')
+            // TODO: set "colors" as constants
+            if (character == '1' || character == '#')
             {
                 cell->state = EState::WHITE;
             }
-            else if (character == '2')
+            else if (character == '2' || character == 'O')
             {
                 cell->state = EState::BLACK;
             }
-#elif SERVER_VERSION == SERVER_V2
-            if (character == 'O')
-            {
-                cell->state = EState::WHITE;
-            }
-            else if (character == '#')
-            {
-                cell->state = EState::BLACK;
-            }
-#endif
             // else if (character == '*') // current cell -> needed?
             else
             {
@@ -143,6 +132,33 @@ void Board::Parse(std::string boardContent)
             {
                 cell->neighbours[7] = GetCell(x + 1, y + 1);
             }
+        }
+    }
+
+    // print board for human player after successful parse
+    if (mode == EMode::HUMAN)
+    {
+        for (int y = 0; y < BOARD_HEIGHT; y++)
+        {
+            if (y % 2 == 0)
+            {
+                if (y == 0) std::cout << "  0 1 2 3 4 5 6 7 8" << std::endl;
+                else std::cout << "  |/|\\|/|\\|/|\\|/|\\|" << std::endl;
+            }
+            else
+            {
+                std::cout << "  |\\|/|\\|/|\\|/|\\|/|" << std::endl;
+            }
+
+            std::cout << y << " ";
+            for (int x = 0; x < BOARD_WIDTH; x++)
+            {
+                EState state = (&cells[y][x])->state;
+                if (state == EState::WHITE) std::cout << "# ";
+                else if (state == EState::BLACK) std::cout << "O ";
+                else std::cout << ". ";
+            }
+            std::cout << std::endl;
         }
     }
 }

@@ -1,5 +1,5 @@
-#define DEBUG_OUTPUT
-#define SHOW_RAW_MSG
+//#define DEBUG_OUTPUT
+//#define SHOW_RAW_MSG
 
 #ifdef _WIN32
 // link with Ws2_32.lib
@@ -15,9 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <string>
-#ifdef DEBUG_OUTPUT
 #include <iostream>
-#endif
 
 #include "Board.h"
 #include "Client.h"
@@ -35,7 +33,7 @@
 #define MSG_BOARD_HEADER "   0   1   2   3   4   5   6   7   8"
 #define MSG_STONE "Please enter origin"                 // x - axis, y-axis
 #define MSG_SELECT_LOCATION "Please enter destination"  // x - axis, y-axis
-#define MSG_CAPTURE ".."
+#define MSG_CAPTURE "Please enter wether you want to Withdraw or Approach [W/A]"
 #define MSG_PLAYMODE "Please choose your mode [0-2]"    // select Start, rules, exit and AI or HUMAN player
 #define MSG_PLAYERSTART "Please choose wether you want the AI to start or not [0-1]"    // select starting player
 #define MSG_CONTINUE "Do you want to continue with your turn [Y/N]?" // make another turn?
@@ -186,9 +184,10 @@ void Client::Start()
         {
             if ((pos = strRecv.rfind(MSG_BOARD_HEADER)) != std::string::npos)
             {
-                // std::string field = strRecv.substr(pos, 201); // TODO: make const for fixed size length
-                // std::string field = strRecv.substr(pos, 209); // TODO: make const for fixed size length
-                std::string field = strRecv.substr(pos, 380); // TODO: make const for fixed size length
+                // TODO: make const for fixed size length
+                // std::string field = strRecv.substr(pos, 201);
+                // std::string field = strRecv.substr(pos, 209);
+                std::string field = strRecv.substr(pos, 380);
 
                 // remove newlines for combined parsing depending on different server versions
                 field.erase(remove(field.begin(), field.end(), ' '), field.end());
