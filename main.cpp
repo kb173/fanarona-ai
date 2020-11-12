@@ -6,8 +6,8 @@
 
 int main()
 {
-
-    Board* board = new Board(); // our game board -> gets filled by server messages, calculates next position...
+    // TODO: get Board Mode from arguments, also server to connect (or local?)
+    Board* board = new Board(EMode::HUMAN); // our game board -> gets filled by server messages, calculates next position...
 
     // Client client("10.64.99.107", 4455); // Lars' Fanorona Server
     // Client client("127.0.0.1", 8888); // Test server

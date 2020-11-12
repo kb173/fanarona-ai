@@ -14,12 +14,18 @@ enum class EState : char
     BLACK,
 };
 
+enum class EMove : char
+{
+    NONE,
+    STONE,
+    LOCATION,
+    CAPTURE,
+};
+
 enum class EMode : char
 {
-    SELECT_INVALID,
-    SELECT_STONE,
-    SELECT_MOVEMENT,
-    SELECT_CAPTURE,
+    HUMAN,
+    AI,
 };
 
 struct Node
@@ -81,20 +87,20 @@ struct Turn
 class Board
 {
   public:
-    Board();
+    Board(EMode);
     ~Board();
 
     void Parse(std::string boardContent);
     void Print();
 
-    // returns the next position to send to the server, depending on the mode (picking a stone, specifying movement,
-    // etc.)
+    // returns the next position to send to the server, depending on the mode (picking a stone, specifying movement, etc.)
     // TODO: return type string?
-    std::string GetPosition(EMode);
+    std::string GetPosition(EMove);
 
     const std::vector<Turn> FindTurns(EState);
 
   private:
+    EMode mode;
     Node cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
 
     inline Node* GetCell(int x, int y);
