@@ -22,10 +22,24 @@
 #include "Board.h"
 #include "Client.h"
 
-#define MSG_BOARD_HEADER "  0 1 2 3 4 5 6 7 8"         // start of server message for current board state
-#define MSG_SELECT_STONE "select stone:"               // message to select stone
-#define MSG_SELECT_LOCATION "select location to move:" // message to select location for current stone
-#define MSG_SELECT_CAPTURE "select stone to take: "    // message to select stone to capture for multiple choices
+#define SERVER_V1 1
+#define SERVER_V2 2
+
+#define SERVER_VERSION SERVER_V2
+#if SERVER_VERSION == SERVER_V1
+#define MSG_BOARD_HEADER "  0 1 2 3 4 5 6 7 8"          // start of server message for current board state
+#define MSG_STONE "select stone:"                       // select stone
+#define MSG_SELECT_LOCATION "select location to move:"  // location for current stone
+#define MSG_CAPTURE "select stone to take: "            // stone to capture for multiple choices
+#elif  SERVER_VERSION == SERVER_V2
+#define MSG_BOARD_HEADER "   0   1   2   3   4   5   6   7   8"
+#define MSG_STONE "Please enter origin"                 // x - axis, y-axis
+#define MSG_SELECT_LOCATION "Please enter destination"  // x - axis, y-axis
+#define MSG_CAPTURE ".."
+#define MSG_PLAYMODE "Please choose your mode [0-2]"    // select Start, rules, exit and AI or HUMAN player
+#define MSG_PLAYERSTART "Please choose wether you want the AI to start or not [0-1]"    // select starting player
+#define MSG_CONTINUE "Do you want to continue with your turn [Y/N]?" // make another turn?
+#endif
 
 Client::Client(std::string ip, int port)
 {
@@ -46,9 +60,7 @@ Client::Client(std::string ip, int port)
     struct sockaddr_in serv_addr;
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-#ifdef DEBUG_OUTPUT
         std::cout << "Socket creation error: " << sock << std::endl;
-#endif
         throw "Socket creation error.";
     }
 
@@ -60,17 +72,13 @@ Client::Client(std::string ip, int port)
     int status = 0;
     if ((status = inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr)) <= 0)
     {
-#ifdef DEBUG_OUTPUT
         std::cout << "Invalid address/ Address not supported > status: " << status << std::endl;
-#endif
         throw "Invalid address/ Address not supported";
     }
 
     if ((status = connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))) < 0)
     {
-#ifdef DEBUG_OUTPUT
         std::cout << "Connection failed! > status: " << status << " errno: " << errno << std::endl;
-#endif
         throw "Connection Failed";
     }
 
@@ -97,15 +105,28 @@ std::string Client::ReadString()
     {
         throw "Receive Failed";
     }
+#ifdef SHOW_RAW_MSG
+    std::cout << "<<< received RAW string:\r\n" << buffer << "\r\n###\r\n";
+#endif
     return std::string(buffer);
 }
 
 void Client::WriteString(std::string input)
 {
+    // append newline if not present
+    if (input.rfind("\n") != input.length())
+    {
+        input.append("\n");
+    }
+
+#ifdef SHOW_RAW_MSG
+    std::cout << ">>> sending string:\r\n" << input << "\r\n###\r\n";
+#endif
     if (send(sock, input.c_str(), (int)input.length(), 0) < 0)
     {
         throw "Send Failed";
     }
+    strRecv.clear();
 }
 
 void Client::SetBoard(Board* i_board)
@@ -116,47 +137,66 @@ void Client::SetBoard(Board* i_board)
 void Client::Start()
 {
     size_t pos = std::string::npos;
-    std::string recv = "";
     while (true)
     {
-        recv.append(ReadString());
-#ifdef SHOW_RAW_MSG
-        std::cout << "### RAW\r\n" << recv << "\r\n###\r\n";
-#endif
+        strRecv.append(ReadString());
 
-        EMode mode = EMode::SELECT_INVALID;
-        if (recv.find(MSG_SELECT_STONE) != std::string::npos)
+        EMove mode = EMove::NONE;
+        if (strRecv.find(MSG_CONTINUE) != std::string::npos)
         {
-            mode = EMode::SELECT_STONE;
+            WriteString("Y"); // never give up, never surrender!
         }
-        else if (recv.find(MSG_SELECT_LOCATION) != std::string::npos)
+        else if (strRecv.find(MSG_CAPTURE) != std::string::npos)
         {
-            mode = EMode::SELECT_MOVEMENT;
+            mode = EMove::CAPTURE;
         }
-        else if (recv.find(MSG_SELECT_CAPTURE) != std::string::npos)
+        else if (strRecv.find(MSG_SELECT_LOCATION) != std::string::npos)
         {
-            mode = EMode::SELECT_CAPTURE;
+            mode = EMove::LOCATION;
+        }
+        else if (strRecv.find(MSG_STONE) != std::string::npos)
+        {
+            mode = EMove::STONE;
+        }
+        else if (strRecv.find(MSG_PLAYMODE) != std::string::npos)
+        {
+            static int type = 0;
+            if (type == 0)
+            {
+                WriteString("0");
+                type++;
+            }
+            else
+            {
+                WriteString("1");
+            }
+        }
+        else if (strRecv.find(MSG_PLAYERSTART) != std::string::npos)
+        {
+            WriteString("1"); // we go always second... if not -> TODO: configure as param/property
         }
         else
         {
 #ifdef DEBUG_OUTPUT
-            std::cout << "/// unhandled text:\n'" << recv << "'" << std::endl;
+            std::cout << "/// currently unhandled text buffer:\n'" << strRecv << "'" << std::endl;
 #endif
         }
 
-        if (mode != EMode::SELECT_INVALID)
+        if (mode != EMove::NONE)
         {
-            if ((pos = recv.rfind(MSG_BOARD_HEADER)) != std::string::npos)
+            if ((pos = strRecv.rfind(MSG_BOARD_HEADER)) != std::string::npos)
             {
-                // std::string field = recv.substr(pos, 201); // TODO: make const for fixed size length
-                std::string field = recv.substr(pos, 209); // TODO: make const for fixed size length
+                // std::string field = strRecv.substr(pos, 201); // TODO: make const for fixed size length
+                // std::string field = strRecv.substr(pos, 209); // TODO: make const for fixed size length
+                std::string field = strRecv.substr(pos, 380); // TODO: make const for fixed size length
+
+                // remove newlines for combined parsing depending on different server versions
+                field.erase(remove(field.begin(), field.end(), ' '), field.end());
                 board->Parse(field);
             }
 
             std::string input = board->GetPosition(mode);
-            WriteString(input + "\n");
-
-            recv.clear();
+            WriteString(input);
         }
     }
 }
