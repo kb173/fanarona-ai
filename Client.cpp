@@ -16,6 +16,7 @@
 #include <string.h>
 #include <string>
 #include <iostream>
+#include <algorithm>
 
 #include "Board.h"
 #include "Client.h"
