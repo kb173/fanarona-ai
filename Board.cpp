@@ -220,30 +220,41 @@ std::string Board::GetPosition (EMove move)
   std::string input;
   if (m_mode == EMode::HUMAN)
   {
-    if (move == EMove::STONE)
+    // Output turn information
+    auto turns = FindTurns (EState::WHITE);
+    std::cout << turns.size() << " available Turns: \n";
+    for (auto turn : turns)
     {
-      auto turns = FindTurns (EState::WHITE);
-      std::cout << turns.size() << " available Turns: \n";
-      for (auto turn : turns)
-      {
-        std::cout << turn.ToString() << "\n";
-      }
-      std::cout << "select stone: ";
+      std::cout << turn.ToString() << "\n";
     }
-    else if (move == EMove::LOCATION)
+
+    // Check what the server is asking of us and output an appropriate message
+    if (move == EMove::ORIGIN_X)
     {
-      std::cout << "select location: ";
+      std::cout << "Origin X: ";
     }
-    else if (move == EMove::CAPTURE)
+    else if (move == EMove::ORIGIN_Y)
     {
-      std::cout << "select capture: ";
+      std::cout << "Origin Y: ";
+    }
+    else if (move == EMove::DEST_X)
+    {
+      std::cout << "Destination X: ";
+    }
+    else if (move == EMove::DEST_Y)
+    {
+      std::cout << "Destination Y: ";
+    }
+    else if (move == EMove::W_OR_A)
+    {
+      std::cout << "Withdraw or Approach?: ";
     }
 
     // std::cin >> input; // does not parse whitespaces!
     std::getline (std::cin, input);
 
-    // TODO: validate input (for user)
-
+    // FIXME: Needs to be updated for new format (or may not be needed at all)
+    /*
     // select current moving piece
     if (move == EMove::STONE || move == EMove::LOCATION)
     {
@@ -254,22 +265,11 @@ std::string Board::GetPosition (EMove move)
         m_movingPiece = cell;
       }
     }
+    */
   }
   else // TODO: check if valid mode or just assume correct value?
   {
     input = "TODO: AI finds best option";
-    if (move == EMove::STONE)
-    {
-      // TODO: AI finds best option
-    }
-    else if (move == EMove::LOCATION)
-    {
-      // TODO: AI finds best option
-    }
-    else if (move == EMove::CAPTURE)
-    {
-      // TODO: AI finds best option
-    }
   }
   return input;
 }

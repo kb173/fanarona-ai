@@ -14,6 +14,7 @@
 #endif
 #include <algorithm>
 #include <iostream>
+#include <map>
 #include <stdio.h>
 #include <string.h>
 #include <string>
@@ -31,16 +32,26 @@
   #define MSG_SELECT_LOCATION "select location to move:" // location for current stone
   #define MSG_CAPTURE         "select stone to take: "   // stone to capture for multiple choices
 #elif SERVER_VERSION == SERVER_V2
-  #define MSG_BOARD_HEADER    "   0   1   2   3   4   5   6   7   8"
-  #define MSG_STONE           "Please enter origin"      // x - axis, y-axis
-  #define MSG_SELECT_LOCATION "Please enter destination" // x - axis, y-axis
-  #define MSG_CAPTURE         "Please enter wether you want to Withdraw or Approach [W/A]"
+  #define MSG_BOARD_HEADER "   0   1   2   3   4   5   6   7   8"
   #define MSG_PLAYMODE                                                                             \
     "Please choose your mode [0-2]" // select Start, rules, exit and AI or HUMAN player
   #define MSG_PLAYERSTART                                                                          \
     "Please choose wether you want the AI to start or not [0-1]"       // select starting player
   #define MSG_CONTINUE "Do you want to continue with your turn [Y/N]?" // make another turn?
 #endif
+
+std::map<std::string, EMove> message_state_map {
+  {"Please enter origin x-axis", EMove::ORIGIN_X},
+  {"Please enter origin y-axis", EMove::ORIGIN_Y},
+  {"Please enter destination x-axis", EMove::DEST_X},
+  {"Please enter destination y-axis", EMove::DEST_Y},
+  {"Please enter wether you want to Withdraw or Approach [W/A]", EMove::W_OR_A}};
+
+std::map<std::string, std::string> message_write_map {
+  {"Exit\r\n\r\nPlease choose your mode [0-2]", "0"},
+  {"User\r\n\r\nPlease choose your mode [0-2]", "1"},
+  {"Please choose wether you want the AI to start or not [0-1]", "1"},
+  {"Do you want to continue with your turn [Y/N]?", "Y"}};
 
 Client::Client (std::string ip, int port)
 {
@@ -141,63 +152,48 @@ void Client::Start()
   {
     m_strRecv.append (ReadString());
 
-    EMove mode = EMove::NONE;
-    if (m_strRecv.rfind (MSG_CONTINUE) != std::string::npos)
+    EMove mode;
+
+    bool in_game = false;
+
+    // Check which gameplay selection this string corresponds to (if any) and set the `mode`
+    // accordingly
+    for (const auto& message_and_move : message_state_map)
     {
-      WriteString ("Y"); // never give up, never surrender!
-    }
-    else if (m_strRecv.rfind (MSG_SELECT_LOCATION) != std::string::npos)
-    {
-      mode = EMove::LOCATION;
-    }
-    else if (m_strRecv.rfind (MSG_STONE) != std::string::npos)
-    {
-      mode = EMove::STONE;
-    }
-    else if (m_strRecv.rfind (MSG_CAPTURE) != std::string::npos)
-    {
-      mode = EMove::CAPTURE;
-    }
-    else if (m_strRecv.rfind (MSG_PLAYMODE) != std::string::npos)
-    {
-      static int type = 0;
-      if (type == 0)
+      if (m_strRecv.rfind (message_and_move.first) != std::string::npos)
       {
-        WriteString ("0");
-        type++;
+        mode    = message_and_move.second;
+        in_game = true;
+
+        // Since we found an in-game state, pass the game data to the Board
+        if ((pos = m_strRecv.rfind (MSG_BOARD_HEADER)) != std::string::npos)
+        {
+          // TODO: make const for fixed size length
+          // std::string field = strRecv.substr(pos, 201);
+          // std::string field = strRecv.substr(pos, 209);
+          std::string field = m_strRecv.substr (pos, 380);
+
+          // remove newlines for combined parsing depending on different server versions
+          field.erase (remove (field.begin(), field.end(), ' '), field.end());
+          m_board->Parse (field);
+        }
+
+        std::string input = m_board->GetPosition (mode);
+        WriteString (input);
       }
-      else
-      {
-        WriteString ("1");
-      }
-    }
-    else if (m_strRecv.rfind (MSG_PLAYERSTART) != std::string::npos)
-    {
-      WriteString ("1"); // we go always second... if not -> TODO: configure as param/property
-    }
-    else
-    {
-#ifdef DEBUG_OUTPUT
-      std::cout << "/// currently unhandled text buffer:\n'" << m_strRecv << "'" << std::endl;
-#endif
     }
 
-    if (mode != EMove::NONE)
+    // If that wasn't an in-game string, we're in the menu
+    if (!in_game)
     {
-      if ((pos = m_strRecv.rfind (MSG_BOARD_HEADER)) != std::string::npos)
+      // Check which menu point this string corresponds to and send the result
+      for (const auto& message_and_write : message_write_map)
       {
-        // TODO: make const for fixed size length
-        // std::string field = strRecv.substr(pos, 201);
-        // std::string field = strRecv.substr(pos, 209);
-        std::string field = m_strRecv.substr (pos, 380);
-
-        // remove newlines for combined parsing depending on different server versions
-        field.erase (remove (field.begin(), field.end(), ' '), field.end());
-        m_board->Parse (field);
+        if (m_strRecv.rfind (message_and_write.first) != std::string::npos)
+        {
+          WriteString (message_and_write.second);
+        }
       }
-
-      std::string input = m_board->GetPosition (mode);
-      WriteString (input);
     }
   }
 }

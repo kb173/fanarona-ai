@@ -17,10 +17,11 @@ enum class EState : char
 
 enum class EMove : char
 {
-  NONE,
-  STONE,
-  LOCATION,
-  CAPTURE,
+  ORIGIN_X,
+  ORIGIN_Y,
+  DEST_X,
+  DEST_Y,
+  W_OR_A
 };
 
 enum class EMode : char
