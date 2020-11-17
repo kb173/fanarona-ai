@@ -454,7 +454,15 @@ void Board::RollbackTurn (Turn* turn)
   // Put captured back
   for (auto& node : turn->capture->capturedNodes)
   {
-    node->state = turn->move->From()->state;
+    // FIXME: Can we avoid this if-check? We just need the opposite color
+    if (turn->move->From()->state == EState::BLACK)
+    {
+      node->state = EState::WHITE;
+    }
+    else
+    {
+      node->state = EState::BLACK;
+    }
   }
 }
 
