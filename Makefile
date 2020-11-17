@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall --std=c++11
+CXXFLAGS = -Wall --std=c++11 -g
 
 funorona: main.o Client.o Board.o
 	$(CXX) $(CXXFLAGS) -o funorona main.o Client.o Board.o
