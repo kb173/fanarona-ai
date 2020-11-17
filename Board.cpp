@@ -299,7 +299,7 @@ std::string Board::GetPosition (EMove move)
       if (move == EMove::DEST_X)
       {
         // We're in a chain of turns, so just use the next one
-        m_turnToHandle = m_turnToHandle->nextTurn;
+        m_turn_to_handle = m_turn_to_handle->nextTurn;
       }
       else if (move == EMove::ORIGIN_X)
       {
@@ -317,8 +317,8 @@ std::string Board::GetPosition (EMove move)
 
           if (score > optimal_value)
           {
-            m_turnToHandle = turn;
-            optimal_value  = score;
+            m_turn_to_handle = turn;
+            optimal_value    = score;
           }
         }
       }
@@ -327,24 +327,24 @@ std::string Board::GetPosition (EMove move)
     // Check what the server is asking of us and output an appropriate message
     if (move == EMove::ORIGIN_X)
     {
-      input = std::to_string (m_turnToHandle->move->From()->x);
+      input = std::to_string (m_turn_to_handle->move->From()->x);
     }
     else if (move == EMove::ORIGIN_Y)
     {
-      input = std::to_string (m_turnToHandle->move->From()->y);
+      input = std::to_string (m_turn_to_handle->move->From()->y);
     }
     else if (move == EMove::DEST_X)
     {
-      input = std::to_string (m_turnToHandle->move->To()->x);
+      input = std::to_string (m_turn_to_handle->move->To()->x);
     }
     else if (move == EMove::DEST_Y)
     {
-      input              = std::to_string (m_turnToHandle->move->To()->y);
+      input              = std::to_string (m_turn_to_handle->move->To()->y);
       m_potentially_done = true;
     }
     else if (move == EMove::W_OR_A)
     {
-      if (m_turnToHandle->IsWithdraw())
+      if (m_turn_to_handle->IsWithdraw())
       {
         input = "W";
       }
