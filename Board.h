@@ -84,6 +84,8 @@ struct Turn
 
   uint GetTurnChainLength() const;
 
+  bool IsWithdraw() const;
+
   Move* move;
   Capture* capture;
   Turn* nextTurn;
@@ -115,23 +117,13 @@ private:
   EMode m_mode;
   Node m_cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
 
+  Turn* turnToHandle;
+
+  bool potentially_done =
+    true; // True if the previous command indicates that we may need a new Turn next time
+
   inline Node* GetCell (int x, int y);
   inline bool IsPositionInBounds (int x, int y);
-
-  // TODO: set this correctly after capturing, so we know which piece we have to use to continue
-  // @Bella
-  Node* m_movingPiece = nullptr;
-
-  // find possible moves and returns a vector of it, moves are pairs of nodes pointer and int
-  // denoting direction this means the vector can contain the same node multiple times if it can
-  // move in different directions always call findMoves, it decides which of the secondary functions
-  // to call bool parameter determines for which color we're finding moves
-  const std::vector<Move> FindMoves (EState);
-
-  // secondary find functions because there are two kinds of selection behaviours: normal and
-  // continuing moves (after a capture)
-  const std::vector<Move> FindFirstMoves (EState);
-  const std::vector<Move> FindContinuingMoves();
 
   // returns all pieces captured by a move, either in the direction of the move or behind the move.
   const std::vector<Node*> GetCapturesInDirection (const Move& move, bool reverse_direction);

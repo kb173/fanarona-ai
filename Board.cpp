@@ -49,6 +49,22 @@ uint Turn::GetTurnChainLength() const
   return length;
 }
 
+bool Turn::IsWithdraw() const
+{
+  // The turn is a withdraw if the first captured node is a neighbor of From.
+  Node* first_capture = capture->capturedNodes.front();
+
+  for (const auto& neighbour : move->From()->neighbours)
+  {
+    if (neighbour == first_capture)
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 Board::Board (EMode mode) : m_mode (mode)
 {
 }
@@ -271,24 +287,73 @@ std::string Board::GetPosition (EMove move)
 
     // std::cin >> input; // does not parse whitespaces!
     std::getline (std::cin, input);
+  }
+  else
+  {
+    Print();
 
-    // FIXME: Needs to be updated for new format (or may not be needed at all)
-    /*
-    // select current moving piece
-    if (move == EMove::STONE || move == EMove::LOCATION)
+    if (potentially_done)
     {
-      if (input.length() > 2)
+      potentially_done = false;
+
+      if (move == EMove::DEST_X)
       {
-        Node* cell    = GetCell ((input[0] - '0'), (input[2] - '0'));
-        cell->state   = EState::CURRENT;
-        m_movingPiece = cell;
+        // We're in a chain of turns, so just use the next one
+        turnToHandle = turnToHandle->nextTurn;
+      }
+      else if (move == EMove::ORIGIN_X)
+      {
+        // We're done with the previous chain, get a new optimal turn
+        auto turns = FindTurns (EState::WHITE);
+
+        // Get the optimal turn
+        // TODO: Minimax
+        uint optimal_value = 0;
+
+        // For now, the optimal turn is the one with the most captured + following turns
+        for (const auto& turn : turns)
+        {
+          uint score = turn->capture->capturedNodes.size() + turn->GetTurnChainLength();
+
+          if (score > optimal_value)
+          {
+            turnToHandle  = turn;
+            optimal_value = score;
+          }
+        }
       }
     }
-    */
-  }
-  else // TODO: check if valid mode or just assume correct value?
-  {
-    input = "TODO: AI finds best option";
+
+    // Check what the server is asking of us and output an appropriate message
+    if (move == EMove::ORIGIN_X)
+    {
+      input = std::to_string (turnToHandle->move->From()->x);
+    }
+    else if (move == EMove::ORIGIN_Y)
+    {
+      input = std::to_string (turnToHandle->move->From()->y);
+    }
+    else if (move == EMove::DEST_X)
+    {
+      input = std::to_string (turnToHandle->move->To()->x);
+    }
+    else if (move == EMove::DEST_Y)
+    {
+      input            = std::to_string (turnToHandle->move->To()->y);
+      potentially_done = true;
+    }
+    else if (move == EMove::W_OR_A)
+    {
+      if (turnToHandle->IsWithdraw())
+      {
+        input = "W";
+      }
+      else
+      {
+        input = "A";
+      }
+      potentially_done = true;
+    }
   }
   return input;
 }
@@ -391,84 +456,6 @@ void Board::RollbackTurn (Turn* turn)
   {
     node->state = turn->move->From()->state;
   }
-}
-
-// returns movable pieces for desired color, and integer denoting in which direction it can move
-// this means pieces can occur twice in the returned vector if they can move in two or more
-// directions
-const std::vector<Move> Board::FindMoves (EState movingState)
-{
-  // if we have no moving piece its a normal turn else we continue moving that piece
-  return m_movingPiece != nullptr ? FindContinuingMoves() : FindFirstMoves (movingState);
-}
-
-const std::vector<Move> Board::FindFirstMoves (EState movingState)
-{
-  std::vector<Move> nonCapturingMoves;
-  std::vector<Move> capturingMoves;
-
-  // iterate over board
-  for (int y = 0; y < BOARD_HEIGHT; y++)
-  {
-    for (int x = 0; x < BOARD_WIDTH; x++)
-    {
-      auto cell = GetCell (x, y);
-      // if we find a stone of my color
-      if (cell->state == movingState)
-      {
-        // iterate over neighbors
-        for (int i = 0; i < 8; i++)
-        {
-          auto neighbour = cell->neighbours[i];
-          // if neighbor node is empty
-          if (neighbour != nullptr && neighbour->state == EState::EMPTY)
-          {
-            Move move (cell, i);
-            // check if move captures and add to corresponding vector
-            if (GetBestCaptures (move).size() >= 1)
-            {
-              capturingMoves.push_back (move);
-            }
-            else
-            {
-              nonCapturingMoves.push_back (move);
-            }
-          }
-        }
-      }
-    }
-  }
-  // capture is mandatory thus only return those moves if available
-  return capturingMoves.size() > 0 ? capturingMoves : nonCapturingMoves;
-}
-
-const std::vector<Move> Board::FindContinuingMoves()
-{
-  std::vector<Move> nonCapturingMoves;
-  std::vector<Move> capturingMoves;
-
-  // iterate over neighbors of current moving piece
-  for (int i = 0; i < 8; i++)
-  {
-    auto neighbour = m_movingPiece->neighbours[i];
-
-    // if neighbor is empty
-    if (neighbour != nullptr && neighbour->state == EState::EMPTY)
-    {
-      Move move (m_movingPiece, i);
-      // check for captures and add to corresponding vector
-      if (GetBestCaptures (move).size() >= 1)
-      {
-        capturingMoves.push_back (move);
-      }
-      else
-      {
-        nonCapturingMoves.push_back (move);
-      }
-    }
-  }
-  // capture is mandatory thus only return those moves if available
-  return capturingMoves.size() > 0 ? capturingMoves : nonCapturingMoves;
 }
 
 const std::vector<Node*> Board::GetCapturesInDirection (const Move& move, bool reverse_direction)
