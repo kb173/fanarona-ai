@@ -100,18 +100,8 @@ public:
   void Parse (std::string boardContent);
   void Print();
 
-  // returns the next position to send to the server,
-  // depending on the mode (picking a stone, specifying movement, etc.)
-  // TODO: return type string? better use Point?
+  // Return the String which the Client should send to the Server next.
   std::string GetPosition (EMove);
-
-  const std::list<Turn*> FindTurnsForNode (EState, Node*);
-
-  const std::list<Turn*> FindTurns (EState);
-
-  void ApplyTurn (Turn* turn);
-
-  void RollbackTurn (Turn* turn);
 
 private:
   EMode m_mode;
@@ -122,13 +112,22 @@ private:
   bool m_potentially_done =
     true; // True if the previous command indicates that we may need a new Turn next time
 
+  // Return a list of all possible turns which the given Node could take.
+  const std::list<Turn*> FindTurnsForNode (EState, Node*);
+
+  // Return a list of all possible turns which any Node on the field with the given state could
+  // take.
+  const std::list<Turn*> FindTurns (EState);
+
+  // Apply a turn to the Board by moving the corresponding Node and removing Captures.
+  void ApplyTurn (Turn* turn);
+
+  // Rollback a turn which was previously applied with ApplyTurn.
+  void RollbackTurn (Turn* turn);
+
   inline Node* GetCell (int x, int y);
   inline bool IsPositionInBounds (int x, int y);
 
   // returns all pieces captured by a move, either in the direction of the move or behind the move.
   const std::vector<Node*> GetCapturesInDirection (const Move& move, bool reverse_direction);
-
-  // returns all pieces captured by a move in a certain direction.
-  // checks forwards and backwards and returns the pieces in the better direction.
-  const std::vector<Node*> GetBestCaptures (const Move& move);
 };

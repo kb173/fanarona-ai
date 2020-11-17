@@ -121,9 +121,6 @@ void Board::Parse (std::string boardContent)
       cell->x = x;
       cell->y = y;
 
-      // TODO: dont override valid current stone selection
-      // if (movingPiece && movingPiece->x == x && movingPiece->y == y)
-
       // TODO: define "colors" as constants, add property playerColor
       if (character == '1' || character == '#')
       {
@@ -248,10 +245,8 @@ bool Board::IsPositionInBounds (int x, int y)
   return x >= 0 && x < BOARD_WIDTH && y >= 0 && y < BOARD_HEIGHT;
 }
 
-// temp implementation for stdin input by user: TODO add logic implementation here
 std::string Board::GetPosition (EMove move)
 {
-  // TODO: own implementation for human, AI player
   std::string input;
   if (m_mode == EMode::HUMAN)
   {
@@ -344,14 +339,7 @@ std::string Board::GetPosition (EMove move)
     }
     else if (move == EMove::W_OR_A)
     {
-      if (m_turn_to_handle->IsWithdraw())
-      {
-        input = "W";
-      }
-      else
-      {
-        input = "A";
-      }
+      input              = m_turn_to_handle->IsWithdraw() ? "W" : "A";
       m_potentially_done = true;
     }
   }
@@ -378,15 +366,19 @@ const std::list<Turn*> Board::FindTurnsForNode (EState movingState, Node* node)
         Capture* captureForward  = new Capture (GetCapturesInDirection (*move, false));
         Capture* captureBackward = new Capture (GetCapturesInDirection (*move, true));
 
-        // are there following turns?
+        // FIXME: Duplication for forward and backward
         Turn* forwardTurn = new Turn (move, captureForward);
         if (captureForward->capturedNodes.size() > 0)
         {
+          // If there are following turns: Apply the turn, recursively create the chain of turns,
+          // and rollback
           ApplyTurn (forwardTurn);
 
           std::list<Turn*> turns = FindTurnsForNode (movingState, neighbour);
           if (turns.size() > 0)
           {
+            // TODO: Currently the first turn is arbitrarily picked. But this should follow the same
+            // heuristic as GetPosition!
             forwardTurn->nextTurn = turns.front();
           }
 
@@ -497,15 +489,6 @@ const std::vector<Node*> Board::GetCapturesInDirection (const Move& move, bool r
   }
 
   return captures;
-}
-
-const std::vector<Node*> Board::GetBestCaptures (const Move& move)
-{
-  auto captures_forwards  = GetCapturesInDirection (move, false);
-  auto captures_backwards = GetCapturesInDirection (move, true);
-
-  return captures_forwards.size() > captures_backwards.size() ? captures_forwards
-                                                              : captures_backwards;
 }
 
 std::string Move::ToString() const
