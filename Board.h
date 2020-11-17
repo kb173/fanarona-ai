@@ -117,9 +117,9 @@ private:
   EMode m_mode;
   Node m_cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
 
-  Turn* turnToHandle;
+  Turn* m_turnToHandle;
 
-  bool potentially_done =
+  bool m_potentially_done =
     true; // True if the previous command indicates that we may need a new Turn next time
 
   inline Node* GetCell (int x, int y);

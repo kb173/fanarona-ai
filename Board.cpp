@@ -292,14 +292,14 @@ std::string Board::GetPosition (EMove move)
   {
     Print();
 
-    if (potentially_done)
+    if (m_potentially_done)
     {
-      potentially_done = false;
+      m_potentially_done = false;
 
       if (move == EMove::DEST_X)
       {
         // We're in a chain of turns, so just use the next one
-        turnToHandle = turnToHandle->nextTurn;
+        m_turnToHandle = m_turnToHandle->nextTurn;
       }
       else if (move == EMove::ORIGIN_X)
       {
@@ -317,8 +317,8 @@ std::string Board::GetPosition (EMove move)
 
           if (score > optimal_value)
           {
-            turnToHandle  = turn;
-            optimal_value = score;
+            m_turnToHandle = turn;
+            optimal_value  = score;
           }
         }
       }
@@ -327,24 +327,24 @@ std::string Board::GetPosition (EMove move)
     // Check what the server is asking of us and output an appropriate message
     if (move == EMove::ORIGIN_X)
     {
-      input = std::to_string (turnToHandle->move->From()->x);
+      input = std::to_string (m_turnToHandle->move->From()->x);
     }
     else if (move == EMove::ORIGIN_Y)
     {
-      input = std::to_string (turnToHandle->move->From()->y);
+      input = std::to_string (m_turnToHandle->move->From()->y);
     }
     else if (move == EMove::DEST_X)
     {
-      input = std::to_string (turnToHandle->move->To()->x);
+      input = std::to_string (m_turnToHandle->move->To()->x);
     }
     else if (move == EMove::DEST_Y)
     {
-      input            = std::to_string (turnToHandle->move->To()->y);
-      potentially_done = true;
+      input              = std::to_string (m_turnToHandle->move->To()->y);
+      m_potentially_done = true;
     }
     else if (move == EMove::W_OR_A)
     {
-      if (turnToHandle->IsWithdraw())
+      if (m_turnToHandle->IsWithdraw())
       {
         input = "W";
       }
@@ -352,7 +352,7 @@ std::string Board::GetPosition (EMove move)
       {
         input = "A";
       }
-      potentially_done = true;
+      m_potentially_done = true;
     }
   }
   return input;
