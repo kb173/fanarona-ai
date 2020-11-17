@@ -108,15 +108,17 @@ void Board::Parse (std::string boardContent)
       }
 
       // TODO: only setup neighbour connections during first parsing phase @rene
-      if (IsPositionInBounds (x - 1, y - 1) && lines[inputRow - 1][inputColumn - 1] == '\\')
+      if (IsPositionInBounds (x - 1, y - 1) &&
+          lines[inputRow - 1][inputColumn - 1 - (inputRow % 2)] == '\\')
       {
         cell->neighbours[0] = GetCell (x - 1, y - 1);
       }
-      if (IsPositionInBounds (x, y - 1) && lines[inputRow - 1][inputColumn] == '|')
+      if (IsPositionInBounds (x, y - 1) && lines[inputRow - 1][inputColumn - (inputRow % 2)] == '|')
       {
         cell->neighbours[1] = GetCell (x, y - 1);
       }
-      if (IsPositionInBounds (x + 1, y - 1) && lines[inputRow - 1][inputColumn + 1] == '/')
+      if (IsPositionInBounds (x + 1, y - 1) &&
+          lines[inputRow - 1][inputColumn + 1 - (inputRow % 2)] == '/')
       {
         cell->neighbours[2] = GetCell (x + 1, y - 1);
       }
@@ -128,15 +130,17 @@ void Board::Parse (std::string boardContent)
       {
         cell->neighbours[4] = GetCell (x + 1, y);
       }
-      if (IsPositionInBounds (x - 1, y + 1) && lines[inputRow + 1][inputColumn - 1] == '/')
+      if (IsPositionInBounds (x - 1, y + 1) &&
+          lines[inputRow + 1][inputColumn - 1 - (inputRow % 2)] == '/')
       {
         cell->neighbours[5] = GetCell (x - 1, y + 1);
       }
-      if (IsPositionInBounds (x, y + 1) && lines[inputRow + 1][inputColumn] == '|')
+      if (IsPositionInBounds (x, y + 1) && lines[inputRow + 1][inputColumn - (inputRow % 2)] == '|')
       {
         cell->neighbours[6] = GetCell (x, y + 1);
       }
-      if (IsPositionInBounds (x + 1, y + 1) && lines[inputRow + 1][inputColumn + 1] == '\\')
+      if (IsPositionInBounds (x + 1, y + 1) &&
+          lines[inputRow + 1][inputColumn + 1 - (inputRow % 2)] == '\\')
       {
         cell->neighbours[7] = GetCell (x + 1, y + 1);
       }
