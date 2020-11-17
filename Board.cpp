@@ -25,9 +25,28 @@ std::string Capture::ToString() const
 
 std::string Turn::ToString() const
 {
-  // std::string nextTurnString = nextTurn ? "\n" + nextTurn->ToString() : "\n";
-  // return move->ToString() + "\n" + capture->ToString() + nextTurnString;
-  return move->ToString() + " " + capture->ToString();
+  std::string ret = move->ToString() + " " + capture->ToString();
+
+  if (nextTurn != nullptr)
+  {
+    ret += " with " + std::to_string (GetTurnChainLength()) + " following turns";
+  }
+
+  return ret;
+}
+
+uint Turn::GetTurnChainLength() const
+{
+  const Turn* current_turn = this;
+  uint length              = 0;
+
+  while (current_turn != nullptr)
+  {
+    current_turn = current_turn->nextTurn;
+    length++;
+  }
+
+  return length;
 }
 
 Board::Board (EMode mode) : m_mode (mode)
@@ -225,7 +244,7 @@ std::string Board::GetPosition (EMove move)
     std::cout << turns.size() << " available Turns: \n";
     for (auto turn : turns)
     {
-      std::cout << turn.ToString() << "\n";
+      std::cout << turn->ToString() << "\n";
     }
 
     // Check what the server is asking of us and output an appropriate message
@@ -274,43 +293,104 @@ std::string Board::GetPosition (EMove move)
   return input;
 }
 
-const std::vector<Turn> Board::FindTurns (EState movingState)
+const std::list<Turn*> Board::FindTurnsForNode (EState movingState, Node* node)
 {
-  std::vector<Turn> turns;
+  std::list<Turn*> turns;
+
+  // if we find a stone of my color
+  if (node->state == movingState)
+  {
+    // iterate over neighbors
+    for (int i = 0; i < 8; i++)
+    {
+      auto neighbour = node->neighbours[i];
+
+      // if neighbor node is empty
+      if (neighbour != nullptr && neighbour->state == EState::EMPTY)
+      {
+        // this is a possible turn!
+        Move* move               = new Move (node, i);
+        Capture* captureForward  = new Capture (GetCapturesInDirection (*move, false));
+        Capture* captureBackward = new Capture (GetCapturesInDirection (*move, true));
+
+        // are there following turns?
+        Turn* forwardTurn = new Turn (move, captureForward);
+        if (captureForward->capturedNodes.size() > 0)
+        {
+          ApplyTurn (forwardTurn);
+
+          std::list<Turn*> turns = FindTurnsForNode (movingState, neighbour);
+          if (turns.size() > 0)
+          {
+            forwardTurn->nextTurn = turns.front();
+          }
+
+          RollbackTurn (forwardTurn);
+        }
+
+        Turn* backwardTurn = new Turn (move, captureBackward);
+        if (captureBackward->capturedNodes.size() > 0)
+        {
+          ApplyTurn (backwardTurn);
+
+          std::list<Turn*> turns = FindTurnsForNode (movingState, neighbour);
+          if (turns.size() > 0)
+          {
+            backwardTurn->nextTurn = turns.front();
+          }
+
+          RollbackTurn (backwardTurn);
+        }
+
+        turns.emplace_back (forwardTurn);
+        turns.emplace_back (backwardTurn);
+      }
+    }
+  }
+
+  return turns;
+}
+
+const std::list<Turn*> Board::FindTurns (EState movingState)
+{
+  std::list<Turn*> turns;
 
   // iterate over board
   for (int y = 0; y < BOARD_HEIGHT; y++)
   {
     for (int x = 0; x < BOARD_WIDTH; x++)
     {
-      auto cell = GetCell (x, y);
-
-      // if we find a stone of my color
-      if (cell->state == movingState)
-      {
-        // iterate over neighbors
-        for (int i = 0; i < 8; i++)
-        {
-          auto neighbour = cell->neighbours[i];
-
-          // if neighbor node is empty
-          if (neighbour != nullptr && neighbour->state == EState::EMPTY)
-          {
-            // this is a possible turn!
-
-            Move* move               = new Move (cell, i);
-            Capture* captureForward  = new Capture (GetCapturesInDirection (*move, false));
-            Capture* captureBackward = new Capture (GetCapturesInDirection (*move, true));
-
-            turns.emplace_back (Turn (move, captureForward));
-            turns.emplace_back (Turn (move, captureBackward));
-          }
-        }
-      }
+      Node* node = GetCell (x, y);
+      auto moves = FindTurnsForNode (movingState, node);
+      turns.splice (turns.end(), moves);
     }
   }
 
   return turns;
+}
+
+void Board::ApplyTurn (Turn* turn)
+{
+  // Remove captured
+  for (auto& node : turn->capture->capturedNodes)
+  {
+    node->state = EState::EMPTY;
+  }
+
+  // Make turn
+  std::swap (turn->move->To()->state, turn->move->From()->state);
+}
+
+void Board::RollbackTurn (Turn* turn)
+{
+  // Reset turn
+  std::swap (turn->move->To()->state, turn->move->From()->state);
+
+  // Put captured back
+  for (auto& node : turn->capture->capturedNodes)
+  {
+    node->state = turn->move->From()->state;
+  }
 }
 
 // returns movable pieces for desired color, and integer denoting in which direction it can move

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <list>
 #include <string>
 #include <vector>
 
@@ -81,6 +82,8 @@ struct Turn
 
   std::string ToString() const;
 
+  uint GetTurnChainLength() const;
+
   Move* move;
   Capture* capture;
   Turn* nextTurn;
@@ -100,7 +103,13 @@ public:
   // TODO: return type string? better use Point?
   std::string GetPosition (EMove);
 
-  const std::vector<Turn> FindTurns (EState);
+  const std::list<Turn*> FindTurnsForNode (EState, Node*);
+
+  const std::list<Turn*> FindTurns (EState);
+
+  void ApplyTurn (Turn* turn);
+
+  void RollbackTurn (Turn* turn);
 
 private:
   EMode m_mode;
