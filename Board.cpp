@@ -61,7 +61,6 @@ bool Turn::IsWithdraw() const
       return true;
     }
   }
-
   return false;
 }
 
@@ -75,6 +74,7 @@ Board::~Board()
 
 void Board::Parse (std::string boardContent)
 {
+  static bool bFirst_parse = true; // using static variable to determine first parsing phase
   std::istringstream stream (boardContent);
   std::string str;
 
@@ -111,13 +111,10 @@ void Board::Parse (std::string boardContent)
         break;
       }
 
-      // int inputColumn = x * 2 + 2;
       int inputColumn = x * 2 + (inputRow % 2);
       char character  = line[inputColumn];
 
-      auto cell = GetCell (x, y);
-
-      // TODO: Assign this earlier?
+      Node *cell = GetCell (x, y);
       cell->x = x;
       cell->y = y;
 
@@ -139,45 +136,49 @@ void Board::Parse (std::string boardContent)
         cell->state = EState::EMPTY;
       }
 
-      // TODO: only setup neighbour connections during first parsing phase @rene
-      if (IsPositionInBounds (x - 1, y - 1) &&
-          lines[inputRow - 1][inputColumn - 1 - (inputRow % 2)] == '\\')
+      if (bFirst_parse)
       {
-        cell->neighbours[0] = GetCell (x - 1, y - 1);
-      }
-      if (IsPositionInBounds (x, y - 1) && lines[inputRow - 1][inputColumn - (inputRow % 2)] == '|')
-      {
-        cell->neighbours[1] = GetCell (x, y - 1);
-      }
-      if (IsPositionInBounds (x + 1, y - 1) &&
-          lines[inputRow - 1][inputColumn + 1 - (inputRow % 2)] == '/')
-      {
-        cell->neighbours[2] = GetCell (x + 1, y - 1);
-      }
-      if (IsPositionInBounds (x - 1, y) && lines[inputRow][inputColumn - 1] == '-')
-      {
-        cell->neighbours[3] = GetCell (x - 1, y);
-      }
-      if (IsPositionInBounds (x + 1, y) && lines[inputRow][inputColumn + 1] == '-')
-      {
-        cell->neighbours[4] = GetCell (x + 1, y);
-      }
-      if (IsPositionInBounds (x - 1, y + 1) &&
-          lines[inputRow + 1][inputColumn - 1 - (inputRow % 2)] == '/')
-      {
-        cell->neighbours[5] = GetCell (x - 1, y + 1);
-      }
-      if (IsPositionInBounds (x, y + 1) && lines[inputRow + 1][inputColumn - (inputRow % 2)] == '|')
-      {
-        cell->neighbours[6] = GetCell (x, y + 1);
-      }
-      if (IsPositionInBounds (x + 1, y + 1) &&
-          lines[inputRow + 1][inputColumn + 1 - (inputRow % 2)] == '\\')
-      {
-        cell->neighbours[7] = GetCell (x + 1, y + 1);
+        if (IsPositionInBounds(x - 1, y - 1) &&
+            lines[inputRow - 1][inputColumn - 1 - (inputRow % 2)] == '\\')
+        {
+            cell->neighbours[0] = GetCell(x - 1, y - 1);
+        }
+        if (IsPositionInBounds(x, y - 1) && lines[inputRow - 1][inputColumn - (inputRow % 2)] == '|')
+        {
+            cell->neighbours[1] = GetCell(x, y - 1);
+        }
+        if (IsPositionInBounds(x + 1, y - 1) &&
+            lines[inputRow - 1][inputColumn + 1 - (inputRow % 2)] == '/')
+        {
+            cell->neighbours[2] = GetCell(x + 1, y - 1);
+        }
+        if (IsPositionInBounds(x - 1, y) && lines[inputRow][inputColumn - 1] == '-')
+        {
+            cell->neighbours[3] = GetCell(x - 1, y);
+        }
+        if (IsPositionInBounds(x + 1, y) && lines[inputRow][inputColumn + 1] == '-')
+        {
+            cell->neighbours[4] = GetCell(x + 1, y);
+        }
+        if (IsPositionInBounds(x - 1, y + 1) &&
+            lines[inputRow + 1][inputColumn - 1 - (inputRow % 2)] == '/')
+        {
+            cell->neighbours[5] = GetCell(x - 1, y + 1);
+        }
+        if (IsPositionInBounds(x, y + 1) && lines[inputRow + 1][inputColumn - (inputRow % 2)] == '|')
+        {
+            cell->neighbours[6] = GetCell(x, y + 1);
+        }
+        if (IsPositionInBounds(x + 1, y + 1) &&
+            lines[inputRow + 1][inputColumn + 1 - (inputRow % 2)] == '\\')
+        {
+            cell->neighbours[7] = GetCell(x + 1, y + 1);
+        }
       }
     }
   }
+
+  bFirst_parse = false;
 
   // print board for human player after successful parse
   if (m_mode == EMode::HUMAN)

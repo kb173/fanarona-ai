@@ -22,23 +22,14 @@
 #include "Board.h"
 #include "Client.h"
 
-#define SERVER_V1 1
-#define SERVER_V2 2
+#define BOARD_LENGTH 380 // SERVER_V2 total gridsize including whitespaces
 
-#define SERVER_VERSION SERVER_V2
-#if SERVER_VERSION == SERVER_V1
-  #define MSG_BOARD_HEADER    "  0 1 2 3 4 5 6 7 8" // start of server message for current board state
-  #define MSG_STONE           "select stone:"       // select stone
-  #define MSG_SELECT_LOCATION "select location to move:" // location for current stone
-  #define MSG_CAPTURE         "select stone to take: "   // stone to capture for multiple choices
-#elif SERVER_VERSION == SERVER_V2
-  #define MSG_BOARD_HEADER "   0   1   2   3   4   5   6   7   8"
-  #define MSG_PLAYMODE                                                                             \
-    "Please choose your mode [0-2]" // select Start, rules, exit and AI or HUMAN player
-  #define MSG_PLAYERSTART                                                                          \
-    "Please choose wether you want the AI to start or not [0-1]"       // select starting player
-  #define MSG_CONTINUE "Do you want to continue with your turn [Y/N]?" // make another turn?
-#endif
+#define MSG_BOARD_HEADER "   0   1   2   3   4   5   6   7   8"
+#define MSG_PLAYMODE                                                                             \
+"Please choose your mode [0-2]" // select Start, rules, exit and AI or HUMAN player
+#define MSG_PLAYERSTART                                                                          \
+"Please choose wether you want the AI to start or not [0-1]"       // select starting player
+#define MSG_CONTINUE "Do you want to continue with your turn [Y/N]?" // make another turn?
 
 std::map<std::string, EMove> message_state_map {
   {"Please enter origin x-axis", EMove::ORIGIN_X},
@@ -156,8 +147,8 @@ void Client::Start()
 
     bool in_game = false;
 
-    // Check which gameplay selection this string corresponds to (if any) and set the `mode`
-    // accordingly
+    // Check which gameplay selection this string corresponds to (if any)
+    // and set the `mode` accordingly
     for (const auto& message_and_move : message_state_map)
     {
       if (m_strRecv.rfind (message_and_move.first) != std::string::npos)
@@ -168,10 +159,7 @@ void Client::Start()
         // Since we found an in-game state, pass the game data to the Board
         if ((pos = m_strRecv.rfind (MSG_BOARD_HEADER)) != std::string::npos)
         {
-          // TODO: make const for fixed size length
-          // std::string field = strRecv.substr(pos, 201);
-          // std::string field = strRecv.substr(pos, 209);
-          std::string field = m_strRecv.substr (pos, 380);
+          std::string field = m_strRecv.substr (pos, BOARD_LENGTH);
 
           // remove newlines for combined parsing depending on different server versions
           field.erase (remove (field.begin(), field.end(), ' '), field.end());
