@@ -13,7 +13,5 @@ Client.o: Client.cpp
 Board.o: Board.cpp
 	$(CXX) $(CXXFLAGS) -c Board.cpp
 
-Server: Server.cpp
-
 clean:
 	-rm *.o funorona
