@@ -308,8 +308,7 @@ std::string Board::GetPosition (EMove move)
         // For now, the optimal turn is the one with the most captured + following turns
         for (const auto& turn : turns)
         {
-          uint score = turn->capture->capturedNodes.size() + turn->GetTurnChainLength();
-
+          uint score = (uint)turn->capture->capturedNodes.size() + turn->GetTurnChainLength();
           if (score > optimal_value)
           {
             m_turn_to_handle = turn;

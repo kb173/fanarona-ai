@@ -99,7 +99,7 @@ Client::Client (std::string ip, int port)
 Client::~Client()
 {
 #ifdef _WIN32
-  closesocket (sock);
+  closesocket (m_sock);
 #else
   close (m_sock);
 #endif
@@ -109,7 +109,7 @@ std::string Client::ReadString()
 {
   memset (m_buffer, 0, READ_DATA_SIZE);
 #ifdef _WIN32
-  if (recv (sock, buffer, READ_DATA_SIZE, 0) < 0)
+  if (recv (m_sock, m_buffer, READ_DATA_SIZE, 0) < 0)
 #else
   if (read (m_sock, m_buffer, READ_DATA_SIZE) < 0)
 #endif

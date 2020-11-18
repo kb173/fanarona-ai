@@ -8,6 +8,10 @@
 const int BOARD_WIDTH  = 9;
 const int BOARD_HEIGHT = 5;
 
+#ifdef _WIN32
+  typedef unsigned int uint;
+#endif
+
 enum class EState : char
 {
   EMPTY,
@@ -107,7 +111,8 @@ private:
   EMode m_mode;
   Node m_cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
 
-  Turn* m_turn_to_handle;
+  Turn* m_turn_to_handle =
+      nullptr;
 
   bool m_potentially_done =
     true; // True if the previous command indicates that we may need a new Turn next time
