@@ -9,7 +9,7 @@ const int BOARD_WIDTH  = 9;
 const int BOARD_HEIGHT = 5;
 
 #ifdef _WIN32
-  typedef unsigned int uint;
+typedef unsigned int uint;
 #endif
 
 enum class EState : char
@@ -42,7 +42,7 @@ struct Node
   std::array<Node*, 8> neighbours = {};
 
   Node() = default;
-  Node (int x, int y) : x (x), y (y)
+  Node(int x, int y) : x(x), y(y)
   {
   }
 
@@ -55,7 +55,7 @@ private:
   Node* m_origin;
 
 public:
-  Move (Node* origin, int direction) : m_origin (origin), direction (direction)
+  Move(Node* origin, int direction) : m_origin(origin), direction(direction)
   {
   }
 
@@ -69,7 +69,7 @@ public:
 
 struct Capture
 {
-  Capture (std::vector<Node*> capturedNodes) : capturedNodes (capturedNodes)
+  Capture(std::vector<Node*> capturedNodes) : capturedNodes(capturedNodes)
   {
   }
 
@@ -80,7 +80,7 @@ struct Capture
 
 struct Turn
 {
-  Turn (Move* move, Capture* capture) : move (move), capture (capture), nextTurn (nullptr)
+  Turn(Move* move, Capture* capture) : move(move), capture(capture), nextTurn(nullptr)
   {
   }
 
@@ -98,41 +98,40 @@ struct Turn
 class Board
 {
 public:
-  Board (EMode);
+  Board(EMode);
   ~Board();
 
-  void Parse (std::string boardContent);
+  void Parse(std::string boardContent);
   void Print();
 
   // Return the String which the Client should send to the Server next.
-  std::string GetPosition (EMove);
+  std::string GetPosition(EMove);
 
 private:
   EMode m_mode;
   Node m_cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
 
-  Turn* m_turn_to_handle =
-      nullptr;
+  Turn* m_turn_to_handle = nullptr;
 
   bool m_potentially_done =
     true; // True if the previous command indicates that we may need a new Turn next time
 
   // Return a list of all possible turns which the given Node could take.
-  const std::list<Turn*> FindTurnsForNode (EState, Node*);
+  const std::list<Turn*> FindTurnsForNode(EState, Node*);
 
   // Return a list of all possible turns which any Node on the field with the given state could
   // take.
-  const std::list<Turn*> FindTurns (EState);
+  const std::list<Turn*> FindTurns(EState);
 
   // Apply a turn to the Board by moving the corresponding Node and removing Captures.
-  void ApplyTurn (Turn* turn);
+  void ApplyTurn(Turn* turn);
 
   // Rollback a turn which was previously applied with ApplyTurn.
-  void RollbackTurn (Turn* turn);
+  void RollbackTurn(Turn* turn);
 
-  inline Node* GetCell (int x, int y);
-  inline bool IsPositionInBounds (int x, int y);
+  inline Node* GetCell(int x, int y);
+  inline bool IsPositionInBounds(int x, int y);
 
   // returns all pieces captured by a move, either in the direction of the move or behind the move.
-  const std::vector<Node*> GetCapturesInDirection (const Move& move, bool reverse_direction);
+  const std::vector<Node*> GetCapturesInDirection(const Move& move, bool reverse_direction);
 };

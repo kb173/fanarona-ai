@@ -5,7 +5,7 @@
 
 std::string Node::ToString() const
 {
-  return std::to_string (x) + " " + std::to_string (y);
+  return std::to_string(x) + " " + std::to_string(y);
 }
 
 Node* Move::From() const
@@ -20,7 +20,7 @@ Node* Move::To() const
 
 std::string Capture::ToString() const
 {
-  return "Capturing " + std::to_string (capturedNodes.size()) + " nodes";
+  return "Capturing " + std::to_string(capturedNodes.size()) + " nodes";
 }
 
 std::string Turn::ToString() const
@@ -29,7 +29,7 @@ std::string Turn::ToString() const
 
   if (nextTurn != nullptr)
   {
-    ret += " with " + std::to_string (GetTurnChainLength()) + " following turns";
+    ret += " with " + std::to_string(GetTurnChainLength()) + " following turns";
   }
 
   return ret;
@@ -64,7 +64,7 @@ bool Turn::IsWithdraw() const
   return false;
 }
 
-Board::Board (EMode mode) : m_mode (mode)
+Board::Board(EMode mode) : m_mode(mode)
 {
 }
 
@@ -72,25 +72,25 @@ Board::~Board()
 {
 }
 
-void Board::Parse (std::string boardContent)
+void Board::Parse(std::string boardContent)
 {
   static bool bFirst_parse = true; // using static variable to determine first parsing phase
-  std::istringstream stream (boardContent);
+  std::istringstream stream(boardContent);
   std::string str;
 
   std::vector<std::string> lines;
-  while (getline (stream, str))
+  while (getline(stream, str))
   {
     // Remove carriage return if a server with Windows line endings is used
     if (str[0] == '\r' && str.length() > 0)
     {
-      str = str.substr (1);
+      str = str.substr(1);
     }
 
     // don't add empty lines
     if (str.length() != 0)
     {
-      lines.push_back (str);
+      lines.push_back(str);
     }
   }
 
@@ -106,7 +106,7 @@ void Board::Parse (std::string boardContent)
     int iLineSize = (int)line.size();
     for (int x = 0; x < iLineSize; x++)
     {
-      if (!IsPositionInBounds (x, y))
+      if (!IsPositionInBounds(x, y))
       {
         break;
       }
@@ -114,9 +114,9 @@ void Board::Parse (std::string boardContent)
       int inputColumn = x * 2 + (inputRow % 2);
       char character  = line[inputColumn];
 
-      Node *cell = GetCell (x, y);
-      cell->x = x;
-      cell->y = y;
+      Node* cell = GetCell(x, y);
+      cell->x    = x;
+      cell->y    = y;
 
       // TODO: define "colors" as constants, add property playerColor
       if (character == '1' || character == '#')
@@ -141,38 +141,40 @@ void Board::Parse (std::string boardContent)
         if (IsPositionInBounds(x - 1, y - 1) &&
             lines[inputRow - 1][inputColumn - 1 - (inputRow % 2)] == '\\')
         {
-            cell->neighbours[0] = GetCell(x - 1, y - 1);
+          cell->neighbours[0] = GetCell(x - 1, y - 1);
         }
-        if (IsPositionInBounds(x, y - 1) && lines[inputRow - 1][inputColumn - (inputRow % 2)] == '|')
+        if (IsPositionInBounds(x, y - 1) &&
+            lines[inputRow - 1][inputColumn - (inputRow % 2)] == '|')
         {
-            cell->neighbours[1] = GetCell(x, y - 1);
+          cell->neighbours[1] = GetCell(x, y - 1);
         }
         if (IsPositionInBounds(x + 1, y - 1) &&
             lines[inputRow - 1][inputColumn + 1 - (inputRow % 2)] == '/')
         {
-            cell->neighbours[2] = GetCell(x + 1, y - 1);
+          cell->neighbours[2] = GetCell(x + 1, y - 1);
         }
         if (IsPositionInBounds(x - 1, y) && lines[inputRow][inputColumn - 1] == '-')
         {
-            cell->neighbours[3] = GetCell(x - 1, y);
+          cell->neighbours[3] = GetCell(x - 1, y);
         }
         if (IsPositionInBounds(x + 1, y) && lines[inputRow][inputColumn + 1] == '-')
         {
-            cell->neighbours[4] = GetCell(x + 1, y);
+          cell->neighbours[4] = GetCell(x + 1, y);
         }
         if (IsPositionInBounds(x - 1, y + 1) &&
             lines[inputRow + 1][inputColumn - 1 - (inputRow % 2)] == '/')
         {
-            cell->neighbours[5] = GetCell(x - 1, y + 1);
+          cell->neighbours[5] = GetCell(x - 1, y + 1);
         }
-        if (IsPositionInBounds(x, y + 1) && lines[inputRow + 1][inputColumn - (inputRow % 2)] == '|')
+        if (IsPositionInBounds(x, y + 1) &&
+            lines[inputRow + 1][inputColumn - (inputRow % 2)] == '|')
         {
-            cell->neighbours[6] = GetCell(x, y + 1);
+          cell->neighbours[6] = GetCell(x, y + 1);
         }
         if (IsPositionInBounds(x + 1, y + 1) &&
             lines[inputRow + 1][inputColumn + 1 - (inputRow % 2)] == '\\')
         {
-            cell->neighbours[7] = GetCell(x + 1, y + 1);
+          cell->neighbours[7] = GetCell(x + 1, y + 1);
         }
       }
     }
@@ -232,27 +234,27 @@ void Board::Print()
   }
 }
 
-Node* Board::GetCell (int x, int y)
+Node* Board::GetCell(int x, int y)
 {
-  if (!IsPositionInBounds (x, y))
+  if (!IsPositionInBounds(x, y))
   {
     return nullptr;
   }
   return &m_cells[y][x];
 }
 
-bool Board::IsPositionInBounds (int x, int y)
+bool Board::IsPositionInBounds(int x, int y)
 {
   return x >= 0 && x < BOARD_WIDTH && y >= 0 && y < BOARD_HEIGHT;
 }
 
-std::string Board::GetPosition (EMove move)
+std::string Board::GetPosition(EMove move)
 {
   std::string input;
   if (m_mode == EMode::HUMAN)
   {
     // Output turn information
-    auto turns = FindTurns (EState::WHITE);
+    auto turns = FindTurns(EState::WHITE);
     std::cout << turns.size() << " available Turns: \n";
     for (auto turn : turns)
     {
@@ -282,7 +284,7 @@ std::string Board::GetPosition (EMove move)
     }
 
     // std::cin >> input; // does not parse whitespaces!
-    std::getline (std::cin, input);
+    std::getline(std::cin, input);
   }
   else
   {
@@ -300,7 +302,7 @@ std::string Board::GetPosition (EMove move)
       else if (move == EMove::ORIGIN_X)
       {
         // We're done with the previous chain, get a new optimal turn
-        auto turns = FindTurns (EState::WHITE);
+        auto turns = FindTurns(EState::WHITE);
 
         // Get the optimal turn
         // TODO: Minimax
@@ -322,19 +324,19 @@ std::string Board::GetPosition (EMove move)
     // Check what the server is asking of us and output an appropriate message
     if (move == EMove::ORIGIN_X)
     {
-      input = std::to_string (m_turn_to_handle->move->From()->x);
+      input = std::to_string(m_turn_to_handle->move->From()->x);
     }
     else if (move == EMove::ORIGIN_Y)
     {
-      input = std::to_string (m_turn_to_handle->move->From()->y);
+      input = std::to_string(m_turn_to_handle->move->From()->y);
     }
     else if (move == EMove::DEST_X)
     {
-      input = std::to_string (m_turn_to_handle->move->To()->x);
+      input = std::to_string(m_turn_to_handle->move->To()->x);
     }
     else if (move == EMove::DEST_Y)
     {
-      input              = std::to_string (m_turn_to_handle->move->To()->y);
+      input              = std::to_string(m_turn_to_handle->move->To()->y);
       m_potentially_done = true;
     }
     else if (move == EMove::W_OR_A)
@@ -346,7 +348,7 @@ std::string Board::GetPosition (EMove move)
   return input;
 }
 
-const std::list<Turn*> Board::FindTurnsForNode (EState movingState, Node* node)
+const std::list<Turn*> Board::FindTurnsForNode(EState movingState, Node* node)
 {
   std::list<Turn*> turns;
 
@@ -362,19 +364,19 @@ const std::list<Turn*> Board::FindTurnsForNode (EState movingState, Node* node)
       if (neighbour != nullptr && neighbour->state == EState::EMPTY)
       {
         // this is a possible turn!
-        Move* move               = new Move (node, i);
-        Capture* captureForward  = new Capture (GetCapturesInDirection (*move, false));
-        Capture* captureBackward = new Capture (GetCapturesInDirection (*move, true));
+        Move* move               = new Move(node, i);
+        Capture* captureForward  = new Capture(GetCapturesInDirection(*move, false));
+        Capture* captureBackward = new Capture(GetCapturesInDirection(*move, true));
 
         // FIXME: Duplication for forward and backward
-        Turn* forwardTurn = new Turn (move, captureForward);
+        Turn* forwardTurn = new Turn(move, captureForward);
         if (captureForward->capturedNodes.size() > 0)
         {
           // If there are following turns: Apply the turn, recursively create the chain of turns,
           // and rollback
-          ApplyTurn (forwardTurn);
+          ApplyTurn(forwardTurn);
 
-          std::list<Turn*> turns = FindTurnsForNode (movingState, neighbour);
+          std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour);
           if (turns.size() > 0)
           {
             // TODO: Currently the first turn is arbitrarily picked. But this should follow the same
@@ -382,25 +384,25 @@ const std::list<Turn*> Board::FindTurnsForNode (EState movingState, Node* node)
             forwardTurn->nextTurn = turns.front();
           }
 
-          RollbackTurn (forwardTurn);
+          RollbackTurn(forwardTurn);
         }
 
-        Turn* backwardTurn = new Turn (move, captureBackward);
+        Turn* backwardTurn = new Turn(move, captureBackward);
         if (captureBackward->capturedNodes.size() > 0)
         {
-          ApplyTurn (backwardTurn);
+          ApplyTurn(backwardTurn);
 
-          std::list<Turn*> turns = FindTurnsForNode (movingState, neighbour);
+          std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour);
           if (turns.size() > 0)
           {
             backwardTurn->nextTurn = turns.front();
           }
 
-          RollbackTurn (backwardTurn);
+          RollbackTurn(backwardTurn);
         }
 
-        turns.emplace_back (forwardTurn);
-        turns.emplace_back (backwardTurn);
+        turns.emplace_back(forwardTurn);
+        turns.emplace_back(backwardTurn);
       }
     }
   }
@@ -408,7 +410,7 @@ const std::list<Turn*> Board::FindTurnsForNode (EState movingState, Node* node)
   return turns;
 }
 
-const std::list<Turn*> Board::FindTurns (EState movingState)
+const std::list<Turn*> Board::FindTurns(EState movingState)
 {
   std::list<Turn*> turns;
 
@@ -417,16 +419,16 @@ const std::list<Turn*> Board::FindTurns (EState movingState)
   {
     for (int x = 0; x < BOARD_WIDTH; x++)
     {
-      Node* node = GetCell (x, y);
-      auto moves = FindTurnsForNode (movingState, node);
-      turns.splice (turns.end(), moves);
+      Node* node = GetCell(x, y);
+      auto moves = FindTurnsForNode(movingState, node);
+      turns.splice(turns.end(), moves);
     }
   }
 
   return turns;
 }
 
-void Board::ApplyTurn (Turn* turn)
+void Board::ApplyTurn(Turn* turn)
 {
   // Remove captured
   for (auto& node : turn->capture->capturedNodes)
@@ -435,13 +437,13 @@ void Board::ApplyTurn (Turn* turn)
   }
 
   // Make turn
-  std::swap (turn->move->To()->state, turn->move->From()->state);
+  std::swap(turn->move->To()->state, turn->move->From()->state);
 }
 
-void Board::RollbackTurn (Turn* turn)
+void Board::RollbackTurn(Turn* turn)
 {
   // Reset turn
-  std::swap (turn->move->To()->state, turn->move->From()->state);
+  std::swap(turn->move->To()->state, turn->move->From()->state);
 
   // Put captured back
   for (auto& node : turn->capture->capturedNodes)
@@ -458,7 +460,7 @@ void Board::RollbackTurn (Turn* turn)
   }
 }
 
-const std::vector<Node*> Board::GetCapturesInDirection (const Move& move, bool reverse_direction)
+const std::vector<Node*> Board::GetCapturesInDirection(const Move& move, bool reverse_direction)
 {
   std::vector<Node*> captures;
 
@@ -482,7 +484,7 @@ const std::vector<Node*> Board::GetCapturesInDirection (const Move& move, bool r
   while (currentNeighbour != nullptr && currentNeighbour->state != EState::EMPTY &&
          currentNeighbour->state != myState)
   {
-    captures.emplace_back (currentNeighbour);
+    captures.emplace_back(currentNeighbour);
 
     // continue with next neighbor
     currentNeighbour = currentNeighbour->neighbours[direction];
