@@ -248,6 +248,26 @@ bool Board::IsPositionInBounds(int x, int y)
   return x >= 0 && x < BOARD_WIDTH && y >= 0 && y < BOARD_HEIGHT;
 }
 
+bool Board::NodeAlreadyVisited(Turn* turn, Node* node)
+{
+  if (node == nullptr)
+  {
+    return true;
+  }
+
+  bool visited      = false;
+  Turn* currentTurn = turn;
+  while (currentTurn != nullptr)
+  {
+    if (currentTurn->move->From() == node)
+    {
+      visited = true;
+    }
+    currentTurn = currentTurn->previousTurn;
+  }
+
+  return visited;
+}
 std::string Board::GetPosition(EMove move)
 {
   std::string input;
@@ -348,9 +368,10 @@ std::string Board::GetPosition(EMove move)
   return input;
 }
 
-const std::list<Turn*> Board::FindTurnsForNode(EState movingState, Node* node)
+const std::list<Turn*> Board::FindTurnsForNode(EState movingState, Node* node, Turn* previousTurn)
 {
-  std::list<Turn*> turns;
+  std::list<Turn*> capturingTurns;
+  std::list<Turn*> paikaTurns;
 
   // if we find a stone of my color
   if (node->state == movingState)
@@ -363,51 +384,56 @@ const std::list<Turn*> Board::FindTurnsForNode(EState movingState, Node* node)
       // if neighbor node is empty
       if (neighbour != nullptr && neighbour->state == EState::EMPTY)
       {
-        // this is a possible turn!
-        Move* move               = new Move(node, i);
-        Capture* captureForward  = new Capture(GetCapturesInDirection(*move, false));
-        Capture* captureBackward = new Capture(GetCapturesInDirection(*move, true));
-
-        // FIXME: Duplication for forward and backward
-        Turn* forwardTurn = new Turn(move, captureForward);
-        if (captureForward->capturedNodes.size() > 0)
+        if (previousTurn == nullptr || !NodeAlreadyVisited(previousTurn, neighbour))
         {
-          // If there are following turns: Apply the turn, recursively create the chain of turns,
-          // and rollback
-          ApplyTurn(forwardTurn);
+          // this is a possible turn!
+          Move* move               = new Move(node, i);
+          Capture* captureForward  = new Capture(GetCapturesInDirection(*move, false));
+          Capture* captureBackward = new Capture(GetCapturesInDirection(*move, true));
 
-          std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour);
-          if (turns.size() > 0)
+          // FIXME: Duplication for forward and backward
+          Turn* forwardTurn = new Turn(move, captureForward);
+          if (captureForward->capturedNodes.size() > 0)
           {
-            // TODO: Currently the first turn is arbitrarily picked. But this should follow the same
-            // heuristic as GetPosition!
-            forwardTurn->nextTurn = turns.front();
+            // If there are following turns: Apply the turn, recursively create the chain of turns,
+            // and rollback
+            ApplyTurn(forwardTurn);
+
+            std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour, forwardTurn);
+            if (turns.size() > 0)
+            {
+              // TODO: Currently the first turn is arbitrarily picked. But this should follow the
+              // same heuristic as GetPosition!
+              forwardTurn->nextTurn       = turns.front();
+              turns.front()->previousTurn = forwardTurn;
+            }
+
+            RollbackTurn(forwardTurn);
           }
 
-          RollbackTurn(forwardTurn);
-        }
-
-        Turn* backwardTurn = new Turn(move, captureBackward);
-        if (captureBackward->capturedNodes.size() > 0)
-        {
-          ApplyTurn(backwardTurn);
-
-          std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour);
-          if (turns.size() > 0)
+          Turn* backwardTurn = new Turn(move, captureBackward);
+          if (captureBackward->capturedNodes.size() > 0)
           {
-            backwardTurn->nextTurn = turns.front();
+            ApplyTurn(backwardTurn);
+
+            std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour, backwardTurn);
+            if (turns.size() > 0)
+            {
+              backwardTurn->nextTurn      = turns.front();
+              turns.front()->previousTurn = backwardTurn;
+            }
+
+            RollbackTurn(backwardTurn);
           }
-
-          RollbackTurn(backwardTurn);
+          captureForward->capturedNodes.size() > 0 ? capturingTurns.emplace_back(forwardTurn)
+                                                   : paikaTurns.emplace_back(forwardTurn);
+          captureBackward->capturedNodes.size() > 0 ? capturingTurns.emplace_back(backwardTurn)
+                                                    : paikaTurns.emplace_back(backwardTurn);
         }
-
-        turns.emplace_back(forwardTurn);
-        turns.emplace_back(backwardTurn);
       }
     }
   }
-
-  return turns;
+  return capturingTurns.size() > 0 ? capturingTurns : paikaTurns;
 }
 
 const std::list<Turn*> Board::FindTurns(EState movingState)
@@ -420,7 +446,7 @@ const std::list<Turn*> Board::FindTurns(EState movingState)
     for (int x = 0; x < BOARD_WIDTH; x++)
     {
       Node* node = GetCell(x, y);
-      auto moves = FindTurnsForNode(movingState, node);
+      auto moves = FindTurnsForNode(movingState, node, nullptr);
       turns.splice(turns.end(), moves);
     }
   }

@@ -80,7 +80,8 @@ struct Capture
 
 struct Turn
 {
-  Turn(Move* move, Capture* capture) : move(move), capture(capture), nextTurn(nullptr)
+  Turn(Move* move, Capture* capture) :
+    move(move), capture(capture), nextTurn(nullptr), previousTurn(nullptr)
   {
   }
 
@@ -93,6 +94,7 @@ struct Turn
   Move* move;
   Capture* capture;
   Turn* nextTurn;
+  Turn* previousTurn;
 };
 
 class Board
@@ -117,7 +119,7 @@ private:
     true; // True if the previous command indicates that we may need a new Turn next time
 
   // Return a list of all possible turns which the given Node could take.
-  const std::list<Turn*> FindTurnsForNode(EState, Node*);
+  const std::list<Turn*> FindTurnsForNode(EState, Node*, Turn*);
 
   // Return a list of all possible turns which any Node on the field with the given state could
   // take.
@@ -131,7 +133,8 @@ private:
 
   inline Node* GetCell(int x, int y);
   inline bool IsPositionInBounds(int x, int y);
-
-  // returns all pieces captured by a move, either in the direction of the move or behind the move.
+  bool NodeAlreadyVisited(Turn*, Node*);
+  // returns all pieces captured by a move, either in the direction of the move or behind the
+  // move.
   const std::vector<Node*> GetCapturesInDirection(const Move& move, bool reverse_direction);
 };
