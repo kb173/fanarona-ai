@@ -167,6 +167,8 @@ void Client::Start()
           m_board->Parse(field);
         }
 
+        usleep(300000);
+
         std::string input = m_board->GetPosition(mode);
         WriteString(input);
       }

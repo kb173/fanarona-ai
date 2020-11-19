@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits.h>
 #include <sstream>
 
 #include "Board.h"
@@ -321,23 +322,21 @@ std::string Board::GetPosition(EMove move)
       }
       else if (move == EMove::ORIGIN_X)
       {
-        // We're done with the previous chain, get a new optimal turn
         auto turns = FindTurns(EState::WHITE);
 
         // Get the optimal turn
-        // TODO: Minimax
         uint optimal_value = 0;
 
-        // For now, the optimal turn is the one with the most captured + following turns
         for (const auto& turn : turns)
         {
-          uint score = (uint)turn->capture->capturedNodes.size() * 2 + turn->GetTurnChainLength();
-          if (score > optimal_value)
+          Turn* bestChildTurn = Minimax(turn, 3, INT_MIN, INT_MAX, EState::WHITE);
+          if (bestChildTurn->score > optimal_value)
           {
-            m_turn_to_handle = turn;
-            optimal_value    = score;
+            m_turn_to_handle = bestChildTurn;
+            optimal_value    = bestChildTurn->score;
           }
         }
+        std::cout << "optimal score: " << optimal_value << std::endl;
       }
     }
 
@@ -483,6 +482,85 @@ void Board::RollbackTurn(Turn* turn)
     {
       node->state = EState::BLACK;
     }
+  }
+}
+
+int Board::CalculateTurnScore(Turn* turn)
+{
+  return turn->capture->capturedNodes.size() * 2 + turn->GetTurnChainLength();
+}
+
+Turn* Board::Minimax(Turn* currentTurn, int depth, int alpha, int beta, EState player)
+{
+  if (depth == 0)
+  {
+    return currentTurn;
+  }
+
+  currentTurn->score = CalculateTurnScore(currentTurn);
+  ApplyTurn(currentTurn);
+
+  if (player == EState::WHITE)
+  {
+    auto allTurns = FindTurns(EState::WHITE);
+    if (allTurns.size() == 0)
+    {
+      RollbackTurn(currentTurn);
+      return currentTurn;
+    }
+
+    Turn* maxTurn = allTurns.front();
+    for (auto& childTurn : allTurns)
+    {
+      auto turn = Minimax(childTurn, depth - 1, alpha, beta, EState::BLACK);
+      if (turn->score > maxTurn->score)
+      {
+        maxTurn = turn;
+      }
+
+      if (turn->score > alpha)
+      {
+        alpha = turn->score;
+      }
+      if (beta <= alpha)
+      {
+        break;
+      }
+    }
+
+    RollbackTurn(currentTurn);
+    return maxTurn;
+  }
+  else
+  {
+    auto allTurns = FindTurns(EState::BLACK);
+    if (allTurns.size() == 0)
+    {
+      RollbackTurn(currentTurn);
+      return currentTurn;
+    }
+
+    Turn* minTurn = allTurns.front();
+    for (auto& childTurn : allTurns)
+    {
+      auto turn = Minimax(childTurn, depth - 1, alpha, beta, EState::WHITE);
+      if (turn->score < minTurn->score)
+      {
+        minTurn = turn;
+      }
+
+      if (turn->score < beta)
+      {
+        beta = turn->score;
+      }
+      if (beta <= alpha)
+      {
+        break;
+      }
+    }
+
+    RollbackTurn(currentTurn);
+    return minTurn;
   }
 }
 

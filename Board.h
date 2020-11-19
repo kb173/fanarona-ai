@@ -95,6 +95,7 @@ struct Turn
   Capture* capture;
   Turn* nextTurn;
   Turn* previousTurn;
+  int score;
 };
 
 class Board
@@ -130,6 +131,10 @@ private:
 
   // Rollback a turn which was previously applied with ApplyTurn.
   void RollbackTurn(Turn* turn);
+
+  int CalculateTurnScore(Turn* turn);
+
+  Turn* Minimax(Turn* currentTurn, int depth, int alpha, int beta, EState maximizingPlayer);
 
   inline Node* GetCell(int x, int y);
   inline bool IsPositionInBounds(int x, int y);
