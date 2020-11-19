@@ -269,6 +269,15 @@ bool Board::NodeAlreadyVisited(Turn* turn, Node* node)
 
   return visited;
 }
+
+bool Board::NewDirection(Turn* previousTurn, int direction)
+{
+  if (previousTurn == nullptr)
+  {
+    return true;
+  }
+  return !previousTurn->move->direction == direction;
+}
 std::string Board::GetPosition(EMove move)
 {
   std::string input;
@@ -385,49 +394,52 @@ const std::list<Turn*> Board::FindTurnsForNode(EState movingState, Node* node, T
       {
         if (previousTurn == nullptr || !NodeAlreadyVisited(previousTurn, neighbour))
         {
-          // this is a possible turn!
-          Move* move               = new Move(node, i);
-          Capture* captureForward  = new Capture(GetCapturesInDirection(*move, false));
-          Capture* captureBackward = new Capture(GetCapturesInDirection(*move, true));
-
-          // FIXME: Duplication for forward and backward
-          Turn* forwardTurn = new Turn(move, captureForward);
-          if (captureForward->capturedNodes.size() > 0)
+          if (NewDirection(previousTurn, i))
           {
-            // If there are following turns: Apply the turn, recursively create the chain of turns,
-            // and rollback
-            ApplyTurn(forwardTurn);
+            // this is a possible turn!
+            Move* move               = new Move(node, i);
+            Capture* captureForward  = new Capture(GetCapturesInDirection(*move, false));
+            Capture* captureBackward = new Capture(GetCapturesInDirection(*move, true));
 
-            std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour, forwardTurn);
-            if (turns.size() > 0)
+            // FIXME: Duplication for forward and backward
+            Turn* forwardTurn = new Turn(move, captureForward);
+            if (captureForward->capturedNodes.size() > 0)
             {
-              // TODO: Currently the first turn is arbitrarily picked. But this should follow the
-              // same heuristic as GetPosition!
-              forwardTurn->nextTurn       = turns.front();
-              turns.front()->previousTurn = forwardTurn;
+              // If there are following turns: Apply the turn, recursively create the chain of
+              // turns, and rollback
+              ApplyTurn(forwardTurn);
+
+              std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour, forwardTurn);
+              if (turns.size() > 0)
+              {
+                // TODO: Currently the first turn is arbitrarily picked. But this should follow the
+                // same heuristic as GetPosition!
+                forwardTurn->nextTurn       = turns.front();
+                turns.front()->previousTurn = forwardTurn;
+              }
+
+              RollbackTurn(forwardTurn);
             }
 
-            RollbackTurn(forwardTurn);
-          }
-
-          Turn* backwardTurn = new Turn(move, captureBackward);
-          if (captureBackward->capturedNodes.size() > 0)
-          {
-            ApplyTurn(backwardTurn);
-
-            std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour, backwardTurn);
-            if (turns.size() > 0)
+            Turn* backwardTurn = new Turn(move, captureBackward);
+            if (captureBackward->capturedNodes.size() > 0)
             {
-              backwardTurn->nextTurn      = turns.front();
-              turns.front()->previousTurn = backwardTurn;
-            }
+              ApplyTurn(backwardTurn);
 
-            RollbackTurn(backwardTurn);
+              std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour, backwardTurn);
+              if (turns.size() > 0)
+              {
+                backwardTurn->nextTurn      = turns.front();
+                turns.front()->previousTurn = backwardTurn;
+              }
+
+              RollbackTurn(backwardTurn);
+            }
+            captureForward->capturedNodes.size() > 0 ? capturingTurns.emplace_back(forwardTurn)
+                                                     : paikaTurns.emplace_back(forwardTurn);
+            captureBackward->capturedNodes.size() > 0 ? capturingTurns.emplace_back(backwardTurn)
+                                                      : paikaTurns.emplace_back(backwardTurn);
           }
-          captureForward->capturedNodes.size() > 0 ? capturingTurns.emplace_back(forwardTurn)
-                                                   : paikaTurns.emplace_back(forwardTurn);
-          captureBackward->capturedNodes.size() > 0 ? capturingTurns.emplace_back(backwardTurn)
-                                                    : paikaTurns.emplace_back(backwardTurn);
         }
       }
     }

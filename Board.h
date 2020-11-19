@@ -139,6 +139,7 @@ private:
   inline Node* GetCell(int x, int y);
   inline bool IsPositionInBounds(int x, int y);
   bool NodeAlreadyVisited(Turn*, Node*);
+  bool NewDirection(Turn*, int);
   // returns all pieces captured by a move, either in the direction of the move or behind the
   // move.
   const std::vector<Node*> GetCapturesInDirection(const Move& move, bool reverse_direction);
