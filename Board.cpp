@@ -338,7 +338,7 @@ std::string Board::GetPosition(EMove move)
 
         for (const auto& turn : turns)
         {
-          Turn* bestChildTurn = Minimax(turn, 3, INT_MIN, INT_MAX, EState::WHITE);
+          Turn* bestChildTurn = Minimax(turn, 3, INT_MIN, INT_MAX, EState::BLACK);
           if (bestChildTurn->score > optimal_value)
           {
             m_turn_to_handle = bestChildTurn;
