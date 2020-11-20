@@ -95,7 +95,6 @@ struct Turn
   Capture* capture;
   Turn* nextTurn;
   Turn* previousTurn;
-  int score;
 };
 
 class Board
@@ -134,7 +133,7 @@ private:
 
   int CalculateTurnScore(Turn* turn);
 
-  Turn* Minimax(Turn* currentTurn, int depth, int alpha, int beta, EState maximizingPlayer);
+  int Minimax(Turn* currentTurn, int depth, int alpha, int beta, EState maximizingPlayer);
 
   inline Node* GetCell(int x, int y);
   inline bool IsPositionInBounds(int x, int y);
