@@ -23,5 +23,5 @@ private:
               EState maximizingPlayer);
 
 public:
-  std::string getNextMove(Board* board, EMove move);
+  std::string GetNextMove(Board* board, EMove move);
 };

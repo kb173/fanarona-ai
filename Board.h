@@ -26,7 +26,7 @@ class Board
 private:
   EMode m_mode;
   Node m_cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
-  AIPlayer player;
+  AIPlayer m_player;
 
 public:
   Board(EMode mode) : m_mode(mode)

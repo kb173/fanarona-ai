@@ -222,7 +222,7 @@ std::string Board::GetPosition(EMove move)
   {
     Print();
 
-    return player.getNextMove(this, move);
+    return m_player.GetNextMove(this, move);
   }
 }
 
