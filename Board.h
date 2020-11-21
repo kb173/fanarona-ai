@@ -91,6 +91,10 @@ struct Turn
 
   bool IsWithdraw() const;
 
+  bool NodeAlreadyVisited(Node*) const;
+
+  bool IsNewDirection(int) const;
+
   Move* move;
   Capture* capture;
   Turn* nextTurn;

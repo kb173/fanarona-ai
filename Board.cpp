@@ -249,15 +249,16 @@ bool Board::IsPositionInBounds(int x, int y)
   return x >= 0 && x < BOARD_WIDTH && y >= 0 && y < BOARD_HEIGHT;
 }
 
-bool Board::NodeAlreadyVisited(Turn* turn, Node* node)
+bool Turn::NodeAlreadyVisited(Node* node) const
 {
   if (node == nullptr)
   {
     return true;
   }
 
-  bool visited      = false;
-  Turn* currentTurn = turn;
+  bool visited            = false;
+  const Turn* currentTurn = this;
+
   while (currentTurn != nullptr)
   {
     if (currentTurn->move->From() == node)
@@ -270,14 +271,11 @@ bool Board::NodeAlreadyVisited(Turn* turn, Node* node)
   return visited;
 }
 
-bool Board::NewDirection(Turn* previousTurn, int direction)
+bool Turn::IsNewDirection(int direction) const
 {
-  if (previousTurn == nullptr)
-  {
-    return true;
-  }
-  return previousTurn->move->direction != direction;
+  return move->direction != direction;
 }
+
 std::string Board::GetPosition(EMove move)
 {
   std::string input;
@@ -389,10 +387,11 @@ const std::list<Turn*> Board::FindTurnsForNode(EState movingState, Node* node, T
     {
       auto neighbour = node->neighbours[i];
 
-      // if neighbor node is empty
+      // if the neighbor node is empty and the previous turn doesn't forbid this direction via the
+      // rules
       if ((neighbour != nullptr && neighbour->state == EState::EMPTY) &&
-          (previousTurn == nullptr || !NodeAlreadyVisited(previousTurn, neighbour)) &&
-          (NewDirection(previousTurn, i)))
+          (previousTurn == nullptr ||
+           (!previousTurn->NodeAlreadyVisited(neighbour) && previousTurn->IsNewDirection(i))))
       {
         // this is a possible turn!
         Move* move               = new Move(node, i);
