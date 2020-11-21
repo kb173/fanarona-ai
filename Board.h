@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "AIPlayer.h"
 #include "GameElements.h"
 
 const int BOARD_WIDTH  = 9;
@@ -22,24 +23,22 @@ enum class EMode : char
 
 class Board
 {
+private:
+  EMode m_mode;
+  Node m_cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
+  AIPlayer player;
+
 public:
-  Board(EMode);
-  ~Board();
+  Board(EMode mode) : m_mode(mode)
+  {
+  }
+  ~Board() = default;
 
   void Parse(std::string boardContent);
   void Print();
 
   // Return the String which the Client should send to the Server next.
   std::string GetPosition(EMove);
-
-private:
-  EMode m_mode;
-  Node m_cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
-
-  Turn* m_turn_to_handle = nullptr;
-
-  bool m_potentially_done =
-    true; // True if the previous command indicates that we may need a new Turn next time
 
   // Return a list of all possible turns which the given Node could take.
   const std::list<Turn*> FindTurnsForNode(EState, Node*, Turn*);
@@ -54,14 +53,10 @@ private:
   // Rollback a turn which was previously applied with ApplyTurn.
   void RollbackTurn(Turn* turn);
 
-  int CalculateTurnScore(Turn* turn);
-
-  int Minimax(Turn* currentTurn, int depth, int alpha, int beta, EState maximizingPlayer);
-
   inline Node* GetCell(int x, int y);
+
   inline bool IsPositionInBounds(int x, int y);
-  bool NodeAlreadyVisited(Turn*, Node*);
-  bool NewDirection(Turn*, int);
+
   // returns all pieces captured by a move, either in the direction of the move or behind the
   // move.
   const std::vector<Node*> GetCapturesInDirection(const Move& move, bool reverse_direction);

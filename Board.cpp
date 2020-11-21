@@ -4,14 +4,6 @@
 
 #include "Board.h"
 
-Board::Board(EMode mode) : m_mode(mode)
-{
-}
-
-Board::~Board()
-{
-}
-
 void Board::Parse(std::string boardContent)
 {
   static bool bFirst_parse = true; // using static variable to determine first parsing phase
@@ -230,60 +222,8 @@ std::string Board::GetPosition(EMove move)
   {
     Print();
 
-    if (m_potentially_done)
-    {
-      m_potentially_done = false;
-
-      if (move == EMove::DEST_X)
-      {
-        // We're in a chain of turns, so just use the next one
-        m_turn_to_handle = m_turn_to_handle->nextTurn;
-      }
-      else if (move == EMove::ORIGIN_X)
-      {
-        auto turns = FindTurns(EState::WHITE);
-
-        // Get the optimal turn
-        int optimal_value = INT_MIN;
-
-        for (const auto& turn : turns)
-        {
-          int score = Minimax(turn, 3, INT_MIN, INT_MAX, EState::WHITE);
-          if (score > optimal_value)
-          {
-            m_turn_to_handle = turn;
-            optimal_value    = score;
-          }
-        }
-        std::cout << "optimal score: " << optimal_value << std::endl;
-      }
-    }
-
-    // Check what the server is asking of us and output an appropriate message
-    if (move == EMove::ORIGIN_X)
-    {
-      input = std::to_string(m_turn_to_handle->move->From()->x);
-    }
-    else if (move == EMove::ORIGIN_Y)
-    {
-      input = std::to_string(m_turn_to_handle->move->From()->y);
-    }
-    else if (move == EMove::DEST_X)
-    {
-      input = std::to_string(m_turn_to_handle->move->To()->x);
-    }
-    else if (move == EMove::DEST_Y)
-    {
-      input              = std::to_string(m_turn_to_handle->move->To()->y);
-      m_potentially_done = true;
-    }
-    else if (move == EMove::W_OR_A)
-    {
-      input              = m_turn_to_handle->IsWithdraw() ? "W" : "A";
-      m_potentially_done = true;
-    }
+    return player.getNextMove(this, move);
   }
-  return input;
 }
 
 const std::list<Turn*> Board::FindTurnsForNode(EState movingState, Node* node, Turn* previousTurn)
@@ -417,84 +357,6 @@ void Board::RollbackTurn(Turn* turn)
     {
       node->state = EState::BLACK;
     }
-  }
-}
-
-int Board::CalculateTurnScore(Turn* turn)
-{
-  return turn->capture->capturedNodes.size() * 2 + turn->GetTurnChainLength();
-}
-
-int Board::Minimax(Turn* currentTurn, int depth, int alpha, int beta, EState player)
-{
-  if (depth == 0)
-  {
-    return CalculateTurnScore(currentTurn);
-  }
-
-  ApplyTurn(currentTurn);
-
-  if (player == EState::WHITE)
-  {
-    auto allTurns = FindTurns(EState::WHITE);
-    if (allTurns.size() == 0)
-    {
-      RollbackTurn(currentTurn);
-      return CalculateTurnScore(currentTurn);
-    }
-
-    int maxScore = INT_MIN;
-    for (auto& childTurn : allTurns)
-    {
-      auto turnScore = Minimax(childTurn, depth - 1, alpha, beta, EState::BLACK);
-      if (turnScore > maxScore)
-      {
-        maxScore = turnScore;
-      }
-
-      if (turnScore > alpha)
-      {
-        alpha = turnScore;
-      }
-      if (beta <= alpha)
-      {
-        break;
-      }
-    }
-
-    RollbackTurn(currentTurn);
-    return maxScore;
-  }
-  else
-  {
-    auto allTurns = FindTurns(EState::BLACK);
-    if (allTurns.size() == 0)
-    {
-      RollbackTurn(currentTurn);
-      return CalculateTurnScore(currentTurn);
-    }
-
-    int minScore = INT_MAX;
-    for (auto& childTurn : allTurns)
-    {
-      auto turnScore = Minimax(childTurn, depth - 1, alpha, beta, EState::WHITE);
-      if (turnScore < minScore)
-      {
-        minScore = turnScore;
-      }
-
-      if (turnScore < beta)
-      {
-        beta = turnScore;
-      }
-      if (beta <= alpha)
-      {
-        break;
-      }
-    }
-
-    RollbackTurn(currentTurn);
-    return minScore;
   }
 }
 
