@@ -449,20 +449,32 @@ const std::list<Turn*> Board::FindTurnsForNode(EState movingState, Node* node, T
 
 const std::list<Turn*> Board::FindTurns(EState movingState)
 {
-  std::list<Turn*> turns;
+  std::list<Turn*> captureTurns;
+  std::list<Turn*> paikaTurns;
 
   // iterate over board
   for (int y = 0; y < BOARD_HEIGHT; y++)
   {
     for (int x = 0; x < BOARD_WIDTH; x++)
     {
-      Node* node = GetCell(x, y);
-      auto moves = FindTurnsForNode(movingState, node, nullptr);
-      turns.splice(turns.end(), moves);
+      Node* node           = GetCell(x, y);
+      auto potential_turns = FindTurnsForNode(movingState, node, nullptr);
+
+      for (const auto& turn : potential_turns)
+      {
+        if (turn->capture->capturedNodes.size() > 0)
+        {
+          captureTurns.emplace_back(turn); // TODO: Consider moving (splice)
+        }
+        else
+        {
+          paikaTurns.emplace_back(turn); // TODO: Consider moving (splice)
+        }
+      }
     }
   }
 
-  return turns;
+  return captureTurns.size() > 0 ? captureTurns : paikaTurns;
 }
 
 void Board::ApplyTurn(Turn* turn)
