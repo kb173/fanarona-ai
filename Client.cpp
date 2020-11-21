@@ -43,7 +43,7 @@ std::map<std::string, std::string> message_write_map {
   {"User\r\n\r\nPlease choose your mode [0-2]", "1"},
   {"Please choose wether you want the AI to start or not [0-1]", "1"},
   {"Do you want to continue with your turn [Y/N]?", "Y"},
-  {"Do you want to surrender [Y/N]?", "N"}};
+  {"Do you want to surrender [Y/N]?", "Y"}};
 
 Client::Client(std::string ip, int port)
 {
@@ -167,7 +167,7 @@ void Client::Start()
           m_board->Parse(field);
         }
 
-        usleep(300000);
+        // usleep(300000);
 
         std::string input = m_board->GetPosition(mode);
         WriteString(input);

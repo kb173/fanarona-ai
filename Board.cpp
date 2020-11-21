@@ -183,6 +183,7 @@ bool Board::IsPositionInBounds(int x, int y)
 std::string Board::GetPosition(EMove move)
 {
   std::string input;
+
   if (m_mode == EMode::HUMAN)
   {
     // Output turn information
@@ -222,8 +223,10 @@ std::string Board::GetPosition(EMove move)
   {
     Print();
 
-    return m_player.GetNextMove(this, move);
+    input = m_player.GetNextMove(this, move);
   }
+
+  return input;
 }
 
 const std::list<Turn*> Board::FindTurnsForNode(EState movingState, Node* node, Turn* previousTurn)

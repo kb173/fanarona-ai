@@ -86,7 +86,7 @@ int AIPlayer::Minimax(Board* board,
   }
 }
 
-std::string AIPlayer::getNextMove(Board* board, EMove move)
+std::string AIPlayer::GetNextMove(Board* board, EMove move)
 {
   std::string input;
 
