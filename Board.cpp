@@ -390,57 +390,53 @@ const std::list<Turn*> Board::FindTurnsForNode(EState movingState, Node* node, T
       auto neighbour = node->neighbours[i];
 
       // if neighbor node is empty
-      if (neighbour != nullptr && neighbour->state == EState::EMPTY)
+      if ((neighbour != nullptr && neighbour->state == EState::EMPTY) &&
+          (previousTurn == nullptr || !NodeAlreadyVisited(previousTurn, neighbour)) &&
+          (NewDirection(previousTurn, i)))
       {
-        if (previousTurn == nullptr || !NodeAlreadyVisited(previousTurn, neighbour))
+        // this is a possible turn!
+        Move* move               = new Move(node, i);
+        Capture* captureForward  = new Capture(GetCapturesInDirection(*move, false));
+        Capture* captureBackward = new Capture(GetCapturesInDirection(*move, true));
+
+        // FIXME: Duplication for forward and backward
+        Turn* forwardTurn = new Turn(move, captureForward);
+        if (captureForward->capturedNodes.size() > 0)
         {
-          if (NewDirection(previousTurn, i))
+          // If there are following turns: Apply the turn, recursively create the chain of
+          // turns, and rollback
+          ApplyTurn(forwardTurn);
+
+          std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour, forwardTurn);
+          if (turns.size() > 0)
           {
-            // this is a possible turn!
-            Move* move               = new Move(node, i);
-            Capture* captureForward  = new Capture(GetCapturesInDirection(*move, false));
-            Capture* captureBackward = new Capture(GetCapturesInDirection(*move, true));
-
-            // FIXME: Duplication for forward and backward
-            Turn* forwardTurn = new Turn(move, captureForward);
-            if (captureForward->capturedNodes.size() > 0)
-            {
-              // If there are following turns: Apply the turn, recursively create the chain of
-              // turns, and rollback
-              ApplyTurn(forwardTurn);
-
-              std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour, forwardTurn);
-              if (turns.size() > 0)
-              {
-                // TODO: Currently the first turn is arbitrarily picked. But this should follow the
-                // same heuristic as GetPosition!
-                forwardTurn->nextTurn       = turns.front();
-                turns.front()->previousTurn = forwardTurn;
-              }
-
-              RollbackTurn(forwardTurn);
-            }
-
-            Turn* backwardTurn = new Turn(move, captureBackward);
-            if (captureBackward->capturedNodes.size() > 0)
-            {
-              ApplyTurn(backwardTurn);
-
-              std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour, backwardTurn);
-              if (turns.size() > 0)
-              {
-                backwardTurn->nextTurn      = turns.front();
-                turns.front()->previousTurn = backwardTurn;
-              }
-
-              RollbackTurn(backwardTurn);
-            }
-            captureForward->capturedNodes.size() > 0 ? capturingTurns.emplace_back(forwardTurn)
-                                                     : paikaTurns.emplace_back(forwardTurn);
-            captureBackward->capturedNodes.size() > 0 ? capturingTurns.emplace_back(backwardTurn)
-                                                      : paikaTurns.emplace_back(backwardTurn);
+            // TODO: Currently the first turn is arbitrarily picked. But this should follow the
+            // same heuristic as GetPosition!
+            forwardTurn->nextTurn       = turns.front();
+            turns.front()->previousTurn = forwardTurn;
           }
+
+          RollbackTurn(forwardTurn);
         }
+
+        Turn* backwardTurn = new Turn(move, captureBackward);
+        if (captureBackward->capturedNodes.size() > 0)
+        {
+          ApplyTurn(backwardTurn);
+
+          std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour, backwardTurn);
+          if (turns.size() > 0)
+          {
+            backwardTurn->nextTurn      = turns.front();
+            turns.front()->previousTurn = backwardTurn;
+          }
+
+          RollbackTurn(backwardTurn);
+        }
+        captureForward->capturedNodes.size() > 0 ? capturingTurns.emplace_back(forwardTurn)
+                                                 : paikaTurns.emplace_back(forwardTurn);
+        captureBackward->capturedNodes.size() > 0 ? capturingTurns.emplace_back(backwardTurn)
+                                                  : paikaTurns.emplace_back(backwardTurn);
       }
     }
   }
@@ -460,6 +456,10 @@ const std::list<Turn*> Board::FindTurns(EState movingState)
       Node* node           = GetCell(x, y);
       auto potential_turns = FindTurnsForNode(movingState, node, nullptr);
 
+      // Separate capturing from paika turns
+      // TODO: This check happens twice, here and in FindTurnsForNode (which returns either only
+      // capturing or only paika). We could potentially increase performance by only checking once
+      // and e.g. returning a flag for capturing or paika in FindTurnsForNode.
       for (const auto& turn : potential_turns)
       {
         if (turn->capture->capturedNodes.size() > 0)
