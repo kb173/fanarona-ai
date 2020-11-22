@@ -1,11 +1,11 @@
 #include "AIPlayer.h"
 #include "Board.h"
 
-#include <bits/stdc++.h> // for INT_MIN
+#include <limits.h> // for INT_MIN
 
 int AIPlayer::CalculateTurnScore(Turn* turn)
 {
-  return turn->capture->capturedNodes.size() * 2 + turn->GetTurnChainLength();
+  return (int)turn->capture->capturedNodes.size() * 2 + turn->GetTurnChainLength();
 }
 
 int AIPlayer::Minimax(Board* board,
