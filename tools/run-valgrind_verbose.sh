@@ -1,0 +1,1 @@
+valgrind --leak-check=full -v --show-leak-kinds=all --tool=memcheck ./funorona
