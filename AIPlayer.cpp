@@ -135,7 +135,7 @@ std::string AIPlayer::GetNextMove(Board* board, EMove move)
 
       for (const auto& turn : turns)
       {
-        int score = Minimax(board, turn, minimax_depth, INT_MIN, INT_MAX, EState::WHITE);
+        int score = Minimax(board, turn, m_minimax_depth, INT_MIN, INT_MAX, EState::WHITE);
         if (score > optimal_value)
         {
           m_turn_to_handle = turn;
