@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -28,8 +29,8 @@ enum class EMove : char
 struct Node
 {
   int x, y;
-  EState state                    = EState::EMPTY;
-  std::array<Node*, 8> neighbours = {};
+  EState state                                    = EState::EMPTY;
+  std::array<std::shared_ptr<Node>, 8> neighbours = {};
 
   Node() = default;
   Node(int x, int y) : x(x), y(y)
@@ -42,35 +43,35 @@ struct Node
 struct Move
 {
 private:
-  Node* m_origin;
+  std::shared_ptr<Node> m_origin;
 
 public:
-  Move(Node* origin, int direction) : m_origin(origin), direction(direction)
+  Move(std::shared_ptr<Node> origin, int direction) : m_origin(origin), direction(direction)
   {
   }
 
   std::string ToString() const;
 
-  Node* From() const;
-  Node* To() const;
+  std::shared_ptr<Node> From() const;
+  std::shared_ptr<Node> To() const;
 
   int direction;
 };
 
 struct Capture
 {
-  Capture(std::vector<Node*> capturedNodes) : capturedNodes(capturedNodes)
+  Capture(std::vector<std::shared_ptr<Node>> capturedNodes) : capturedNodes(capturedNodes)
   {
   }
 
   std::string ToString() const;
 
-  std::vector<Node*> capturedNodes;
+  std::vector<std::shared_ptr<Node>> capturedNodes;
 };
 
-struct Turn
+struct Turn : public std::enable_shared_from_this<Turn>
 {
-  Turn(Move* move, Capture* capture) :
+  Turn(std::shared_ptr<Move> move, std::shared_ptr<Capture> capture) :
     move(move), capture(capture), nextTurn(nullptr), previousTurn(nullptr)
   {
   }
@@ -81,12 +82,12 @@ struct Turn
 
   bool IsWithdraw() const;
 
-  bool NodeAlreadyVisited(Node*) const;
+  bool NodeAlreadyVisited(std::shared_ptr<Node>) const;
 
   bool IsNewDirection(int) const;
 
-  Move* move;
-  Capture* capture;
-  Turn* nextTurn;
-  Turn* previousTurn;
+  std::shared_ptr<Move> move;
+  std::shared_ptr<Capture> capture;
+  std::shared_ptr<Turn> nextTurn;
+  std::shared_ptr<Turn> previousTurn;
 };

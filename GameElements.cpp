@@ -5,12 +5,12 @@ std::string Node::ToString() const
   return std::to_string(x) + " " + std::to_string(y);
 }
 
-Node* Move::From() const
+std::shared_ptr<Node> Move::From() const
 {
   return m_origin;
 }
 
-Node* Move::To() const
+std::shared_ptr<Node> Move::To() const
 {
   return m_origin->neighbours[direction];
 }
@@ -34,8 +34,8 @@ std::string Turn::ToString() const
 
 uint Turn::GetTurnChainLength() const
 {
-  const Turn* current_turn = this;
-  uint length              = 0;
+  std::shared_ptr<const Turn> current_turn = shared_from_this();
+  uint length                              = 0;
 
   while (current_turn != nullptr)
   {
@@ -49,7 +49,7 @@ uint Turn::GetTurnChainLength() const
 bool Turn::IsWithdraw() const
 {
   // The turn is a withdraw if the first captured node is a neighbor of From.
-  Node* first_capture = capture->capturedNodes.front();
+  std::shared_ptr<Node> first_capture = capture->capturedNodes.front();
 
   for (const auto& neighbour : move->From()->neighbours)
   {
@@ -61,15 +61,15 @@ bool Turn::IsWithdraw() const
   return false;
 }
 
-bool Turn::NodeAlreadyVisited(Node* node) const
+bool Turn::NodeAlreadyVisited(std::shared_ptr<Node> node) const
 {
   if (node == nullptr)
   {
     return true;
   }
 
-  bool visited            = false;
-  const Turn* currentTurn = this;
+  bool visited                            = false;
+  std::shared_ptr<const Turn> currentTurn = shared_from_this();
 
   while (currentTurn != nullptr)
   {

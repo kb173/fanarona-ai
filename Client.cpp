@@ -132,7 +132,7 @@ void Client::WriteString(std::string input)
   m_strRecv.clear();
 }
 
-void Client::SetBoard(Board* i_board)
+void Client::SetBoard(std::shared_ptr<Board> i_board)
 {
   m_board = i_board;
 }
