@@ -15,6 +15,8 @@ private:
 
   int CalculateTurnScore(Turn* turn);
 
+  int RateBoard(Board * board, EState player);
+
   int Minimax(Board* Board,
               Turn* currentTurn,
               int depth,

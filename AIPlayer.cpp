@@ -8,6 +8,30 @@ int AIPlayer::CalculateTurnScore(Turn* turn)
   return (int)turn->capture->capturedNodes.size() * 2 + turn->GetTurnChainLength();
 }
 
+int AIPlayer::RateBoard(Board * board, EState player) 
+{
+  // Get the number of our nodes minus the number of enemy nodes
+  int good_node_count = 0;
+  int bad_node_count = 0;
+
+  // iterate over board
+  for (int y = 0; y < BOARD_HEIGHT; y++)
+  {
+    for (int x = 0; x < BOARD_WIDTH; x++)
+    {
+      Node* node = board->GetCell(x, y);
+
+      if (node->state == player) {
+        good_node_count++;
+      } else {
+        bad_node_count++;
+      }
+    }
+  }
+
+  return good_node_count - bad_node_count;
+}
+
 int AIPlayer::Minimax(Board* board,
                       Turn* currentTurn,
                       int depth,
@@ -17,7 +41,7 @@ int AIPlayer::Minimax(Board* board,
 {
   if (depth == 0)
   {
-    return CalculateTurnScore(currentTurn);
+    return RateBoard(board, player);
   }
 
   board->ApplyTurn(currentTurn);
