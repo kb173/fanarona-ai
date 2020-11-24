@@ -8,11 +8,11 @@ int AIPlayer::CalculateTurnScore(Turn* turn)
   return (int)turn->capture->capturedNodes.size() * 2 + turn->GetTurnChainLength();
 }
 
-int AIPlayer::RateBoard(Board * board, EState player) 
+int AIPlayer::RateBoard(Board* board, EState player)
 {
   // Get the number of our nodes minus the number of enemy nodes
   int good_node_count = 0;
-  int bad_node_count = 0;
+  int bad_node_count  = 0;
 
   // iterate over board
   for (int y = 0; y < BOARD_HEIGHT; y++)
@@ -21,9 +21,12 @@ int AIPlayer::RateBoard(Board * board, EState player)
     {
       Node* node = board->GetCell(x, y);
 
-      if (node->state == player) {
+      if (node->state == player)
+      {
         good_node_count++;
-      } else {
+      }
+      else
+      {
         bad_node_count++;
       }
     }
@@ -132,7 +135,7 @@ std::string AIPlayer::GetNextMove(Board* board, EMove move)
 
       for (const auto& turn : turns)
       {
-        int score = Minimax(board, turn, 3, INT_MIN, INT_MAX, EState::WHITE);
+        int score = Minimax(board, turn, minimax_depth, INT_MIN, INT_MAX, EState::WHITE);
         if (score > optimal_value)
         {
           m_turn_to_handle = turn;

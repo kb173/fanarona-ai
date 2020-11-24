@@ -13,9 +13,11 @@ private:
   bool m_potentially_done =
     true; // True if the previous command indicates that we may need a new Turn next time
 
+  int m_minimax_depth = 5;
+
   int CalculateTurnScore(Turn* turn);
 
-  int RateBoard(Board * board, EState player);
+  int RateBoard(Board* board, EState player);
 
   int Minimax(Board* Board,
               Turn* currentTurn,
