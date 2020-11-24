@@ -23,13 +23,9 @@
 #include "Client.h"
 
 #define BOARD_LENGTH 380 // SERVER_V2 total gridsize including whitespaces
-
-#define MSG_BOARD_HEADER "   0   1   2   3   4   5   6   7   8"
-#define MSG_PLAYMODE                                                                               \
-  "Please choose your mode [0-2]" // select Start, rules, exit and AI or HUMAN player
-#define MSG_PLAYERSTART                                                                            \
-  "Please choose wether you want the AI to start or not [0-1]"       // select starting player
-#define MSG_CONTINUE "Do you want to continue with your turn [Y/N]?" // make another turn?
+#define MSG_BOARD_HEADER "   0   1   2   3   4   5   6   7   8" // defines start of board
+//"************************ Player 2 won!**********************"
+#define GAME_OVER " won!**********************" // end of game
 
 std::map<std::string, EMove> message_state_map {
   {"Please enter origin x-axis", EMove::ORIGIN_X},
@@ -184,6 +180,11 @@ void Client::Start()
         {
           WriteString(message_and_write.second);
         }
+      }
+
+      if (m_strRecv.rfind(GAME_OVER) != std::string::npos)
+      {
+          return;
       }
     }
   }
