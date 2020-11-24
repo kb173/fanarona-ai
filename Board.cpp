@@ -1,8 +1,21 @@
 #include <iostream>
 #include <limits.h>
+#include <memory>
 #include <sstream>
 
 #include "Board.h"
+
+Board::Board(EMode mode) : m_mode(mode)
+{
+  // iterate over board
+  for (int y = 0; y < BOARD_HEIGHT; y++)
+  {
+    for (int x = 0; x < BOARD_WIDTH; x++)
+    {
+      m_cells[y][x] = std::make_shared<Node>();
+    }
+  }
+}
 
 void Board::Parse(std::string boardContent)
 {
@@ -46,9 +59,9 @@ void Board::Parse(std::string boardContent)
       int inputColumn = x * 2 + (inputRow % 2);
       char character  = line[inputColumn];
 
-      Node* cell = GetCell(x, y);
-      cell->x    = x;
-      cell->y    = y;
+      std::shared_ptr<Node> cell = GetCell(x, y);
+      cell->x                    = x;
+      cell->y                    = y;
 
       // TODO: define "colors" as constants, add property playerColor
       if (character == '1' || character == '#')
@@ -144,7 +157,7 @@ void Board::Print()
     std::cout << y << " ";
     for (int x = 0; x < BOARD_WIDTH; x++)
     {
-      EState state = (&m_cells[y][x])->state;
+      EState state = m_cells[y][x]->state;
       if (state == EState::WHITE)
       {
         std::cout << "O ";
@@ -166,13 +179,13 @@ void Board::Print()
   }
 }
 
-Node* Board::GetCell(int x, int y)
+std::shared_ptr<Node> Board::GetCell(int x, int y)
 {
   if (!IsPositionInBounds(x, y))
   {
     return nullptr;
   }
-  return &m_cells[y][x];
+  return m_cells[y][x];
 }
 
 bool Board::IsPositionInBounds(int x, int y)
@@ -223,16 +236,18 @@ std::string Board::GetPosition(EMove move)
   {
     Print();
 
-    input = m_player.GetNextMove(this, move);
+    input = m_player.GetNextMove(shared_from_this(), move);
   }
 
   return input;
 }
 
-const std::list<Turn*> Board::FindTurnsForNode(EState movingState, Node* node, Turn* previousTurn)
+const std::list<std::shared_ptr<Turn>> Board::FindTurnsForNode(EState movingState,
+                                                               std::shared_ptr<Node> node,
+                                                               std::shared_ptr<Turn> previousTurn)
 {
-  std::list<Turn*> capturingTurns;
-  std::list<Turn*> paikaTurns;
+  std::list<std::shared_ptr<Turn>> capturingTurns;
+  std::list<std::shared_ptr<Turn>> paikaTurns;
 
   // if we find a stone of my color
   if (node->state == movingState)
@@ -249,19 +264,20 @@ const std::list<Turn*> Board::FindTurnsForNode(EState movingState, Node* node, T
            (!previousTurn->NodeAlreadyVisited(neighbour) && previousTurn->IsNewDirection(i))))
       {
         // this is a possible turn!
-        Move* move               = new Move(node, i);
-        Capture* captureForward  = new Capture(GetCapturesInDirection(*move, false));
-        Capture* captureBackward = new Capture(GetCapturesInDirection(*move, true));
+        auto move            = std::make_shared<Move>(node, i);
+        auto captureForward  = std::make_shared<Capture>(GetCapturesInDirection(*move, false));
+        auto captureBackward = std::make_shared<Capture>(GetCapturesInDirection(*move, true));
 
         // FIXME: Duplication for forward and backward
-        Turn* forwardTurn = new Turn(move, captureForward);
+        auto forwardTurn = std::make_shared<Turn>(move, captureForward);
         if (captureForward->capturedNodes.size() > 0)
         {
           // If there are following turns: Apply the turn, recursively create the chain of
           // turns, and rollback
           ApplyTurn(forwardTurn);
 
-          std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour, forwardTurn);
+          std::list<std::shared_ptr<Turn>> turns =
+            FindTurnsForNode(movingState, neighbour, forwardTurn);
           if (turns.size() > 0)
           {
             // TODO: Currently the first turn is arbitrarily picked. But this should follow the
@@ -273,12 +289,13 @@ const std::list<Turn*> Board::FindTurnsForNode(EState movingState, Node* node, T
           RollbackTurn(forwardTurn);
         }
 
-        Turn* backwardTurn = new Turn(move, captureBackward);
+        auto backwardTurn = std::make_shared<Turn>(move, captureBackward);
         if (captureBackward->capturedNodes.size() > 0)
         {
           ApplyTurn(backwardTurn);
 
-          std::list<Turn*> turns = FindTurnsForNode(movingState, neighbour, backwardTurn);
+          std::list<std::shared_ptr<Turn>> turns =
+            FindTurnsForNode(movingState, neighbour, backwardTurn);
           if (turns.size() > 0)
           {
             backwardTurn->nextTurn      = turns.front();
@@ -297,18 +314,18 @@ const std::list<Turn*> Board::FindTurnsForNode(EState movingState, Node* node, T
   return capturingTurns.size() > 0 ? capturingTurns : paikaTurns;
 }
 
-const std::list<Turn*> Board::FindTurns(EState movingState)
+const std::list<std::shared_ptr<Turn>> Board::FindTurns(EState movingState)
 {
-  std::list<Turn*> captureTurns;
-  std::list<Turn*> paikaTurns;
+  std::list<std::shared_ptr<Turn>> captureTurns;
+  std::list<std::shared_ptr<Turn>> paikaTurns;
 
   // iterate over board
   for (int y = 0; y < BOARD_HEIGHT; y++)
   {
     for (int x = 0; x < BOARD_WIDTH; x++)
     {
-      Node* node           = GetCell(x, y);
-      auto potential_turns = FindTurnsForNode(movingState, node, nullptr);
+      std::shared_ptr<Node> node = GetCell(x, y);
+      auto potential_turns       = FindTurnsForNode(movingState, node, nullptr);
 
       // Separate capturing from paika turns
       // TODO: This check happens twice, here and in FindTurnsForNode (which returns either only
@@ -331,7 +348,7 @@ const std::list<Turn*> Board::FindTurns(EState movingState)
   return captureTurns.size() > 0 ? captureTurns : paikaTurns;
 }
 
-void Board::ApplyTurn(Turn* turn)
+void Board::ApplyTurn(std::shared_ptr<Turn> turn)
 {
   // Remove captured
   for (auto& node : turn->capture->capturedNodes)
@@ -343,7 +360,7 @@ void Board::ApplyTurn(Turn* turn)
   std::swap(turn->move->To()->state, turn->move->From()->state);
 }
 
-void Board::RollbackTurn(Turn* turn)
+void Board::RollbackTurn(std::shared_ptr<Turn> turn)
 {
   // Reset turn
   std::swap(turn->move->To()->state, turn->move->From()->state);
@@ -363,14 +380,15 @@ void Board::RollbackTurn(Turn* turn)
   }
 }
 
-const std::vector<Node*> Board::GetCapturesInDirection(const Move& move, bool reverse_direction)
+const std::vector<std::shared_ptr<Node>> Board::GetCapturesInDirection(const Move& move,
+                                                                       bool reverse_direction)
 {
-  std::vector<Node*> captures;
+  std::vector<std::shared_ptr<Node>> captures;
 
   EState myState = move.From()->state;
 
   int direction;
-  Node* currentNeighbour;
+  std::shared_ptr<Node> currentNeighbour;
 
   if (reverse_direction)
   {

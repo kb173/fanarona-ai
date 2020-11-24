@@ -8,24 +8,22 @@ class Board;
 class AIPlayer
 {
 private:
-  Turn* m_turn_to_handle = nullptr;
+  std::shared_ptr<Turn> m_turn_to_handle = nullptr;
 
   bool m_potentially_done =
     true; // True if the previous command indicates that we may need a new Turn next time
 
   int m_minimax_depth = 5;
 
-  int CalculateTurnScore(Turn* turn);
+  int RateBoard(std::shared_ptr<Board> board);
 
-  int RateBoard(Board* board, EState player);
-
-  int Minimax(Board* Board,
-              Turn* currentTurn,
+  int Minimax(std::shared_ptr<Board> board,
+              std::shared_ptr<Turn> currentTurn,
               int depth,
               int alpha,
               int beta,
               EState maximizingPlayer);
 
 public:
-  std::string GetNextMove(Board* board, EMove move);
+  std::string GetNextMove(std::shared_ptr<Board> board, EMove move);
 };

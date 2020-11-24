@@ -3,40 +3,34 @@
 
 #include <limits.h> // for INT_MIN
 
-int AIPlayer::CalculateTurnScore(Turn* turn)
-{
-  return (int)turn->capture->capturedNodes.size() * 2 + turn->GetTurnChainLength();
-}
-
-int AIPlayer::RateBoard(Board* board, EState player)
+int AIPlayer::RateBoard(std::shared_ptr<Board> board)
 {
   // Get the number of our nodes minus the number of enemy nodes
-  int good_node_count = 0;
-  int bad_node_count  = 0;
+  int rating = 0;
 
   // iterate over board
   for (int y = 0; y < BOARD_HEIGHT; y++)
   {
     for (int x = 0; x < BOARD_WIDTH; x++)
     {
-      Node* node = board->GetCell(x, y);
+      std::shared_ptr<Node> node = board->GetCell(x, y);
 
-      if (node->state == player)
+      if (node->state == EState::WHITE)
       {
-        good_node_count++;
+        rating++;
       }
-      else
+      else if (node->state == EState::BLACK)
       {
-        bad_node_count++;
+        rating--;
       }
     }
   }
 
-  return good_node_count - bad_node_count;
+  return rating;
 }
 
-int AIPlayer::Minimax(Board* board,
-                      Turn* currentTurn,
+int AIPlayer::Minimax(std::shared_ptr<Board> board,
+                      std::shared_ptr<Turn> currentTurn,
                       int depth,
                       int alpha,
                       int beta,
@@ -44,7 +38,7 @@ int AIPlayer::Minimax(Board* board,
 {
   if (depth == 0)
   {
-    return RateBoard(board, player);
+    return RateBoard(board);
   }
 
   board->ApplyTurn(currentTurn);
@@ -55,7 +49,7 @@ int AIPlayer::Minimax(Board* board,
     if (allTurns.size() == 0)
     {
       board->RollbackTurn(currentTurn);
-      return CalculateTurnScore(currentTurn);
+      return RateBoard(board);
     }
 
     int maxScore = INT_MIN;
@@ -86,7 +80,7 @@ int AIPlayer::Minimax(Board* board,
     if (allTurns.size() == 0)
     {
       board->RollbackTurn(currentTurn);
-      return CalculateTurnScore(currentTurn);
+      return RateBoard(board);
     }
 
     int minScore = INT_MAX;
@@ -113,7 +107,7 @@ int AIPlayer::Minimax(Board* board,
   }
 }
 
-std::string AIPlayer::GetNextMove(Board* board, EMove move)
+std::string AIPlayer::GetNextMove(std::shared_ptr<Board> board, EMove move)
 {
   std::string input;
 

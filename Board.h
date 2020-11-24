@@ -21,17 +21,15 @@ enum class EMode : char
   AI,
 };
 
-class Board
+class Board : public std::enable_shared_from_this<Board>
 {
 private:
   EMode m_mode;
-  Node m_cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
+  std::shared_ptr<Node> m_cells[BOARD_HEIGHT][BOARD_WIDTH] = {};
   AIPlayer m_player;
 
 public:
-  Board(EMode mode) : m_mode(mode)
-  {
-  }
+  Board(EMode mode);
   ~Board() = default;
 
   void Parse(std::string boardContent);
@@ -41,23 +39,26 @@ public:
   std::string GetPosition(EMove);
 
   // Return a list of all possible turns which the given Node could take.
-  const std::list<Turn*> FindTurnsForNode(EState, Node*, Turn*);
+  const std::list<std::shared_ptr<Turn>> FindTurnsForNode(EState,
+                                                          std::shared_ptr<Node>,
+                                                          std::shared_ptr<Turn>);
 
   // Return a list of all possible turns which any Node on the field with the given state could
   // take.
-  const std::list<Turn*> FindTurns(EState);
+  const std::list<std::shared_ptr<Turn>> FindTurns(EState);
 
   // Apply a turn to the Board by moving the corresponding Node and removing Captures.
-  void ApplyTurn(Turn* turn);
+  void ApplyTurn(std::shared_ptr<Turn>);
 
   // Rollback a turn which was previously applied with ApplyTurn.
-  void RollbackTurn(Turn* turn);
+  void RollbackTurn(std::shared_ptr<Turn>);
 
-  inline Node* GetCell(int x, int y);
+  std::shared_ptr<Node> GetCell(int x, int y);
 
   inline bool IsPositionInBounds(int x, int y);
 
   // returns all pieces captured by a move, either in the direction of the move or behind the
   // move.
-  const std::vector<Node*> GetCapturesInDirection(const Move& move, bool reverse_direction);
+  const std::vector<std::shared_ptr<Node>> GetCapturesInDirection(const Move& move,
+                                                                  bool reverse_direction);
 };

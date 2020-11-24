@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 
 // Forward Declarations
@@ -16,7 +17,7 @@ public:
   std::string ReadString();
   void WriteString(std::string input);
 
-  void SetBoard(Board*);
+  void SetBoard(std::shared_ptr<Board>);
   void Start();
 
 private:
@@ -24,5 +25,5 @@ private:
   char m_buffer[READ_DATA_SIZE] = {0};
   std::string m_strRecv         = "";
 
-  Board* m_board;
+  std::shared_ptr<Board> m_board;
 };
