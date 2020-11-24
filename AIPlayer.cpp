@@ -3,11 +3,10 @@
 
 #include <limits.h> // for INT_MIN
 
-int AIPlayer::RateBoard(std::shared_ptr<Board> board, EState player)
+int AIPlayer::RateBoard(std::shared_ptr<Board> board)
 {
   // Get the number of our nodes minus the number of enemy nodes
-  int good_node_count = 0;
-  int bad_node_count  = 0;
+  int rating = 0;
 
   // iterate over board
   for (int y = 0; y < BOARD_HEIGHT; y++)
@@ -16,18 +15,18 @@ int AIPlayer::RateBoard(std::shared_ptr<Board> board, EState player)
     {
       std::shared_ptr<Node> node = board->GetCell(x, y);
 
-      if (node->state == player)
+      if (node->state == EState::WHITE)
       {
-        good_node_count++;
+        rating++;
       }
-      else
+      else if (node->state == EState::BLACK)
       {
-        bad_node_count++;
+        rating--;
       }
     }
   }
 
-  return good_node_count - bad_node_count;
+  return rating;
 }
 
 int AIPlayer::Minimax(std::shared_ptr<Board> board,
@@ -39,7 +38,7 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
 {
   if (depth == 0)
   {
-    return RateBoard(board, player);
+    return RateBoard(board);
   }
 
   board->ApplyTurn(currentTurn);
@@ -50,7 +49,7 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
     if (allTurns.size() == 0)
     {
       board->RollbackTurn(currentTurn);
-      return RateBoard(board, player);
+      return RateBoard(board);
     }
 
     int maxScore = INT_MIN;
@@ -81,7 +80,7 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
     if (allTurns.size() == 0)
     {
       board->RollbackTurn(currentTurn);
-      return RateBoard(board, player);
+      return RateBoard(board);
     }
 
     int minScore = INT_MAX;

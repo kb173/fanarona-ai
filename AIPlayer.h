@@ -15,7 +15,7 @@ private:
 
   int m_minimax_depth = 5;
 
-  int RateBoard(std::shared_ptr<Board> board, EState player);
+  int RateBoard(std::shared_ptr<Board> board);
 
   int Minimax(std::shared_ptr<Board> board,
               std::shared_ptr<Turn> currentTurn,
