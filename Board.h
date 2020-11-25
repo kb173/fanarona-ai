@@ -36,6 +36,10 @@ public:
                                                           std::shared_ptr<Node>,
                                                           std::shared_ptr<Turn>);
 
+  const std::list<std::shared_ptr<Turn>> GenerateTurnsWithFollowingTurns(
+    std::shared_ptr<Turn> startTurn,
+    EState pieceColor);
+
   // Return a list of all possible turns which any Node on the field with the given state could
   // take.
   const std::list<std::shared_ptr<Turn>> FindTurns(EState);

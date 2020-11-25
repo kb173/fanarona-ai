@@ -137,10 +137,9 @@ std::string AIPlayer::GetNextMove(std::shared_ptr<Board> board, EMove move)
       {
         i++;
         int score = Minimax(board, turn, m_minimax_depth, INT_MIN, INT_MAX, EState::BLACK);
-        std::cerr << "move " << i << ": score " << score << ", turn from (" << turn->move->From()->x
-                  << ", " << turn->move->From()->y << ")  to (" << turn->move->To()->x << ", "
-                  << turn->move->To()->y << "), chain of " << turn->GetTurnChainLength()
-                  << std::endl;
+        std::cerr << i << ".Move: "
+                  << "Score: " << score << " " << turn->GetTurnChainLength()
+                  << "-Lenght-Chain: " << turn->ChainToString() << std::endl;
         if (score > optimal_value)
         {
           m_turn_to_handle = turn;
@@ -148,8 +147,8 @@ std::string AIPlayer::GetNextMove(std::shared_ptr<Board> board, EMove move)
         }
       }
 
-      std::cerr << "Perfect move: " << m_turn_to_handle->move->To()->x << ", "
-                << m_turn_to_handle->move->To()->y << " with score " << optimal_value << std::endl;
+      std::cerr << "Best move: " << m_turn_to_handle->ChainToString() << " with score "
+                << optimal_value << std::endl;
     }
   }
 

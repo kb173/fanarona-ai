@@ -2,7 +2,7 @@
 
 std::string Node::ToString() const
 {
-  return std::to_string(x) + " " + std::to_string(y);
+  return "[" + std::to_string(x) + "|" + std::to_string(y) + "]";
 }
 
 std::shared_ptr<Node> Move::From() const
@@ -32,12 +32,25 @@ std::string Turn::ToString() const
   return ret;
 }
 
+std::string Turn::ChainToString() const
+{
+  std::shared_ptr<const Turn> current_turn = shared_from_this();
+
+  std::string ret = current_turn->move->From()->ToString();
+  while (current_turn != nullptr)
+  {
+    ret += " -> " + current_turn->move->To()->ToString();
+    current_turn = current_turn->nextTurn;
+  }
+
+  return ret;
+}
 uint Turn::GetTurnChainLength() const
 {
   std::shared_ptr<const Turn> current_turn = shared_from_this();
-  uint length                              = 0;
+  uint length                              = 1;
 
-  while (current_turn->nextTurn != nullptr)
+  while (current_turn != nullptr)
   {
     current_turn = current_turn->nextTurn;
     length++;

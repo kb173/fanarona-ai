@@ -258,49 +258,65 @@ const std::list<std::shared_ptr<Turn>> Board::FindTurnsForNode(EState movingStat
         auto captureBackward = std::make_shared<Capture>(GetCapturesInDirection(*move, true));
 
         // FIXME: Duplication for forward and backward
-        auto forwardTurn = std::make_shared<Turn>(move, captureForward);
+        auto forwardTurn          = std::make_shared<Turn>(move, captureForward);
+        forwardTurn->previousTurn = previousTurn;
         if (captureForward->capturedNodes.size() > 0)
         {
-          // If there are following turns: Apply the turn, recursively create the chain of
-          // turns, and rollback
-          ApplyTurn(forwardTurn);
-
-          std::list<std::shared_ptr<Turn>> turns =
-            FindTurnsForNode(movingState, neighbour, forwardTurn);
-          if (turns.size() > 0)
+          std::list<std::shared_ptr<Turn>> forwardTurns =
+            GenerateTurnsWithFollowingTurns(forwardTurn, movingState);
+          for (auto turn : forwardTurns)
           {
-            // TODO: Currently the first turn is arbitrarily picked. But this should follow the
-            // same heuristic as GetPosition!
-            forwardTurn->nextTurn       = turns.front();
-            turns.front()->previousTurn = forwardTurn;
+            capturingTurns.emplace_back(turn);
           }
-
-          RollbackTurn(forwardTurn);
+        }
+        else
+        {
+          paikaTurns.emplace_back(forwardTurn);
         }
 
-        auto backwardTurn = std::make_shared<Turn>(move, captureBackward);
+        auto backwardTurn          = std::make_shared<Turn>(move, captureBackward);
+        backwardTurn->previousTurn = previousTurn;
         if (captureBackward->capturedNodes.size() > 0)
         {
-          ApplyTurn(backwardTurn);
-
-          std::list<std::shared_ptr<Turn>> turns =
-            FindTurnsForNode(movingState, neighbour, backwardTurn);
-          if (turns.size() > 0)
+          std::list<std::shared_ptr<Turn>> backwardTurns =
+            GenerateTurnsWithFollowingTurns(backwardTurn, movingState);
+          for (auto turn : backwardTurns)
           {
-            backwardTurn->nextTurn      = turns.front();
-            turns.front()->previousTurn = backwardTurn;
+            capturingTurns.emplace_back(turn);
           }
-
-          RollbackTurn(backwardTurn);
         }
-        captureForward->capturedNodes.size() > 0 ? capturingTurns.emplace_back(forwardTurn)
-                                                 : paikaTurns.emplace_back(forwardTurn);
-        captureBackward->capturedNodes.size() > 0 ? capturingTurns.emplace_back(backwardTurn)
-                                                  : paikaTurns.emplace_back(backwardTurn);
       }
     }
   }
   return capturingTurns.size() > 0 ? capturingTurns : paikaTurns;
+}
+
+const std::list<std::shared_ptr<Turn>> Board::GenerateTurnsWithFollowingTurns(
+  std::shared_ptr<Turn> startTurn,
+  EState pieceColor)
+{
+  std::list<std::shared_ptr<Turn>> generatedTurns;
+  ApplyTurn(startTurn);
+
+  std::list<std::shared_ptr<Turn>> turns =
+    FindTurnsForNode(pieceColor, startTurn->move->To(), startTurn);
+  if (turns.size() > 0)
+  {
+    for (auto turn : turns)
+    {
+      auto newTurn          = std::make_shared<Turn>(startTurn->move, startTurn->capture);
+      newTurn->previousTurn = startTurn->previousTurn;
+      newTurn->nextTurn     = turn;
+      turn->previousTurn    = newTurn;
+      generatedTurns.emplace_back(newTurn);
+    }
+  }
+  else
+  {
+    generatedTurns.emplace_back(startTurn);
+  }
+  RollbackTurn(startTurn);
+  return generatedTurns;
 }
 
 const std::list<std::shared_ptr<Turn>> Board::FindTurns(EState movingState)

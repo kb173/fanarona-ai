@@ -40,16 +40,15 @@ int main(int argc, char** argv)
 
   // our game board -> gets filled by server messages, calculates next position...
   auto board = std::make_shared<Board>(mode, depth);
-  
+
   auto start = std::chrono::high_resolution_clock::now();
-  //Client client(ip, port);
-  LocalClient client = LocalClient();
+  Client client(ip, port);
+  // LocalClient client = LocalClient();
   client.SetBoard(board);
   client.Start();
   std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now() - start;
   std::cerr << "time spent: " << std::setprecision(3) << std::fixed << diff.count() << "s"
             << std::endl;
-
 
   return 0;
 }

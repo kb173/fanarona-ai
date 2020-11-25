@@ -74,7 +74,7 @@ struct Turn : public std::enable_shared_from_this<Turn>
   }
 
   std::string ToString() const;
-
+  std::string ChainToString() const;
   uint GetTurnChainLength() const;
 
   bool IsWithdraw() const;
