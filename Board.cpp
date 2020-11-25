@@ -194,7 +194,7 @@ std::string Board::GetPosition(EMove move)
     // Output turn information
     auto turns = FindTurns(EState::WHITE);
     std::cout << turns.size() << " available Turns: \n";
-    for (auto turn : turns)
+    for (auto &turn : turns)
     {
       std::cout << turn->ToString() << "\n";
     }
