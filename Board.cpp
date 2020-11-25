@@ -72,10 +72,6 @@ void Board::Parse(std::string boardContent)
       {
         cell->state = EState::WHITE;
       }
-      else if (character == '*') // current cell -> needed?
-      {
-        cell->state = EState::CURRENT;
-      }
       else
       {
         cell->state = EState::EMPTY;
@@ -125,13 +121,11 @@ void Board::Parse(std::string boardContent)
     }
   }
 
+  // only setup neighbour connections once
   bFirst_parse = false;
 
-  // print board for human player after successful parse
-  if (m_mode == EMode::HUMAN)
-  {
-    Print();
-  }
+  // Output current board after successful parse
+  Print();
 }
 
 void Board::Print()
@@ -166,10 +160,6 @@ void Board::Print()
       {
         std::cout << "# ";
       }
-      else if (state == EState::CURRENT)
-      {
-        std::cout << "* ";
-      }
       else
       {
         std::cout << ". ";
@@ -196,9 +186,11 @@ bool Board::IsPositionInBounds(int x, int y)
 std::string Board::GetPosition(EMove move)
 {
   std::string input;
-
   if (m_mode == EMode::HUMAN)
   {
+    // Output current board
+    Print();
+
     // Output turn information
     auto turns = FindTurns(EState::WHITE);
     std::cout << turns.size() << " available Turns: \n";
@@ -234,11 +226,8 @@ std::string Board::GetPosition(EMove move)
   }
   else
   {
-    Print();
-
     input = m_player.GetNextMove(shared_from_this(), move);
   }
-
   return input;
 }
 

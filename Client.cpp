@@ -1,5 +1,6 @@
-#define DEBUG_OUTPUT
-#define SHOW_RAW_MSG
+#ifdef _DEBUG
+  #define SHOW_RAW_MSG
+#endif
 
 #ifdef _WIN32
   // link with Ws2_32.lib
@@ -43,9 +44,7 @@ std::map<std::string, std::string> message_write_map {
 
 Client::Client(std::string ip, int port)
 {
-#ifdef DEBUG_OUTPUT
   std::cout << "init listening socket on " << ip << " port " << port << std::endl;
-#endif
 
 #ifdef _WIN32
   WSAData wsaData;
@@ -112,7 +111,7 @@ std::string Client::ReadString()
 
 void Client::WriteString(std::string input)
 {
-  // append newline if not present
+  // Append newline if not present
   if (input.rfind("\n") != input.length())
   {
     input.append("\n");
@@ -135,18 +134,20 @@ void Client::SetBoard(std::shared_ptr<Board> i_board)
 
 void Client::Start()
 {
+  std::cout << "running game loop..." << std::endl;
+
   size_t pos = std::string::npos;
   while (true)
   {
-    // read incoming commands from server
+    // Read incoming commands from server
     m_strRecv.append(ReadString());
 
-    // always parse in-game state if present and pass the game data to the Board
+    // Always parse in-game state if present and pass the game data to the Board
     if ((pos = m_strRecv.rfind(MSG_BOARD_HEADER)) != std::string::npos)
     {
       std::string field = m_strRecv.substr(pos, BOARD_LENGTH);
 
-      // remove newlines for combined parsing depending on different server versions
+      // Remove newlines for combined parsing depending on different server versions
       field.erase(remove(field.begin(), field.end(), ' '), field.end());
       m_board->Parse(field);
     }
@@ -159,6 +160,7 @@ void Client::Start()
       {
         std::string input = m_board->GetPosition(message_and_move.second);
         WriteString(input);
+        break; // m_strRecv is cleared after sending so no checking for other messages is needed
       }
     }
 
@@ -171,12 +173,14 @@ void Client::Start()
         if (m_strRecv.rfind(message_and_write.first) != std::string::npos)
         {
           WriteString(message_and_write.second);
+          break;
         }
       }
 
       // end of game detected, one player won
-      if (m_strRecv.rfind(GAME_OVER) != std::string::npos)
+      if ((pos = m_strRecv.rfind(GAME_OVER)) != std::string::npos)
       {
+        std::cout << "\r\nGAME OVER!\r\n" << m_strRecv.substr(pos - 8, 13) << std::endl << std::endl;
         return;
       }
     }

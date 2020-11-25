@@ -13,8 +13,7 @@ enum class EState : char
 {
   EMPTY,
   WHITE,
-  BLACK,
-  CURRENT,
+  BLACK
 };
 
 enum class EMove : char
