@@ -34,7 +34,8 @@ public:
   // Return a list of all possible turns which the given Node could take.
   const std::list<std::shared_ptr<Turn>> FindTurnsForNode(EState,
                                                           std::shared_ptr<Node>,
-                                                          std::shared_ptr<Turn>);
+                                                          std::shared_ptr<Turn>,
+                                                          bool includePaika);
 
   const std::list<std::shared_ptr<Turn>> GenerateTurnsWithFollowingTurns(
     std::shared_ptr<Turn> startTurn,

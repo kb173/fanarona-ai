@@ -233,7 +233,8 @@ std::string Board::GetPosition(EMove move)
 
 const std::list<std::shared_ptr<Turn>> Board::FindTurnsForNode(EState movingState,
                                                                std::shared_ptr<Node> node,
-                                                               std::shared_ptr<Turn> previousTurn)
+                                                               std::shared_ptr<Turn> previousTurn,
+                                                               bool includePaika)
 {
   std::list<std::shared_ptr<Turn>> capturingTurns;
   std::list<std::shared_ptr<Turn>> paikaTurns;
@@ -288,7 +289,15 @@ const std::list<std::shared_ptr<Turn>> Board::FindTurnsForNode(EState movingStat
       }
     }
   }
-  return capturingTurns.size() > 0 ? capturingTurns : paikaTurns;
+
+  if (includePaika)
+  {
+    return capturingTurns.size() > 0 ? capturingTurns : paikaTurns;
+  }
+  else
+  {
+    return capturingTurns;
+  }
 }
 
 const std::list<std::shared_ptr<Turn>> Board::GenerateTurnsWithFollowingTurns(
@@ -299,7 +308,7 @@ const std::list<std::shared_ptr<Turn>> Board::GenerateTurnsWithFollowingTurns(
   ApplyTurn(startTurn);
 
   std::list<std::shared_ptr<Turn>> turns =
-    FindTurnsForNode(pieceColor, startTurn->move->To(), startTurn);
+    FindTurnsForNode(pieceColor, startTurn->move->To(), startTurn, false);
   if (turns.size() > 0)
   {
     for (auto turn : turns)
@@ -330,7 +339,7 @@ const std::list<std::shared_ptr<Turn>> Board::FindTurns(EState movingState)
     for (int x = 0; x < BOARD_WIDTH; x++)
     {
       std::shared_ptr<Node> node = GetCell(x, y);
-      auto potential_turns       = FindTurnsForNode(movingState, node, nullptr);
+      auto potential_turns       = FindTurnsForNode(movingState, node, nullptr, true);
 
       // Separate capturing from paika turns
       // TODO: This check happens twice, here and in FindTurnsForNode (which returns either only
