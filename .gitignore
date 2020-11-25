@@ -46,3 +46,5 @@ client
 
 # Clang-Tidy
 *compile_commands.json
+
+results/
