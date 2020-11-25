@@ -1,5 +1,7 @@
+#include <chrono>
+#include <iomanip>
 #include <iostream>
-#include <memory>
+
 #include <string.h>
 
 #include "Board.h"
@@ -14,7 +16,6 @@ int main(int argc, char** argv)
   // "127.0.0.1", 8888 // local Test server
   std::string ip = "178.32.219.65";
   int port       = 4455;
-
   for (int i = 0; i < argc; ++i)
   {
     if (strcmp(argv[i], "--human") == 0)
@@ -34,9 +35,13 @@ int main(int argc, char** argv)
   // our game board -> gets filled by server messages, calculates next position...
   auto board = std::make_shared<Board>(mode);
 
+  auto start = std::chrono::high_resolution_clock::now();
   Client client(ip, port);
   client.SetBoard(board);
   client.Start();
+  std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now() - start;
+  std::cout << "time spent: " << std::setprecision(3) << std::fixed << diff.count() << "s"
+            << std::endl;
 
   return 0;
 }
