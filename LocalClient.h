@@ -19,6 +19,6 @@ public:
   void Start();
 
 private:
-  std::string m_strRecv         = "";
+  std::string m_strRecv = "";
   std::shared_ptr<Board> m_board;
 };

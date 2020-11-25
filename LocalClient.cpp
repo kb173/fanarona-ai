@@ -22,7 +22,7 @@
 #include "Board.h"
 #include "LocalClient.h"
 
-#define BOARD_LENGTH 380 // SERVER_V2 total gridsize including whitespaces
+#define BOARD_LENGTH     380 // SERVER_V2 total gridsize including whitespaces
 #define MSG_BOARD_HEADER "0   1   2   3   4   5   6   7   8" // defines start of board
 //"************************ Player 2 won!**********************"
 #define GAME_OVER " won!**********************" // end of game
@@ -41,15 +41,13 @@ std::map<std::string, std::string> message_write_map_local {
   {"Do you want to continue with your turn [Y/N]?", "Y"},
   {"Do you want to surrender [Y/N]?", "Y"}};
 
- LocalClient::LocalClient()
- {
+LocalClient::LocalClient()
+{
+}
 
- }
-
- LocalClient::~LocalClient()
- {
-
- }
+LocalClient::~LocalClient()
+{
+}
 
 std::string LocalClient::ReadString()
 {
