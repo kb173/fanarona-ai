@@ -36,12 +36,14 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
                       int beta,
                       EState player)
 {
+  board->ApplyTurn(currentTurn);
+
   if (depth == 0)
   {
-    return RateBoard(board);
+    int score = RateBoard(board);
+    board->RollbackTurn(currentTurn);
+    return score;
   }
-
-  board->ApplyTurn(currentTurn);
 
   if (player == EState::WHITE)
   {
