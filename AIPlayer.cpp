@@ -1,6 +1,7 @@
 #include "AIPlayer.h"
 #include "Board.h"
 
+#include <iostream>
 #include <limits.h> // for INT_MIN
 
 int AIPlayer::RateBoard(std::shared_ptr<Board> board)
@@ -40,9 +41,9 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
 
   if (depth == 0)
   {
-    int score = RateBoard(board);
+    int rating = RateBoard(board);
     board->RollbackTurn(currentTurn);
-    return score;
+    return rating;
   }
 
   if (player == EState::WHITE)
@@ -129,15 +130,24 @@ std::string AIPlayer::GetNextMove(std::shared_ptr<Board> board, EMove move)
       // Get the optimal turn
       int optimal_value = INT_MIN;
 
+      int i = 0;
       for (const auto& turn : turns)
       {
+        i++;
         int score = Minimax(board, turn, m_minimax_depth, INT_MIN, INT_MAX, EState::WHITE);
+        std::cout << "move " << i << ": score " << score << ", turn to (" << turn->move->To()->x
+                  << ", " << turn->move->To()->y << "), chain of " << turn->GetTurnChainLength()
+                  << std::endl;
         if (score > optimal_value)
         {
           m_turn_to_handle = turn;
           optimal_value    = score;
         }
       }
+
+      std::cout << "Perfect move: " << m_turn_to_handle->move->From()->x << ", "
+                << m_turn_to_handle->move->From()->y << " with score " << optimal_value
+                << std::endl;
     }
   }
 
