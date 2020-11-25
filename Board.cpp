@@ -132,16 +132,13 @@ void Board::Print()
 {
   for (int y = 0; y < BOARD_HEIGHT; y++)
   {
-    if (y % 2 == 0)
+    if (y == 0)
     {
-      if (y == 0)
-      {
-        std::cout << "  0 1 2 3 4 5 6 7 8" << std::endl;
-      }
-      else
-      {
-        std::cout << "  |/|\\|/|\\|/|\\|/|\\|" << std::endl;
-      }
+      std::cout << "\r\n  0 1 2 3 4 5 6 7 8" << std::endl;
+    }
+    else if (y % 2 == 0)
+    {
+      std::cout << "  |/|\\|/|\\|/|\\|/|\\|" << std::endl;
     }
     else
     {
