@@ -51,8 +51,9 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
     auto allTurns = board->FindTurns(EState::WHITE);
     if (allTurns.size() == 0)
     {
+      int rating = RateBoard(board);
       board->RollbackTurn(currentTurn);
-      return RateBoard(board);
+      return rating;
     }
 
     int maxScore = INT_MIN;
@@ -82,8 +83,9 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
     auto allTurns = board->FindTurns(EState::BLACK);
     if (allTurns.size() == 0)
     {
+      int rating = RateBoard(board);
       board->RollbackTurn(currentTurn);
-      return RateBoard(board);
+      return rating;
     }
 
     int minScore = INT_MAX;
