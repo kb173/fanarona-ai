@@ -25,7 +25,7 @@
 #define BOARD_LENGTH 380 // SERVER_V2 total gridsize including whitespaces
 #define MSG_BOARD_HEADER "0   1   2   3   4   5   6   7   8" // defines start of board
 //"************************ Player 2 won!**********************"
-#define GAME_OVER "won!**********************" // end of game
+#define GAME_OVER " won!**********************" // end of game
 
 std::map<std::string, EMove> message_state_map_local {
   {"Please enter origin x-axis", EMove::ORIGIN_X},
@@ -61,6 +61,7 @@ std::string LocalClient::ReadString()
 void LocalClient::WriteString(std::string input)
 {
   std::cout << input << std::endl;
+  m_strRecv.clear();
 }
 
 void LocalClient::SetBoard(std::shared_ptr<Board> i_board)
@@ -73,10 +74,20 @@ void LocalClient::Start()
   size_t pos = std::string::npos;
   while (true)
   {
+    // Read incoming commands
     m_strRecv.append(ReadString());
-    EMove mode;
 
-    bool in_game = false;
+    // Always parse in-game state if present and pass the game data to the Board
+    if ((pos = m_strRecv.rfind(MSG_BOARD_HEADER)) != std::string::npos)
+    {
+      std::string field = m_strRecv.substr(pos, BOARD_LENGTH);
+      if (field.length() >= BOARD_LENGTH)
+      {
+        // Remove newlines for combined parsing depending on different server versions
+        field.erase(remove(field.begin(), field.end(), ' '), field.end());
+        m_board->Parse(field);
+      }
+    }
 
     // Check which gameplay selection this string corresponds to (if any)
     // and set the `mode` accordingly
@@ -84,28 +95,14 @@ void LocalClient::Start()
     {
       if (m_strRecv.rfind(message_and_move.first) != std::string::npos)
       {
-        mode    = message_and_move.second;
-        in_game = true;
-
-        // Since we found an in-game state, pass the game data to the Board
-        if ((pos = m_strRecv.rfind(MSG_BOARD_HEADER)) != std::string::npos)
-        {
-          std::string field = m_strRecv.substr(pos, BOARD_LENGTH);
-          // remove newlines for combined parsing depending on different server versions
-          field.erase(remove(field.begin(), field.end(), ' '), field.end());
-          m_board->Parse(field);
-          
-        }
-
-        // usleep(300000);
-        std::string input = m_board->GetPosition(mode);
+        std::string input = m_board->GetPosition(message_and_move.second);
         WriteString(input);
-        m_strRecv = "";
+        break; // m_strRecv is cleared after sending so no checking for other messages is needed
       }
     }
 
     // If that wasn't an in-game string, we're in the menu
-    if (!in_game)
+    if (m_strRecv.length() > 0)
     {
       // Check which menu point this string corresponds to and send the result
       for (const auto& message_and_write : message_write_map_local)
@@ -113,13 +110,17 @@ void LocalClient::Start()
         if (m_strRecv.rfind(message_and_write.first) != std::string::npos)
         {
           WriteString(message_and_write.second);
-          m_strRecv = "";
+          break;
         }
       }
 
-      if (m_strRecv.rfind(GAME_OVER) != std::string::npos)
+      // end of game detected, one player won
+      if ((pos = m_strRecv.rfind(GAME_OVER)) != std::string::npos)
       {
-          return;
+        std::cerr << "\r\nGAME OVER!\r\n"
+                  << m_strRecv.substr(pos - 8, 13) << std::endl
+                  << std::endl;
+        return;
       }
     }
   }

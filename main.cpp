@@ -47,7 +47,7 @@ int main(int argc, char** argv)
   client.SetBoard(board);
   client.Start();
   std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now() - start;
-  std::cout << "time spent: " << std::setprecision(3) << std::fixed << diff.count() << "s"
+  std::cerr << "time spent: " << std::setprecision(3) << std::fixed << diff.count() << "s"
             << std::endl;
 
 
