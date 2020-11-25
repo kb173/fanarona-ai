@@ -59,7 +59,7 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
     int maxScore = INT_MIN;
     for (auto& childTurn : allTurns)
     {
-      auto turnScore = Minimax(board, childTurn, depth - 1, alpha, beta, EState::WHITE);
+      auto turnScore = Minimax(board, childTurn, depth - 1, alpha, beta, EState::BLACK);
       if (turnScore > maxScore)
       {
         maxScore = turnScore;
@@ -91,7 +91,7 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
     int minScore = INT_MAX;
     for (auto& childTurn : allTurns)
     {
-      auto turnScore = Minimax(board, childTurn, depth - 1, alpha, beta, EState::BLACK);
+      auto turnScore = Minimax(board, childTurn, depth - 1, alpha, beta, EState::WHITE);
       if (turnScore < minScore)
       {
         minScore = turnScore;
