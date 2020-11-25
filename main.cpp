@@ -17,9 +17,18 @@ int main(int argc, char** argv)
 
   for (int i = 0; i < argc; ++i)
   {
-      if (strcmp(argv[i], "--human") == 0) mode = EMode::HUMAN;
-      else if (strcmp(argv[i], "--ip") == 0) ip = argv[i + 1];
-      else if (strcmp(argv[i], "--port") == 0) port = std::stoi(argv[i + 1]);
+    if (strcmp(argv[i], "--human") == 0)
+    {
+      mode = EMode::HUMAN;
+    }
+    else if (strcmp(argv[i], "--ip") == 0)
+    {
+      ip = argv[i + 1];
+    }
+    else if (strcmp(argv[i], "--port") == 0)
+    {
+      port = std::stoi(argv[i + 1]);
+    }
   }
 
   // our game board -> gets filled by server messages, calculates next position...

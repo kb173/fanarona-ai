@@ -180,7 +180,9 @@ void Client::Start()
       // end of game detected, one player won
       if ((pos = m_strRecv.rfind(GAME_OVER)) != std::string::npos)
       {
-        std::cout << "\r\nGAME OVER!\r\n" << m_strRecv.substr(pos - 8, 13) << std::endl << std::endl;
+        std::cout << "\r\nGAME OVER!\r\n"
+                  << m_strRecv.substr(pos - 8, 13) << std::endl
+                  << std::endl;
         return;
       }
     }
