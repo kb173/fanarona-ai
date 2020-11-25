@@ -1,9 +1,11 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <algorithm>
 
 #include "Board.h"
 #include "Client.h"
+#include "LocalClient.h"
 
 int main()
 {
@@ -13,9 +15,11 @@ int main()
 
   // Client client("10.64.99.107", 4455); // Lars' Fanorona Server
   // Client client("127.0.0.1", 8888); // Test server
-  Client client("178.32.219.65", 4455); // Kajetan Test server - alpaga.hammerle.me
+  // Client client("178.32.219.65", 4455); // Kajetan Test server - alpaga.hammerle.me
+  LocalClient client = LocalClient();
   client.SetBoard(board);
   client.Start();
+
 
   return 0;
 }

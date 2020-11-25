@@ -136,36 +136,36 @@ void Board::Print()
     {
       if (y == 0)
       {
-        std::cout << "  0 1 2 3 4 5 6 7 8" << std::endl;
+        std::cerr << "  0 1 2 3 4 5 6 7 8" << std::endl;
       }
       else
       {
-        std::cout << "  |/|\\|/|\\|/|\\|/|\\|" << std::endl;
+        std::cerr<< "  |/|\\|/|\\|/|\\|/|\\|" << std::endl;
       }
     }
     else
     {
-      std::cout << "  |\\|/|\\|/|\\|/|\\|/|" << std::endl;
+      std::cerr << "  |\\|/|\\|/|\\|/|\\|/|" << std::endl;
     }
 
-    std::cout << y << " ";
+    std::cerr << y << " ";
     for (int x = 0; x < BOARD_WIDTH; x++)
     {
       EState state = m_cells[y][x]->state;
       if (state == EState::WHITE)
       {
-        std::cout << "O ";
+        std::cerr << "O ";
       }
       else if (state == EState::BLACK)
       {
-        std::cout << "# ";
+        std::cerr << "# ";
       }
       else
       {
-        std::cout << ". ";
+        std::cerr << ". ";
       }
     }
-    std::cout << std::endl;
+    std::cerr << std::endl;
   }
 }
 
