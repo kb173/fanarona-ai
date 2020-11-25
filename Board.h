@@ -8,10 +8,6 @@
 const int BOARD_WIDTH  = 9;
 const int BOARD_HEIGHT = 5;
 
-#ifdef _WIN32
-typedef unsigned int uint;
-#endif
-
 enum class EMode : char
 {
   HUMAN,
