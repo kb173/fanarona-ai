@@ -22,7 +22,7 @@ private:
   AIPlayer m_player;
 
 public:
-  Board(EMode mode);
+  Board(EMode mode, int depth);
   ~Board() = default;
 
   void Parse(std::string boardContent);

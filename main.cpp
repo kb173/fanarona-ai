@@ -10,6 +10,7 @@
 int main(int argc, char** argv)
 {
   EMode mode = EMode::AI;
+  int depth  = 3;
   // default values for server connection
   // "178.32.219.65", 4455 // Kajetan Test server - alpaga.hammerle.me
   // "10.64.99.107", 4455 // Lars' Fanorona Server
@@ -22,6 +23,10 @@ int main(int argc, char** argv)
     {
       mode = EMode::HUMAN;
     }
+    else if (strcmp(argv[i], "--depth") == 0)
+    {
+      depth = std::stoi(argv[i + 1]);
+    }
     else if (strcmp(argv[i], "--ip") == 0)
     {
       ip = argv[i + 1];
@@ -33,7 +38,7 @@ int main(int argc, char** argv)
   }
 
   // our game board -> gets filled by server messages, calculates next position...
-  auto board = std::make_shared<Board>(mode);
+  auto board = std::make_shared<Board>(mode, depth);
 
   auto start = std::chrono::high_resolution_clock::now();
   Client client(ip, port);

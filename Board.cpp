@@ -5,9 +5,9 @@
 
 #include "Board.h"
 
-Board::Board(EMode mode) : m_mode(mode)
+Board::Board(EMode mode, int depth) : m_mode(mode)
 {
-  // iterate over board
+  // iterate over board, creating cells
   for (int y = 0; y < BOARD_HEIGHT; y++)
   {
     for (int x = 0; x < BOARD_WIDTH; x++)
@@ -15,6 +15,9 @@ Board::Board(EMode mode) : m_mode(mode)
       m_cells[y][x] = std::make_shared<Node>();
     }
   }
+
+  // setting search depth for ai player
+  m_player.SetDepth(depth);
 }
 
 void Board::Parse(std::string boardContent)

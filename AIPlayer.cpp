@@ -179,3 +179,8 @@ std::string AIPlayer::GetNextMove(std::shared_ptr<Board> board, EMove move)
 
   return input;
 }
+
+void AIPlayer::SetDepth(int depth)
+{
+  m_minimax_depth = depth;
+}
