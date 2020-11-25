@@ -2,6 +2,8 @@
 
 #include "GameElements.h"
 
+#include <list>
+
 // Forward declarations
 class Board;
 
@@ -23,6 +25,12 @@ private:
               int alpha,
               int beta,
               EState maximizingPlayer);
+
+  void SortTurns(std::list<std::shared_ptr<Turn>>& turns);
+
+  static bool TurnSmallerThan(std::shared_ptr<Turn> turn1, std::shared_ptr<Turn> turn2);
+
+  static int RateTurn(std::shared_ptr<Turn> turn);
 
 public:
   std::string GetNextMove(std::shared_ptr<Board> board, EMove move);

@@ -56,6 +56,10 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
       return rating;
     }
 
+    // Optimization: Sort turns in order to check the likely better turns first, making
+    // alpha-beta-pruning quit earlier
+    SortTurns(allTurns);
+
     int maxScore = INT_MIN;
     for (auto& childTurn : allTurns)
     {
@@ -88,6 +92,10 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
       return rating;
     }
 
+    // Optimization: Sort turns in order to check the likely better turns first, making
+    // alpha-beta-pruning quit earlier
+    SortTurns(allTurns);
+
     int minScore = INT_MAX;
     for (auto& childTurn : allTurns)
     {
@@ -110,6 +118,21 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
     board->RollbackTurnWithFollowing(currentTurn);
     return minScore;
   }
+}
+
+void AIPlayer::SortTurns(std::list<std::shared_ptr<Turn>>& turns)
+{
+  turns.sort(turnSmallerThan);
+}
+
+bool AIPlayer::turnSmallerThan(std::shared_ptr<Turn> turn1, std::shared_ptr<Turn> turn2)
+{
+  return RateTurn(turn1) > RateTurn(turn2);
+}
+
+int AIPlayer::RateTurn(std::shared_ptr<Turn> turn)
+{
+  return turn->capture->capturedNodes.size() + turn->GetTurnChainLength();
 }
 
 std::string AIPlayer::GetNextMove(std::shared_ptr<Board> board, EMove move)
