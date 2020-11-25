@@ -37,7 +37,7 @@ uint Turn::GetTurnChainLength() const
   std::shared_ptr<const Turn> current_turn = shared_from_this();
   uint length                              = 0;
 
-  while (current_turn != nullptr)
+  while (current_turn->nextTurn != nullptr)
   {
     current_turn = current_turn->nextTurn;
     length++;
