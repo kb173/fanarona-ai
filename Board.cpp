@@ -355,6 +355,7 @@ void Board::RollbackTurn(std::shared_ptr<Turn> turn)
   for (auto& node : turn->capture->capturedNodes)
   {
     // FIXME: Can we avoid this if-check? We just need the opposite color
+    // SUGGESTION: node->state = (EState)(2 * (int)(turn->move->From()->state) % 3);
     if (turn->move->From()->state == EState::BLACK)
     {
       node->state = EState::WHITE;
