@@ -46,9 +46,9 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
     return rating;
   }
 
-  if (player == EState::BLACK)
+  if (player == EState::WHITE)
   {
-    auto allTurns = board->FindTurns(EState::BLACK);
+    auto allTurns = board->FindTurns(EState::WHITE);
     if (allTurns.size() == 0)
     {
       int rating = RateBoard(board);
@@ -59,7 +59,7 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
     int maxScore = INT_MIN;
     for (auto& childTurn : allTurns)
     {
-      auto turnScore = Minimax(board, childTurn, depth - 1, alpha, beta, EState::WHITE);
+      auto turnScore = Minimax(board, childTurn, depth - 1, alpha, beta, EState::BLACK);
       if (turnScore > maxScore)
       {
         maxScore = turnScore;
@@ -80,7 +80,7 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
   }
   else
   {
-    auto allTurns = board->FindTurns(EState::WHITE);
+    auto allTurns = board->FindTurns(EState::BLACK);
     if (allTurns.size() == 0)
     {
       int rating = RateBoard(board);
@@ -91,7 +91,7 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
     int minScore = INT_MAX;
     for (auto& childTurn : allTurns)
     {
-      auto turnScore = Minimax(board, childTurn, depth - 1, alpha, beta, EState::BLACK);
+      auto turnScore = Minimax(board, childTurn, depth - 1, alpha, beta, EState::WHITE);
       if (turnScore < minScore)
       {
         minScore = turnScore;
@@ -130,7 +130,7 @@ std::string AIPlayer::GetNextMove(std::shared_ptr<Board> board, EMove move)
       auto turns = board->FindTurns(EState::WHITE);
 
       // Get the optimal turn
-      int optimal_value = INT_MAX;
+      int optimal_value = INT_MIN;
 
       int i = 0;
       for (const auto& turn : turns)
@@ -141,7 +141,7 @@ std::string AIPlayer::GetNextMove(std::shared_ptr<Board> board, EMove move)
                   << ", " << turn->move->From()->y << ")  to (" << turn->move->To()->x << ", "
                   << turn->move->To()->y << "), chain of " << turn->GetTurnChainLength()
                   << std::endl;
-        if (score < optimal_value)
+        if (score > optimal_value)
         {
           m_turn_to_handle = turn;
           optimal_value    = score;
