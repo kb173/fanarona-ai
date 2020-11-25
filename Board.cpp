@@ -386,6 +386,39 @@ void Board::RollbackTurn(std::shared_ptr<Turn> turn)
   }
 }
 
+void Board::ApplyTurnWithFollowing(std::shared_ptr<Turn> turn)
+{
+  // Apply in order
+  std::shared_ptr<Turn> currentTurn = turn;
+
+  while (currentTurn != nullptr)
+  {
+    ApplyTurn(turn);
+    currentTurn = currentTurn->nextTurn;
+  }
+}
+
+void Board::RollbackTurnWithFollowing(std::shared_ptr<Turn> turn)
+{
+  // Apply in reverse order
+  // First, get the last turn
+  std::shared_ptr<Turn> lastTurn = turn;
+
+  while (lastTurn->nextTurn != nullptr)
+  {
+    lastTurn = lastTurn->nextTurn;
+  }
+
+  // Rollback in order
+  std::shared_ptr<Turn> currentTurn = lastTurn;
+
+  while (currentTurn != nullptr)
+  {
+    RollbackTurn(turn);
+    currentTurn = currentTurn->previousTurn;
+  }
+}
+
 const std::vector<std::shared_ptr<Node>> Board::GetCapturesInDirection(const Move& move,
                                                                        bool reverse_direction)
 {

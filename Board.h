@@ -50,6 +50,10 @@ public:
   // Rollback a turn which was previously applied with ApplyTurn.
   void RollbackTurn(std::shared_ptr<Turn>);
 
+  void ApplyTurnWithFollowing(std::shared_ptr<Turn>);
+
+  void RollbackTurnWithFollowing(std::shared_ptr<Turn>);
+
   std::shared_ptr<Node> GetCell(int x, int y);
 
   inline bool IsPositionInBounds(int x, int y);

@@ -37,12 +37,12 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
                       int beta,
                       EState player)
 {
-  board->ApplyTurn(currentTurn);
+  board->ApplyTurnWithFollowing(currentTurn);
 
   if (depth == 0)
   {
     int rating = RateBoard(board);
-    board->RollbackTurn(currentTurn);
+    board->RollbackTurnWithFollowing(currentTurn);
     return rating;
   }
 
@@ -52,7 +52,7 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
     if (allTurns.size() == 0)
     {
       int rating = RateBoard(board);
-      board->RollbackTurn(currentTurn);
+      board->RollbackTurnWithFollowing(currentTurn);
       return rating;
     }
 
@@ -75,7 +75,7 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
       }
     }
 
-    board->RollbackTurn(currentTurn);
+    board->RollbackTurnWithFollowing(currentTurn);
     return maxScore;
   }
   else
@@ -84,7 +84,7 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
     if (allTurns.size() == 0)
     {
       int rating = RateBoard(board);
-      board->RollbackTurn(currentTurn);
+      board->RollbackTurnWithFollowing(currentTurn);
       return rating;
     }
 
@@ -107,7 +107,7 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
       }
     }
 
-    board->RollbackTurn(currentTurn);
+    board->RollbackTurnWithFollowing(currentTurn);
     return minScore;
   }
 }
