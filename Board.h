@@ -14,7 +14,7 @@ enum class EMode : char
   AI,
 };
 
-class Board : public std::enable_shared_from_this<Board>
+class Board
 {
 private:
   EMode m_mode;

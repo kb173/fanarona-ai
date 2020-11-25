@@ -17,7 +17,7 @@ int main(int argc, char** argv)
   // "10.64.99.107", 4455 // Lars' Fanorona Server
   // "127.0.0.1", 8888 // local Test server
   std::string ip = "178.32.219.65";
-  int port       = 4455;
+  // int port       = 4455;
   for (int i = 0; i < argc; ++i)
   {
     if (strcmp(argv[i], "--human") == 0)
@@ -32,18 +32,18 @@ int main(int argc, char** argv)
     {
       ip = argv[i + 1];
     }
-    else if (strcmp(argv[i], "--port") == 0)
-    {
-      port = std::stoi(argv[i + 1]);
-    }
+    // else if (strcmp(argv[i], "--port") == 0)
+    //{
+    //  port = std::stoi(argv[i + 1]);
+    //}
   }
 
   // our game board -> gets filled by server messages, calculates next position...
   auto board = std::make_shared<Board>(mode, depth);
 
   auto start = std::chrono::high_resolution_clock::now();
-  Client client(ip, port);
-  // LocalClient client = LocalClient();
+  // Client client(ip, port);
+  LocalClient client = LocalClient();
   client.SetBoard(board);
   client.Start();
   std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now() - start;

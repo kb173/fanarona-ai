@@ -226,7 +226,7 @@ std::string Board::GetPosition(EMove move)
   }
   else
   {
-    input = m_player.GetNextMove(shared_from_this(), move);
+    input = m_player.GetNextMove(*this, move);
   }
   return input;
 }

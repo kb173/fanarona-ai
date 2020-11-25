@@ -17,9 +17,9 @@ private:
 
   int m_minimax_depth = 5;
 
-  int RateBoard(std::shared_ptr<Board> board);
+  int RateBoard(Board& board);
 
-  int Minimax(std::shared_ptr<Board> board,
+  int Minimax(Board& board,
               std::shared_ptr<Turn> currentTurn,
               int depth,
               int alpha,
@@ -33,6 +33,6 @@ private:
   static int RateTurn(std::shared_ptr<Turn> turn);
 
 public:
-  std::string GetNextMove(std::shared_ptr<Board> board, EMove move);
+  std::string GetNextMove(Board& board, EMove move);
   void SetDepth(int depth);
 };

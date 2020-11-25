@@ -4,7 +4,7 @@
 #include <iostream>
 #include <limits.h> // for INT_MIN
 
-int AIPlayer::RateBoard(std::shared_ptr<Board> board)
+int AIPlayer::RateBoard(Board& board)
 {
   // Get the number of our nodes minus the number of enemy nodes
   int rating = 0;
@@ -14,7 +14,7 @@ int AIPlayer::RateBoard(std::shared_ptr<Board> board)
   {
     for (int x = 0; x < BOARD_WIDTH; x++)
     {
-      std::shared_ptr<Node> node = board->GetCell(x, y);
+      std::shared_ptr<Node> node = board.GetCell(x, y);
 
       if (node->state == EState::WHITE)
       {
@@ -30,29 +30,29 @@ int AIPlayer::RateBoard(std::shared_ptr<Board> board)
   return rating;
 }
 
-int AIPlayer::Minimax(std::shared_ptr<Board> board,
+int AIPlayer::Minimax(Board& board,
                       std::shared_ptr<Turn> currentTurn,
                       int depth,
                       int alpha,
                       int beta,
                       EState player)
 {
-  board->ApplyTurnWithFollowing(currentTurn);
+  board.ApplyTurnWithFollowing(currentTurn);
 
   if (depth == 0)
   {
     int rating = RateBoard(board);
-    board->RollbackTurnWithFollowing(currentTurn);
+    board.RollbackTurnWithFollowing(currentTurn);
     return rating;
   }
 
   if (player == EState::WHITE)
   {
-    auto allTurns = board->FindTurns(EState::WHITE);
+    auto allTurns = board.FindTurns(EState::WHITE);
     if (allTurns.size() == 0)
     {
       int rating = RateBoard(board);
-      board->RollbackTurnWithFollowing(currentTurn);
+      board.RollbackTurnWithFollowing(currentTurn);
       return rating;
     }
 
@@ -79,16 +79,16 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
       }
     }
 
-    board->RollbackTurnWithFollowing(currentTurn);
+    board.RollbackTurnWithFollowing(currentTurn);
     return maxScore;
   }
   else
   {
-    auto allTurns = board->FindTurns(EState::BLACK);
+    auto allTurns = board.FindTurns(EState::BLACK);
     if (allTurns.size() == 0)
     {
       int rating = RateBoard(board);
-      board->RollbackTurnWithFollowing(currentTurn);
+      board.RollbackTurnWithFollowing(currentTurn);
       return rating;
     }
 
@@ -115,17 +115,17 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
       }
     }
 
-    board->RollbackTurnWithFollowing(currentTurn);
+    board.RollbackTurnWithFollowing(currentTurn);
     return minScore;
   }
 }
 
 void AIPlayer::SortTurns(std::list<std::shared_ptr<Turn>>& turns)
 {
-  turns.sort(turnSmallerThan);
+  turns.sort(TurnSmallerThan);
 }
 
-bool AIPlayer::turnSmallerThan(std::shared_ptr<Turn> turn1, std::shared_ptr<Turn> turn2)
+bool AIPlayer::TurnSmallerThan(std::shared_ptr<Turn> turn1, std::shared_ptr<Turn> turn2)
 {
   return RateTurn(turn1) > RateTurn(turn2);
 }
@@ -135,7 +135,7 @@ int AIPlayer::RateTurn(std::shared_ptr<Turn> turn)
   return turn->capture->capturedNodes.size() + turn->GetTurnChainLength();
 }
 
-std::string AIPlayer::GetNextMove(std::shared_ptr<Board> board, EMove move)
+std::string AIPlayer::GetNextMove(Board& board, EMove move)
 {
   std::string input;
 
@@ -150,7 +150,7 @@ std::string AIPlayer::GetNextMove(std::shared_ptr<Board> board, EMove move)
     }
     else if (move == EMove::ORIGIN_X)
     {
-      auto turns = board->FindTurns(EState::WHITE);
+      auto turns = board.FindTurns(EState::WHITE);
 
       // Get the optimal turn
       int optimal_value = INT_MIN;
