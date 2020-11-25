@@ -6,6 +6,10 @@ C++ AI for Fanorona using alpha-beta-pruning
 
 Run `tools/install-deps.sh` after cloning this repository.
 
+## Multi-run
+
+Run `tools/run-multiple.sh [number of games]`
+
 ## Linting and formatting
 
 Run `tools/format.sh` to fix style and naming issues.
