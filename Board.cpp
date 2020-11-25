@@ -5,9 +5,9 @@
 
 #include "Board.h"
 
-Board::Board(EMode mode) : m_mode(mode)
+Board::Board(EMode mode, int depth) : m_mode(mode)
 {
-  // iterate over board
+  // iterate over board, creating cells
   for (int y = 0; y < BOARD_HEIGHT; y++)
   {
     for (int x = 0; x < BOARD_WIDTH; x++)
@@ -15,6 +15,9 @@ Board::Board(EMode mode) : m_mode(mode)
       m_cells[y][x] = std::make_shared<Node>();
     }
   }
+
+  // setting search depth for ai player
+  m_player.SetDepth(depth);
 }
 
 void Board::Parse(std::string boardContent)
@@ -132,16 +135,13 @@ void Board::Print()
 {
   for (int y = 0; y < BOARD_HEIGHT; y++)
   {
-    if (y % 2 == 0)
+    if (y == 0)
     {
-      if (y == 0)
-      {
-        std::cerr << "  0 1 2 3 4 5 6 7 8" << std::endl;
-      }
-      else
-      {
-        std::cerr<< "  |/|\\|/|\\|/|\\|/|\\|" << std::endl;
-      }
+      std::cerr << "\r\n  0 1 2 3 4 5 6 7 8" << std::endl;
+    }
+    else if (y % 2 == 0)
+    {
+      std::cerr << "  |/|\\|/|\\|/|\\|/|\\|" << std::endl;
     }
     else
     {
@@ -193,10 +193,10 @@ std::string Board::GetPosition(EMove move)
 
     // Output turn information
     auto turns = FindTurns(EState::WHITE);
-    std::cout << turns.size() << " available Turns: \n";
-    for (auto turn : turns)
+    std::cerr << turns.size() << " available Turns: \n";
+    for (auto& turn : turns)
     {
-      std::cout << turn->ToString() << "\n";
+      std::cerr << turn->ToString() << "\n";
     }
 
     // Check what the server is asking of us and output an appropriate message
@@ -358,6 +358,7 @@ void Board::RollbackTurn(std::shared_ptr<Turn> turn)
   for (auto& node : turn->capture->capturedNodes)
   {
     // FIXME: Can we avoid this if-check? We just need the opposite color
+    // SUGGESTION: node->state = (EState)(2 * (int)(turn->move->From()->state) % 3);
     if (turn->move->From()->state == EState::BLACK)
     {
       node->state = EState::WHITE;

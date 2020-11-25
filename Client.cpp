@@ -146,10 +146,12 @@ void Client::Start()
     if ((pos = m_strRecv.rfind(MSG_BOARD_HEADER)) != std::string::npos)
     {
       std::string field = m_strRecv.substr(pos, BOARD_LENGTH);
-
-      // Remove newlines for combined parsing depending on different server versions
-      field.erase(remove(field.begin(), field.end(), ' '), field.end());
-      m_board->Parse(field);
+      if (field.length() == BOARD_LENGTH)
+      {
+        // Remove newlines for combined parsing depending on different server versions
+        field.erase(remove(field.begin(), field.end(), ' '), field.end());
+        m_board->Parse(field);
+      }
     }
 
     // Check which gameplay selection this string corresponds to (if any)
@@ -180,7 +182,9 @@ void Client::Start()
       // end of game detected, one player won
       if ((pos = m_strRecv.rfind(GAME_OVER)) != std::string::npos)
       {
-        std::cout << "\r\nGAME OVER!\r\n" << m_strRecv.substr(pos - 8, 13) << std::endl << std::endl;
+        std::cout << "\r\nGAME OVER!\r\n"
+                  << m_strRecv.substr(pos - 8, 13) << std::endl
+                  << std::endl;
         return;
       }
     }

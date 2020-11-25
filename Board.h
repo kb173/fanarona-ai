@@ -1,19 +1,12 @@
 #pragma once
 
-#include <array>
 #include <list>
-#include <string>
-#include <vector>
 
 #include "AIPlayer.h"
 #include "GameElements.h"
 
 const int BOARD_WIDTH  = 9;
 const int BOARD_HEIGHT = 5;
-
-#ifdef _WIN32
-typedef unsigned int uint;
-#endif
 
 enum class EMode : char
 {
@@ -29,7 +22,7 @@ private:
   AIPlayer m_player;
 
 public:
-  Board(EMode mode);
+  Board(EMode mode, int depth);
   ~Board() = default;
 
   void Parse(std::string boardContent);

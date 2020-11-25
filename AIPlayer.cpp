@@ -1,6 +1,7 @@
 #include "AIPlayer.h"
 #include "Board.h"
 
+#include <iostream>
 #include <limits.h> // for INT_MIN
 
 int AIPlayer::RateBoard(std::shared_ptr<Board> board)
@@ -36,20 +37,23 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
                       int beta,
                       EState player)
 {
+  board->ApplyTurn(currentTurn);
+
   if (depth == 0)
   {
-    return RateBoard(board);
+    int rating = RateBoard(board);
+    board->RollbackTurn(currentTurn);
+    return rating;
   }
-
-  board->ApplyTurn(currentTurn);
 
   if (player == EState::WHITE)
   {
     auto allTurns = board->FindTurns(EState::WHITE);
     if (allTurns.size() == 0)
     {
+      int rating = RateBoard(board);
       board->RollbackTurn(currentTurn);
-      return RateBoard(board);
+      return rating;
     }
 
     int maxScore = INT_MIN;
@@ -79,8 +83,9 @@ int AIPlayer::Minimax(std::shared_ptr<Board> board,
     auto allTurns = board->FindTurns(EState::BLACK);
     if (allTurns.size() == 0)
     {
+      int rating = RateBoard(board);
       board->RollbackTurn(currentTurn);
-      return RateBoard(board);
+      return rating;
     }
 
     int minScore = INT_MAX;
@@ -127,15 +132,24 @@ std::string AIPlayer::GetNextMove(std::shared_ptr<Board> board, EMove move)
       // Get the optimal turn
       int optimal_value = INT_MIN;
 
+      int i = 0;
       for (const auto& turn : turns)
       {
-        int score = Minimax(board, turn, m_minimax_depth, INT_MIN, INT_MAX, EState::WHITE);
+        i++;
+        int score = Minimax(board, turn, m_minimax_depth, INT_MIN, INT_MAX, EState::BLACK);
+        std::cerr << "move " << i << ": score " << score << ", turn from (" << turn->move->From()->x
+                  << ", " << turn->move->From()->y << ")  to (" << turn->move->To()->x << ", "
+                  << turn->move->To()->y << "), chain of " << turn->GetTurnChainLength()
+                  << std::endl;
         if (score > optimal_value)
         {
           m_turn_to_handle = turn;
           optimal_value    = score;
         }
       }
+
+      std::cerr << "Perfect move: " << m_turn_to_handle->move->To()->x << ", "
+                << m_turn_to_handle->move->To()->y << " with score " << optimal_value << std::endl;
     }
   }
 
@@ -164,4 +178,9 @@ std::string AIPlayer::GetNextMove(std::shared_ptr<Board> board, EMove move)
   }
 
   return input;
+}
+
+void AIPlayer::SetDepth(int depth)
+{
+  m_minimax_depth = depth;
 }

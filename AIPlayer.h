@@ -26,4 +26,5 @@ private:
 
 public:
   std::string GetNextMove(std::shared_ptr<Board> board, EMove move);
+  void SetDepth(int depth);
 };
