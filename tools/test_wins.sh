@@ -15,5 +15,5 @@ do
         rm lose_output.txt
     fi
     
-    killall Fanorona
+    killall Fanorona &>/dev/null
 done
