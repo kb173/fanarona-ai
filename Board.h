@@ -1,9 +1,6 @@
 #pragma once
 
-#include <array>
 #include <list>
-#include <string>
-#include <vector>
 
 #include "AIPlayer.h"
 #include "GameElements.h"
