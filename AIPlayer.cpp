@@ -136,7 +136,7 @@ std::string AIPlayer::GetNextMove(std::shared_ptr<Board> board, EMove move)
       for (const auto& turn : turns)
       {
         i++;
-        int score = Minimax(board, turn, m_minimax_depth, INT_MIN, INT_MAX, EState::WHITE);
+        int score = Minimax(board, turn, m_minimax_depth, INT_MIN, INT_MAX, EState::BLACK);
         std::cout << "move " << i << ": score " << score << ", turn from (" << turn->move->From()->x
                   << ", " << turn->move->From()->y << ")  to (" << turn->move->To()->x << ", "
                   << turn->move->To()->y << "), chain of " << turn->GetTurnChainLength()
