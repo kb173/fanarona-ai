@@ -1,23 +1,7 @@
-#define DEBUG_OUTPUT
-#define SHOW_RAW_MSG
-
-#ifdef _WIN32
-  // link with Ws2_32.lib
-  #pragma comment(lib, "Ws2_32.lib")
-
-  #include <winsock2.h>
-  #include <ws2tcpip.h>
-#else
-  #include <arpa/inet.h>
-  #include <sys/socket.h>
-  #include <unistd.h>
-#endif
 #include <algorithm>
 #include <iostream>
 #include <map>
 #include <stdio.h>
-#include <string.h>
-#include <string>
 
 #include "Board.h"
 #include "LocalClient.h"
