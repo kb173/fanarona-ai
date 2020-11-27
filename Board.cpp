@@ -127,8 +127,10 @@ void Board::Parse(std::string boardContent)
   // only setup neighbour connections once
   bFirst_parse = false;
 
+#ifndef OMIT_OUTPUT
   // Output current board after successful parse
   Print();
+#endif
 }
 
 void Board::Print()

@@ -5,6 +5,9 @@
 #include "AIPlayer.h"
 #include "GameElements.h"
 
+
+#define OMIT_OUTPUT
+
 const int BOARD_WIDTH  = 9;
 const int BOARD_HEIGHT = 5;
 

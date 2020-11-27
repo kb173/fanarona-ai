@@ -160,9 +160,11 @@ std::string AIPlayer::GetNextMove(Board& board, EMove move)
       {
         i++;
         int score = Minimax(board, turn, m_minimax_depth, INT_MIN, INT_MAX, EState::BLACK);
+#ifndef OMIT_OUTPUT
         std::cerr << i << ".Move: "
                   << "Score: " << score << " " << turn->GetTurnChainLength()
                   << "-Lenght-Chain: " << turn->ChainToString() << std::endl;
+#endif
         if (score > optimal_value)
         {
           m_turn_to_handle = turn;
@@ -170,8 +172,10 @@ std::string AIPlayer::GetNextMove(Board& board, EMove move)
         }
       }
 
+#ifndef OMIT_OUTPUT
       std::cerr << "Best move: " << m_turn_to_handle->ChainToString() << " with score "
                 << optimal_value << std::endl;
+#endif
     }
   }
 
