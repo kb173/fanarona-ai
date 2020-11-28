@@ -2,23 +2,14 @@
 
 #include <memory>
 #include <string>
+#include "Client.h"
 
 // Forward Declarations
-class Board;
-
-class LocalClient
+class LocalClient : public Client
 {
 public:
   LocalClient();
   ~LocalClient();
-
   std::string ReadString();
   void WriteString(std::string input);
-
-  void SetBoard(std::shared_ptr<Board>);
-  void Start();
-
-private:
-  std::string m_strRecv = "";
-  std::shared_ptr<Board> m_board;
 };

@@ -1,14 +1,17 @@
 CXX = g++
 CXXFLAGS = -Wall --std=c++11
 
-funorona: main.o Client.o LocalClient.o GameElements.o Board.o AIPlayer.o
-	$(CXX) $(CXXFLAGS) -o funorona main.o Client.o LocalClient.o GameElements.o Board.o AIPlayer.o
+funorona: main.o Client.o RemoteClient.o LocalClient.o GameElements.o Board.o AIPlayer.o
+	$(CXX) $(CXXFLAGS) -o funorona main.o Client.o RemoteClient.o LocalClient.o GameElements.o Board.o AIPlayer.o
 
 main.o: main.cpp Client.o Board.o
 	$(CXX) $(CXXFLAGS) -c main.cpp
 
 Client.o: Client.cpp
 	$(CXX) $(CXXFLAGS) -c Client.cpp
+	
+RemoteClient.o: RemoteClient.cpp
+	$(CXX) $(CXXFLAGS) -c RemoteClient.cpp
 	
 LocalClient.o: LocalClient.cpp
 	$(CXX) $(CXXFLAGS) -c LocalClient.cpp

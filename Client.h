@@ -1,28 +1,33 @@
+
 #pragma once
 
 #include <memory>
+#include <string>
+#include <map>
 
-// Forward Declarations
 class Board;
-
-const int READ_DATA_SIZE = 2048;
 
 class Client
 {
 public:
-  Client(std::string ip, int port);
-  ~Client();
-
-  std::string ReadString();
-  void WriteString(std::string input);
+  virtual std::string ReadString() = 0;
+  virtual void WriteString(std::string input) = 0;
 
   void SetBoard(std::shared_ptr<Board>);
   void Start();
 
-private:
-  int m_sock;
-  char m_buffer[READ_DATA_SIZE] = {0};
+protected:
   std::string m_strRecv         = "";
 
+  std::map<std::string, EMove> message_state_map {
+  {"Please enter origin x-axis", EMove::ORIGIN_X},
+  {"Please enter origin y-axis", EMove::ORIGIN_Y},
+  {"Please enter destination x-axis", EMove::DEST_X},
+  {"Please enter destination y-axis", EMove::DEST_Y},
+  {"Please enter wether you want to Withdraw or Approach [W/A]", EMove::W_OR_A}};
+
+  std::map<std::string, std::string> message_write_map;
+
+private:
   std::shared_ptr<Board> m_board;
 };
