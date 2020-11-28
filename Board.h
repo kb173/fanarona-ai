@@ -69,4 +69,9 @@ public:
   // move.
   const std::vector<std::shared_ptr<Node>> GetCapturesInDirection(const Move& move,
                                                                   bool reverse_direction);
+
+  int GetTurnAmount()
+  {
+    return m_player.turnsFound;
+  }
 };

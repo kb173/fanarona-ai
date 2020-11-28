@@ -4,15 +4,21 @@
 #include <iostream>
 #include <limits.h> // for INT_MIN
 
-int AIPlayer::RateBoard(Board& board)
+int AIPlayer::RateBoard(Board& board, EState currentPlayer)
 {
   // Get the number of our nodes minus the number of enemy nodes
   int pieceAmountRating     = 0;
   int middleFieldRating     = 0;
   int diagonalFieldRating   = 0;
-  int moveAmountRating      = 0;
   int distanceToEnemyRating = 0;
-  int scatteredPiecesRating = 0;
+
+  // int scatteredPiecesRating = 0;
+
+  // this takes way to long so were not going to use it
+  // keeping it for documentationssake
+  // int moveAmountRating      = 0;
+  // moveAmountRating += board.FindTurns(EState::WHITE).size();
+  // moveAmountRating += board.FindTurns(EState::BLACK).size();
 
   // iterate over board
   for (int y = 0; y < BOARD_HEIGHT; y++)
@@ -24,10 +30,65 @@ int AIPlayer::RateBoard(Board& board)
       if (node->state == EState::WHITE)
       {
         pieceAmountRating++;
+        if (node->isDiagonalField)
+        {
+          diagonalFieldRating++;
+        }
+        if (node->isMiddleField)
+        {
+          middleFieldRating++;
+        }
+
+        if (board.DistanceToNearestEnemy(node) % 2 == 0)
+        {
+          distanceToEnemyRating += currentPlayer == EState::WHITE ? 1 : -1;
+        }
+        else
+        {
+          distanceToEnemyRating += currentPlayer == EState::WHITE ? -1 : 1;
+        }
+
+        // this takes way to long so were not going to use it
+        // keeping it for documentationssake
+        /*int scattered = 1;
+        for (auto neighbour : node->neighbours)
+        {
+          if (neighbour != nullptr)
+          {
+            if (neighbour->state == EState::WHITE)
+            {
+              scattered = -1;
+            }
+          }
+        }
+        scatteredPiecesRating += scattered;*/
       }
       else if (node->state == EState::BLACK)
       {
         pieceAmountRating--;
+        if (node->isDiagonalField)
+        {
+          diagonalFieldRating--;
+        }
+        if (node->isMiddleField)
+        {
+          middleFieldRating--;
+        }
+
+        // this takes way to long so were not going to use it
+        // keeping it for documentationssake
+        /*int scattered = -1;
+        for (auto neighbour : node->neighbours)
+        {
+          if (neighbour != nullptr)
+          {
+            if (neighbour->state == EState::BLACK)
+            {
+              scattered = 1;
+            }
+          }
+        }
+        scatteredPiecesRating += scattered;*/
       }
     }
   }
@@ -35,12 +96,12 @@ int AIPlayer::RateBoard(Board& board)
   float rating = 0;
 
   // tweak multipliers to change performance
-  rating += 1.0f * pieceAmountRating;
-  rating += 0.0f * middleFieldRating;
-  rating += 0.0f * diagonalFieldRating;
-  rating += 0.0f * moveAmountRating;
-  rating += 0.0f * distanceToEnemyRating;
-  rating += 0.0f * scatteredPiecesRating;
+  rating += (1.0f * pieceAmountRating);
+  rating += (0.1f * middleFieldRating);
+  rating += (0.5f * diagonalFieldRating);
+  // rating += (0.0f * moveAmountRating);
+  rating += (0.1f * distanceToEnemyRating);
+  // rating += (0.05f * scatteredPiecesRating);
 
   return rating;
 }
@@ -56,7 +117,7 @@ int AIPlayer::Minimax(Board& board,
 
   if (depth == 0)
   {
-    int rating = RateBoard(board);
+    int rating = RateBoard(board, player);
     board.RollbackTurnWithFollowing(currentTurn);
     return rating;
   }
@@ -66,7 +127,7 @@ int AIPlayer::Minimax(Board& board,
     auto allTurns = board.FindTurns(EState::WHITE);
     if (allTurns.size() == 0)
     {
-      int rating = RateBoard(board);
+      int rating = RateBoard(board, player);
       board.RollbackTurnWithFollowing(currentTurn);
       return rating;
     }
@@ -102,7 +163,7 @@ int AIPlayer::Minimax(Board& board,
     auto allTurns = board.FindTurns(EState::BLACK);
     if (allTurns.size() == 0)
     {
-      int rating = RateBoard(board);
+      int rating = RateBoard(board, player);
       board.RollbackTurnWithFollowing(currentTurn);
       return rating;
     }
@@ -165,6 +226,7 @@ std::string AIPlayer::GetNextMove(Board& board, EMove move)
     }
     else if (move == EMove::ORIGIN_X)
     {
+      turnsFound++;
       auto turns = board.FindTurns(EState::WHITE);
 
       // Get the optimal turn

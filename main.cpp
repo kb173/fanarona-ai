@@ -1,4 +1,5 @@
 #include <chrono>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -8,8 +9,27 @@
 #include "Client.h"
 #include "LocalClient.h"
 
+void ShowStartUpImage()
+{
+  std::string line;
+  std::ifstream image("startupImage.txt");
+  if (image.is_open())
+  {
+    while (getline(image, line))
+    {
+      std::cerr << line << std::endl;
+    }
+    image.close();
+  }
+  else
+  {
+    std::cerr << "Unable to open startup image" << std::endl;
+  }
+}
+
 int main(int argc, char** argv)
 {
+  ShowStartUpImage();
   EMode mode = EMode::AI;
   int depth  = 3;
   // default values for server connection

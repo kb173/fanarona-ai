@@ -102,6 +102,7 @@ void LocalClient::Start()
         std::cerr << "\r\nGAME OVER!\r\n"
                   << m_strRecv.substr(pos - 8, 13) << std::endl
                   << std::endl;
+        std::cerr << "turns played: " << m_board->GetTurnAmount() << std::endl;
         return;
       }
     }

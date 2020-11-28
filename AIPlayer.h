@@ -17,7 +17,7 @@ private:
 
   int m_minimax_depth = 5;
 
-  int RateBoard(Board& board);
+  int RateBoard(Board& board, EState currentPlayer);
 
   int Minimax(Board& board,
               std::shared_ptr<Turn> currentTurn,
@@ -33,6 +33,7 @@ private:
   static int RateTurn(std::shared_ptr<Turn> turn);
 
 public:
+  int turnsFound = 0;
   std::string GetNextMove(Board& board, EMove move);
   void SetDepth(int depth);
 };
