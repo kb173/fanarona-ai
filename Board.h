@@ -61,6 +61,10 @@ public:
 
   inline bool IsPositionInBounds(int x, int y);
 
+  // returns the distance to the neares enemy piece of the piece on the passed node, return -1 if
+  // the node is empty or no enemy was found,  needed for rating function
+  int DistanceToNearestEnemy(std::shared_ptr<Node>);
+  int DistanceBetweenNodes(std::shared_ptr<Node>, std::shared_ptr<Node>);
   // returns all pieces captured by a move, either in the direction of the move or behind the
   // move.
   const std::vector<std::shared_ptr<Node>> GetCapturesInDirection(const Move& move,

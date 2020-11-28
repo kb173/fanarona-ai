@@ -13,6 +13,10 @@ Board::Board(EMode mode, int depth) : m_mode(mode)
     for (int x = 0; x < BOARD_WIDTH; x++)
     {
       m_cells[y][x] = std::make_shared<Node>();
+      if (x > 0 && x < BOARD_WIDTH - 1 && y > 0 && y < BOARD_HEIGHT)
+      {
+        m_cells[y][x]->isMiddleField = true;
+      }
     }
   }
 
@@ -85,7 +89,8 @@ void Board::Parse(std::string boardContent)
         if (IsPositionInBounds(x - 1, y - 1) &&
             lines[inputRow - 1][inputColumn - 1 - (inputRow % 2)] == '\\')
         {
-          cell->neighbours[0] = GetCell(x - 1, y - 1);
+          cell->isDiagonalField = true;
+          cell->neighbours[0]   = GetCell(x - 1, y - 1);
         }
         if (IsPositionInBounds(x, y - 1) &&
             lines[inputRow - 1][inputColumn - (inputRow % 2)] == '|')
@@ -95,7 +100,8 @@ void Board::Parse(std::string boardContent)
         if (IsPositionInBounds(x + 1, y - 1) &&
             lines[inputRow - 1][inputColumn + 1 - (inputRow % 2)] == '/')
         {
-          cell->neighbours[2] = GetCell(x + 1, y - 1);
+          cell->isDiagonalField = true;
+          cell->neighbours[2]   = GetCell(x + 1, y - 1);
         }
         if (IsPositionInBounds(x - 1, y) && lines[inputRow][inputColumn - 1] == '-')
         {
@@ -108,7 +114,8 @@ void Board::Parse(std::string boardContent)
         if (IsPositionInBounds(x - 1, y + 1) &&
             lines[inputRow + 1][inputColumn - 1 - (inputRow % 2)] == '/')
         {
-          cell->neighbours[5] = GetCell(x - 1, y + 1);
+          cell->isDiagonalField = true;
+          cell->neighbours[5]   = GetCell(x - 1, y + 1);
         }
         if (IsPositionInBounds(x, y + 1) &&
             lines[inputRow + 1][inputColumn - (inputRow % 2)] == '|')
@@ -118,12 +125,12 @@ void Board::Parse(std::string boardContent)
         if (IsPositionInBounds(x + 1, y + 1) &&
             lines[inputRow + 1][inputColumn + 1 - (inputRow % 2)] == '\\')
         {
-          cell->neighbours[7] = GetCell(x + 1, y + 1);
+          cell->isDiagonalField = true;
+          cell->neighbours[7]   = GetCell(x + 1, y + 1);
         }
       }
     }
   }
-
   // only setup neighbour connections once
   bFirst_parse = false;
 
@@ -185,6 +192,61 @@ bool Board::IsPositionInBounds(int x, int y)
   return x >= 0 && x < BOARD_WIDTH && y >= 0 && y < BOARD_HEIGHT;
 }
 
+int Board::DistanceToNearestEnemy(std::shared_ptr<Node> node)
+{
+  if (node->state == EState::EMPTY)
+  {
+    return -1;
+  }
+  EState myState  = node->state;
+  int minDistance = INT_MAX;
+  for (int y = 0; y < BOARD_HEIGHT; y++)
+  {
+    for (int x = 0; x < BOARD_WIDTH; x++)
+    {
+      std::shared_ptr<Node> currentNode = GetCell(x, y);
+      if (currentNode->state != myState && currentNode->state != EState::EMPTY)
+      {
+        int distance = DistanceBetweenNodes(node, currentNode);
+        minDistance  = minDistance > distance ? distance : minDistance;
+      }
+    }
+  }
+  return minDistance == INT_MAX ? -1 : minDistance;
+}
+
+int Board::DistanceBetweenNodes(std::shared_ptr<Node> start, std::shared_ptr<Node> end)
+{
+  int yCur     = start->y;
+  int xCur     = start->x;
+  int yEnd     = end->y;
+  int xEnd     = end->x;
+  int yDir     = yEnd > yCur ? 1 : -1;
+  int xDir     = xEnd > xCur ? 1 : -1;
+  int distance = 0;
+  while (yCur != yEnd || xCur != xEnd)
+  {
+    auto currentNode = GetCell(xCur, yCur);
+    if (currentNode->isDiagonalField && yCur != yEnd && xCur != xEnd)
+    {
+      xCur += xDir;
+      yCur += yDir;
+    }
+    else
+    {
+      if (yCur != yEnd)
+      {
+        yCur += yDir;
+      }
+      else
+      {
+        xCur += xDir;
+      }
+    }
+    distance++;
+  }
+  return distance;
+}
 std::string Board::GetPosition(EMove move)
 {
   std::string input;
