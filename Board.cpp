@@ -526,6 +526,11 @@ const std::vector<std::shared_ptr<Node>> Board::GetCapturesInDirection(const Mov
   return captures;
 }
 
+int Board::GetTurnsPlayed()
+{
+  return m_player.GetTurnsPlayed();
+}
+
 std::string Move::ToString() const
 {
   return "From " + From()->ToString() + " to " + To()->ToString();

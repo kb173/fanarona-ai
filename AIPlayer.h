@@ -10,6 +10,7 @@ class Board;
 class AIPlayer
 {
 private:
+  int m_turnsPlayed                      = 0;
   std::shared_ptr<Turn> m_turn_to_handle = nullptr;
 
   bool m_potentially_done =
@@ -33,7 +34,7 @@ private:
   static int RateTurn(std::shared_ptr<Turn> turn);
 
 public:
-  int turnsFound = 0;
+  int GetTurnsPlayed();
   std::string GetNextMove(Board& board, EMove move);
   void SetDepth(int depth);
 };
