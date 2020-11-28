@@ -7,7 +7,12 @@
 int AIPlayer::RateBoard(Board& board)
 {
   // Get the number of our nodes minus the number of enemy nodes
-  int rating = 0;
+  int pieceAmountRating     = 0;
+  int middleFieldRating     = 0;
+  int diagonalFieldRating   = 0;
+  int moveAmountRating      = 0;
+  int distanceToEnemyRating = 0;
+  int scatteredPiecesRating = 0;
 
   // iterate over board
   for (int y = 0; y < BOARD_HEIGHT; y++)
@@ -18,14 +23,24 @@ int AIPlayer::RateBoard(Board& board)
 
       if (node->state == EState::WHITE)
       {
-        rating++;
+        pieceAmountRating++;
       }
       else if (node->state == EState::BLACK)
       {
-        rating--;
+        pieceAmountRating--;
       }
     }
   }
+
+  float rating = 0;
+
+  // tweak multipliers to change performance
+  rating += 1.0f * pieceAmountRating;
+  rating += 0.0f * middleFieldRating;
+  rating += 0.0f * diagonalFieldRating;
+  rating += 0.0f * moveAmountRating;
+  rating += 0.0f * distanceToEnemyRating;
+  rating += 0.0f * scatteredPiecesRating;
 
   return rating;
 }

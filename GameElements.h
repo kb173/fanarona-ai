@@ -28,8 +28,9 @@ struct Node
   int x, y;
   EState state                                    = EState::EMPTY;
   std::array<std::shared_ptr<Node>, 8> neighbours = {};
-
-  Node() = default;
+  bool isMiddleField                              = false;
+  bool isDiagonalField                            = false;
+  Node()                                          = default;
   Node(int x, int y) : x(x), y(y)
   {
   }
