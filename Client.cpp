@@ -41,7 +41,7 @@ void Client::Start()
 
     // Check which gameplay selection this string corresponds to (if any)
     // and set the `mode` accordingly
-    for (const auto& message_and_move : message_state_map)
+    for (const auto& message_and_move : m_message_state_map)
     {
       if (m_strRecv.rfind(message_and_move.first) != std::string::npos)
       {

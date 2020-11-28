@@ -1,11 +1,10 @@
 
 #pragma once
 
+#include "Board.h"
 #include <map>
 #include <memory>
 #include <string>
-
-class Board;
 
 class Client
 {

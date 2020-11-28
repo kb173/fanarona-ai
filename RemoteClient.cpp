@@ -25,12 +25,12 @@
 
 RemoteClient::RemoteClient(std::string ip, int port)
 {
-  message_write_map.insert(std::make_pair("Exit\r\n\r\nPlease choose your mode [0-2]", "0"));
-  message_write_map.insert(std::make_pair("User\r\n\r\nPlease choose your mode [0-2]", "1"));
-  message_write_map.insert(
+  m_message_write_map.insert(std::make_pair("Exit\r\n\r\nPlease choose your mode [0-2]", "0"));
+  m_message_write_map.insert(std::make_pair("User\r\n\r\nPlease choose your mode [0-2]", "1"));
+  m_message_write_map.insert(
     std::make_pair("Please choose wether you want the AI to start or not [0-1]", "1"));
-  message_write_map.insert(std::make_pair("Do you want to continue with your turn [Y/N]?", "Y"));
-  message_write_map.insert(std::make_pair("Do you want to surrender [Y/N]?", "Y"));
+  m_message_write_map.insert(std::make_pair("Do you want to continue with your turn [Y/N]?", "Y"));
+  m_message_write_map.insert(std::make_pair("Do you want to surrender [Y/N]?", "Y"));
 
   std::cout << "init listening socket on " << ip << " port " << port << std::endl;
 
