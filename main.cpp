@@ -72,14 +72,14 @@ int main(int argc, char** argv)
     LocalClient client = LocalClient();
     client.SetBoard(board);
     client.Start();
-    std::cerr << "turn played: " << client.GetTurnsPlayed() << std::endl;
+    std::cerr << "turns played: " << client.GetTurnsPlayed() << std::endl;
   }
   else
   {
     RemoteClient client(ip, port);
     client.SetBoard(board);
     client.Start();
-    std::cerr << "turn played: " << client.GetTurnsPlayed() << std::endl;
+    std::cerr << "turns played: " << client.GetTurnsPlayed() << std::endl;
   }
   std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now() - start;
   std::cerr << "time spent: " << std::setprecision(3) << std::fixed << diff.count() << "s"

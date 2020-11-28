@@ -226,7 +226,7 @@ std::string AIPlayer::GetNextMove(Board& board, EMove move)
     }
     else if (move == EMove::ORIGIN_X)
     {
-      turnsPlayed++;
+      m_turnsPlayed++;
       auto turns = board.FindTurns(EState::WHITE);
 
       // Get the optimal turn
@@ -290,5 +290,5 @@ void AIPlayer::SetDepth(int depth)
 
 int AIPlayer::GetTurnsPlayed()
 {
-  return turnsPlayed;
+  return m_turnsPlayed;
 }
