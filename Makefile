@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall --std=c++11
+CXXFLAGS = -Wall --std=c++11 -O3
 
 funorona: main.o Client.o RemoteClient.o LocalClient.o GameElements.o Board.o AIPlayer.o
 	$(CXX) $(CXXFLAGS) -o funorona main.o Client.o RemoteClient.o LocalClient.o GameElements.o Board.o AIPlayer.o
