@@ -1,6 +1,12 @@
 CXX = g++
 CXXFLAGS = -Wall --std=c++11 -O3
 
+test: funorona
+	./socat.sh
+
+test-wins: funorona
+	tools/test_wins.sh
+
 funorona: main.o Client.o RemoteClient.o LocalClient.o GameElements.o Board.o AIPlayer.o
 	$(CXX) $(CXXFLAGS) -o funorona main.o Client.o RemoteClient.o LocalClient.o GameElements.o Board.o AIPlayer.o
 

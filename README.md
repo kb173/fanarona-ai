@@ -1,6 +1,10 @@
 # Fanorona AI
 
-C++ AI for Fanorona using alpha-beta-pruning
+C++ AI for Fanorona using alpha-beta-pruning.
+
+## Quick Start
+
+Run `make test` to build and run once, or `make test-wins` to build and run until we lose (which is hopefully never!).
 
 ## Installation
 
@@ -8,7 +12,9 @@ Run `tools/install-deps.sh` after cloning this repository.
 
 ## Multi-run
 
-Run `tools/run-multiple.sh [number of games]`
+To simply run multiple times, use `tools/run-multiple.sh [number of games]`
+
+Alternatively, to test whether we ever lose, run `tools/test_wins.sh`. In case of a loss, the script aborts and the output is written to `lose_output.txt` for further analyzation.
 
 ## Linting and formatting
 
