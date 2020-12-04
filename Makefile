@@ -1,6 +1,8 @@
 CXX = g++
 CXXFLAGS = -Wall --std=c++11 -O3
 
+.DEFAULT_GOAL := funorona
+
 test: funorona
 	./socat.sh
 
