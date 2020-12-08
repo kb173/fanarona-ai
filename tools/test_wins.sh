@@ -7,7 +7,8 @@ echo "$(date +"%T") running test_wins..."
 
 while true
 do
-    ./socat.sh 2>&1 | tee lose_output.txt | grep -q "Player 2 won" && wins=$((wins+1)) || loses=$((loses+1))
+    ./socat.sh 2>&1 | tee lose_output.txt | grep -q "Player 2 won" && wins=$((wins+1)) || loses=$((loses+1)) # localClient
+    #./funorona --remote 2>&1 | tee lose_output.txt | grep -q "Player 2 won" && wins=$((wins+1)) || loses=$((loses+1)) # default remoteClient TODO: solve with bash script arguments
 
     echo "$wins wins vs $loses loses"
 
