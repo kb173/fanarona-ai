@@ -30,7 +30,7 @@ RemoteClient::RemoteClient(std::string ip, int port)
   m_message_write_map.insert(
     std::make_pair("Please choose wether you want the AI to start or not [0-1]", "1"));
   m_message_write_map.insert(std::make_pair("Do you want to continue with your turn [Y/N]?", "Y"));
-  m_message_write_map.insert(std::make_pair("Do you want to surrender [Y/N]?", "Y"));
+  m_message_write_map.insert(std::make_pair("Do you want to surrender [Y/N]?", "N"));
 
   std::cout << "init listening socket on " << ip << " port " << port << std::endl;
 
