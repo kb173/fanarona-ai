@@ -88,7 +88,7 @@ public:
   int GetTurnsPlayed();
 
   // ////////////////////////////////////////////////////////////////////////
-  // SetDepth (Setter for m_turnsPlayed)
+  // SetDepth (Setter for nDepth)
 
   void SetDepth(int nDepth);
 };
