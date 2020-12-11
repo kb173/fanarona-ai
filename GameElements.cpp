@@ -1,30 +1,60 @@
 #include "GameElements.h"
 
+// ////////////////////////////////////////////////////////////////////////
+// ToString
+//
+// Return: information about the node as a string
+
 std::string Node::ToString() const
 {
   return "[" + std::to_string(x) + "|" + std::to_string(y) + "]";
 }
 
+// ////////////////////////////////////////////////////////////////////////
+// ToString
+//
+// Return: information about the move as a string
+
+std::string Move::ToString() const
+{
+  return "From " + From()->ToString() + " to " + To()->ToString();
+}
+
+// ////////////////////////////////////////////////////////////////////////
+// From
+//
+// Return: the node where the piece started
+
 std::shared_ptr<Node> Move::From() const
 {
-  return m_origin;
+  return m_pOrigin;
 }
+
+// ////////////////////////////////////////////////////////////////////////
+// To
+//
+// Return: the node where to piece is going to move to
 
 std::shared_ptr<Node> Move::To() const
 {
-  return m_origin->neighbours[direction];
+  return m_pOrigin->m_aNeighbours[m_nDirection];
 }
+
+// ////////////////////////////////////////////////////////////////////////
+// ToString
+//
+// Return: information about the capture as a string
 
 std::string Capture::ToString() const
 {
-  return "Capturing " + std::to_string(capturedNodes.size()) + " nodes";
+  return "Capturing " + std::to_string(m_vecCaptureNodes.size()) + " nodes";
 }
 
 std::string Turn::ToString() const
 {
-  std::string ret = move->ToString() + " " + capture->ToString();
+  std::string ret = m_pMove->ToString() + " " + m_pCapture->ToString();
 
-  if (nextTurn != nullptr)
+  if (m_pNextTurn != nullptr)
   {
     ret += " with " + std::to_string(GetTurnChainLength()) + " following turns";
   }
@@ -36,11 +66,11 @@ std::string Turn::ChainToString() const
 {
   std::shared_ptr<const Turn> current_turn = shared_from_this();
 
-  std::string ret = current_turn->move->From()->ToString();
+  std::string ret = current_turn->m_pMove->From()->ToString();
   while (current_turn != nullptr)
   {
-    ret += " -> " + current_turn->move->To()->ToString();
-    current_turn = current_turn->nextTurn;
+    ret += " -> " + current_turn->m_pMove->To()->ToString();
+    current_turn = current_turn->m_pNextTurn;
   }
 
   return ret;
@@ -52,7 +82,7 @@ uint Turn::GetTurnChainLength() const
 
   while (current_turn != nullptr)
   {
-    current_turn = current_turn->nextTurn;
+    current_turn = current_turn->m_pNextTurn;
     length++;
   }
 
@@ -62,9 +92,9 @@ uint Turn::GetTurnChainLength() const
 bool Turn::IsWithdraw() const
 {
   // The turn is a withdraw if the first captured node is a neighbor of From.
-  std::shared_ptr<Node> first_capture = capture->capturedNodes.front();
+  std::shared_ptr<Node> first_capture = m_pCapture->m_vecCaptureNodes.front();
 
-  for (const auto& neighbour : move->From()->neighbours)
+  for (const auto& neighbour : m_pMove->From()->m_aNeighbours)
   {
     if (neighbour == first_capture)
     {
@@ -86,11 +116,11 @@ bool Turn::NodeAlreadyVisited(std::shared_ptr<Node> node) const
 
   while (currentTurn != nullptr)
   {
-    if (currentTurn->move->From() == node)
+    if (currentTurn->m_pMove->From() == node)
     {
       visited = true;
     }
-    currentTurn = currentTurn->previousTurn;
+    currentTurn = currentTurn->m_pPreviousTurn;
   }
 
   return visited;
@@ -98,10 +128,5 @@ bool Turn::NodeAlreadyVisited(std::shared_ptr<Node> node) const
 
 bool Turn::IsNewDirection(int direction) const
 {
-  return move->direction != direction;
-}
-
-std::string Move::ToString() const
-{
-  return "From " + From()->ToString() + " to " + To()->ToString();
+  return m_pMove->m_nDirection != direction;
 }

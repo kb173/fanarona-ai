@@ -7,6 +7,10 @@
 
 typedef unsigned int uint;
 
+// ########################################################################
+// Enumerations & Constants
+// ########################################################################
+
 enum class EState : char
 {
   EMPTY,
@@ -23,69 +27,179 @@ enum class EMove : char
   W_OR_A
 };
 
+// ########################################################################
+// Structs
+// ########################################################################
+
 struct Node
 {
+  // ########################################################################
+  // Fields
+  // ########################################################################
+
   int x, y;
-  EState state                                    = EState::EMPTY;
-  std::array<std::shared_ptr<Node>, 8> neighbours = {};
-  bool isMiddleField                              = false;
-  bool isDiagonalField                            = false;
-  Node()                                          = default;
+  EState eState                                      = EState::EMPTY;
+  std::array<std::shared_ptr<Node>, 8> m_aNeighbours = {};
+  bool m_bIsMiddleField                              = false;
+  bool m_bIsDiagonalField                            = false;
+
+  // ########################################################################
+  // Methods
+  // ########################################################################
+
+  // ////////////////////////////////////////////////////////////////////////
+  // Node (Constructor)
+  //
+
+  Node() = default;
+
+  // ////////////////////////////////////////////////////////////////////////
+  // Node (Constructor)
+  //
+
   Node(int x, int y) : x(x), y(y)
   {
   }
+
+  // ////////////////////////////////////////////////////////////////////////
+  // ToString
+  //
+  // Return: information about the node as a string
 
   std::string ToString() const;
 };
 
 struct Move
 {
-private:
-  std::shared_ptr<Node> m_origin;
+  // ########################################################################
+  // Fields
+  // ########################################################################
+  std::shared_ptr<Node> m_pOrigin;
 
-public:
-  Move(std::shared_ptr<Node> origin, int direction) : m_origin(origin), direction(direction)
+  int m_nDirection;
+
+  // ########################################################################
+  // Methods
+  // ########################################################################
+
+  // ////////////////////////////////////////////////////////////////////////
+  // Move (Constructor)
+  //
+
+  Move(std::shared_ptr<Node> pOrigin, int nDirection) : m_pOrigin(pOrigin), m_nDirection(nDirection)
   {
   }
 
+  // ////////////////////////////////////////////////////////////////////////
+  // ToString
+  //
+  // Return: information about the move as a string
+
   std::string ToString() const;
 
-  std::shared_ptr<Node> From() const;
-  std::shared_ptr<Node> To() const;
+  // ////////////////////////////////////////////////////////////////////////
+  // From
+  //
+  // Return: the node where the piece started
 
-  int direction;
+  std::shared_ptr<Node> From() const;
+
+  // ////////////////////////////////////////////////////////////////////////
+  // To
+  //
+  // Return: the node where to piece is going to move to
+
+  std::shared_ptr<Node> To() const;
 };
 
 struct Capture
 {
-  Capture(std::vector<std::shared_ptr<Node>> capturedNodes) : capturedNodes(capturedNodes)
+  // ########################################################################
+  // Fields
+  // ########################################################################
+
+  std::vector<std::shared_ptr<Node>> m_vecCaptureNodes;
+
+public:
+  // ########################################################################
+  // Methods
+  // ########################################################################
+
+  // ////////////////////////////////////////////////////////////////////////
+  // Capture (Constructor)
+  //
+
+  Capture(std::vector<std::shared_ptr<Node>> vecCaptureNodes) : m_vecCaptureNodes(vecCaptureNodes)
   {
   }
 
-  std::string ToString() const;
+  // ////////////////////////////////////////////////////////////////////////
+  // ToString
+  //
+  // Return: information about the capture as a string
 
-  std::vector<std::shared_ptr<Node>> capturedNodes;
+  std::string ToString() const;
 };
 
 struct Turn : public std::enable_shared_from_this<Turn>
 {
-  Turn(std::shared_ptr<Move> move, std::shared_ptr<Capture> capture) :
-    move(move), capture(capture), nextTurn(nullptr), previousTurn(nullptr)
+  // ########################################################################
+  // Fields
+  // ########################################################################
+
+  std::shared_ptr<Move> m_pMove;
+  std::shared_ptr<Capture> m_pCapture;
+  std::shared_ptr<Turn> m_pNextTurn;
+  std::shared_ptr<Turn> m_pPreviousTurn;
+
+  // ########################################################################
+  // Methods
+  // ########################################################################
+
+  // ////////////////////////////////////////////////////////////////////////
+  // Turn (Constructor)
+  //
+
+  Turn(std::shared_ptr<Move> pMove, std::shared_ptr<Capture> pCapture) :
+    m_pMove(pMove), m_pCapture(pCapture), m_pNextTurn(nullptr), m_pPreviousTurn(nullptr)
   {
   }
 
+  // ////////////////////////////////////////////////////////////////////////
+  // ToString
+  //
+  // Return: information about the turn as a string
+
   std::string ToString() const;
+
+  // ////////////////////////////////////////////////////////////////////////
+  // ChainToString (Constructor)
+  //
+  // Return: information about the turn chain as a string
+
   std::string ChainToString() const;
+
+  // ////////////////////////////////////////////////////////////////////////
+  // GetTurnChainLength
+  //
+
   uint GetTurnChainLength() const;
+
+  // ////////////////////////////////////////////////////////////////////////
+  // IsWithdraw
+  //
 
   bool IsWithdraw() const;
 
+  // ////////////////////////////////////////////////////////////////////////
+  // NodeAlreadyVisited
+  //
+
   bool NodeAlreadyVisited(std::shared_ptr<Node>) const;
 
-  bool IsNewDirection(int) const;
+  // ////////////////////////////////////////////////////////////////////////
+  // IsNewDirection
+  //
 
-  std::shared_ptr<Move> move;
-  std::shared_ptr<Capture> capture;
-  std::shared_ptr<Turn> nextTurn;
-  std::shared_ptr<Turn> previousTurn;
+  bool IsNewDirection(int) const;
 };

@@ -32,14 +32,14 @@ int AIPlayer::RateBoard(Board& board, EState currentPlayer)
     {
       std::shared_ptr<Node> pNode = board.GetCell(x, y);
 
-      if (pNode->state == EState::WHITE)
+      if (pNode->eState == EState::WHITE)
       {
         nPieceAmountRating++;
-        if (pNode->isDiagonalField)
+        if (pNode->m_bIsDiagonalField)
         {
           nDiagonalFieldRating++;
         }
-        if (pNode->isMiddleField)
+        if (pNode->m_bIsMiddleField)
         {
           nMiddleFieldRating++;
         }
@@ -56,11 +56,11 @@ int AIPlayer::RateBoard(Board& board, EState currentPlayer)
         // this takes way to long so were not going to use it
         // keeping it for documentationssake
         /*int scattered = 1;
-        for (auto neighbour : node->neighbours)
+        for (auto neighbour : node->m_aNeighbours)
         {
           if (neighbour != nullptr)
           {
-            if (neighbour->state == EState::WHITE)
+            if (neighbour->eState == EState::WHITE)
             {
               scattered = -1;
             }
@@ -68,14 +68,14 @@ int AIPlayer::RateBoard(Board& board, EState currentPlayer)
         }
         scatteredPiecesRating += scattered;*/
       }
-      else if (pNode->state == EState::BLACK)
+      else if (pNode->eState == EState::BLACK)
       {
         nPieceAmountRating--;
-        if (pNode->isDiagonalField)
+        if (pNode->m_bIsDiagonalField)
         {
           nDiagonalFieldRating--;
         }
-        if (pNode->isMiddleField)
+        if (pNode->m_bIsMiddleField)
         {
           nMiddleFieldRating--;
         }
@@ -83,11 +83,11 @@ int AIPlayer::RateBoard(Board& board, EState currentPlayer)
         // this takes way to long so were not going to use it
         // keeping it for documentationssake
         /*int scattered = -1;
-        for (auto neighbour : node->neighbours)
+        for (auto neighbour : node->m_aNeighbours)
         {
           if (neighbour != nullptr)
           {
-            if (neighbour->state == EState::BLACK)
+            if (neighbour->eState == EState::BLACK)
             {
               scattered = 1;
             }
@@ -235,7 +235,7 @@ bool AIPlayer::TurnSmallerThan(std::shared_ptr<Turn> pTurn1, std::shared_ptr<Tur
 
 int AIPlayer::RateTurn(std::shared_ptr<Turn> pTurn)
 {
-  return pTurn->capture->capturedNodes.size() + pTurn->GetTurnChainLength();
+  return pTurn->m_pCapture->m_vecCaptureNodes.size() + pTurn->GetTurnChainLength();
 }
 
 // ////////////////////////////////////////////////////////////////////////
@@ -255,7 +255,7 @@ std::string AIPlayer::GetNextMove(Board& board, EMove eMove)
     if (eMove == EMove::DEST_X)
     {
       // We're in a chain of turns, so just use the next one
-      m_pTurnToHandle = m_pTurnToHandle->nextTurn;
+      m_pTurnToHandle = m_pTurnToHandle->m_pNextTurn;
     }
     else if (eMove == EMove::ORIGIN_X)
     {
@@ -292,19 +292,19 @@ std::string AIPlayer::GetNextMove(Board& board, EMove eMove)
   // Check what the server is asking of us and output an appropriate message
   if (eMove == EMove::ORIGIN_X)
   {
-    strInput = std::to_string(m_pTurnToHandle->move->From()->x);
+    strInput = std::to_string(m_pTurnToHandle->m_pMove->From()->x);
   }
   else if (eMove == EMove::ORIGIN_Y)
   {
-    strInput = std::to_string(m_pTurnToHandle->move->From()->y);
+    strInput = std::to_string(m_pTurnToHandle->m_pMove->From()->y);
   }
   else if (eMove == EMove::DEST_X)
   {
-    strInput = std::to_string(m_pTurnToHandle->move->To()->x);
+    strInput = std::to_string(m_pTurnToHandle->m_pMove->To()->x);
   }
   else if (eMove == EMove::DEST_Y)
   {
-    strInput           = std::to_string(m_pTurnToHandle->move->To()->y);
+    strInput           = std::to_string(m_pTurnToHandle->m_pMove->To()->y);
     m_bPotentiallyDone = true;
   }
   else if (eMove == EMove::W_OR_A)

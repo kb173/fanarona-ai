@@ -19,7 +19,7 @@ Board::Board(EMode eMode, int nDepth) : m_eMode(eMode)
       m_pCells[y][x] = std::make_shared<Node>();
       if (x > 0 && x < BOARD_WIDTH - 1 && y > 0 && y < BOARD_HEIGHT)
       {
-        m_pCells[y][x]->isMiddleField = true;
+        m_pCells[y][x]->m_bIsMiddleField = true;
       }
     }
   }
@@ -83,15 +83,15 @@ void Board::Parse(std::string strBoardContent)
       // TODO: define "colors" as constants, add property playerColor
       if (cCharacter == '1' || cCharacter == '#')
       {
-        pCell->state = EState::BLACK;
+        pCell->eState = EState::BLACK;
       }
       else if (cCharacter == '2' || cCharacter == 'O')
       {
-        pCell->state = EState::WHITE;
+        pCell->eState = EState::WHITE;
       }
       else
       {
-        pCell->state = EState::EMPTY;
+        pCell->eState = EState::EMPTY;
       }
 
       if (bFirstParse)
@@ -99,44 +99,44 @@ void Board::Parse(std::string strBoardContent)
         if (IsPositionInBounds(x - 1, y - 1) &&
             vecLines[nInputRow - 1][nInputColumn - 1 - (nInputRow % 2)] == '\\')
         {
-          pCell->isDiagonalField = true;
-          pCell->neighbours[0]   = GetCell(x - 1, y - 1);
+          pCell->m_bIsDiagonalField = true;
+          pCell->m_aNeighbours[0]   = GetCell(x - 1, y - 1);
         }
         if (IsPositionInBounds(x, y - 1) &&
             vecLines[nInputRow - 1][nInputColumn - (nInputRow % 2)] == '|')
         {
-          pCell->neighbours[1] = GetCell(x, y - 1);
+          pCell->m_aNeighbours[1] = GetCell(x, y - 1);
         }
         if (IsPositionInBounds(x + 1, y - 1) &&
             vecLines[nInputRow - 1][nInputColumn + 1 - (nInputRow % 2)] == '/')
         {
-          pCell->isDiagonalField = true;
-          pCell->neighbours[2]   = GetCell(x + 1, y - 1);
+          pCell->m_bIsDiagonalField = true;
+          pCell->m_aNeighbours[2]   = GetCell(x + 1, y - 1);
         }
         if (IsPositionInBounds(x - 1, y) && vecLines[nInputRow][nInputColumn - 1] == '-')
         {
-          pCell->neighbours[3] = GetCell(x - 1, y);
+          pCell->m_aNeighbours[3] = GetCell(x - 1, y);
         }
         if (IsPositionInBounds(x + 1, y) && vecLines[nInputRow][nInputColumn + 1] == '-')
         {
-          pCell->neighbours[4] = GetCell(x + 1, y);
+          pCell->m_aNeighbours[4] = GetCell(x + 1, y);
         }
         if (IsPositionInBounds(x - 1, y + 1) &&
             vecLines[nInputRow + 1][nInputColumn - 1 - (nInputRow % 2)] == '/')
         {
-          pCell->isDiagonalField = true;
-          pCell->neighbours[5]   = GetCell(x - 1, y + 1);
+          pCell->m_bIsDiagonalField = true;
+          pCell->m_aNeighbours[5]   = GetCell(x - 1, y + 1);
         }
         if (IsPositionInBounds(x, y + 1) &&
             vecLines[nInputRow + 1][nInputColumn - (nInputRow % 2)] == '|')
         {
-          pCell->neighbours[6] = GetCell(x, y + 1);
+          pCell->m_aNeighbours[6] = GetCell(x, y + 1);
         }
         if (IsPositionInBounds(x + 1, y + 1) &&
             vecLines[nInputRow + 1][nInputColumn + 1 - (nInputRow % 2)] == '\\')
         {
-          pCell->isDiagonalField = true;
-          pCell->neighbours[7]   = GetCell(x + 1, y + 1);
+          pCell->m_bIsDiagonalField = true;
+          pCell->m_aNeighbours[7]   = GetCell(x + 1, y + 1);
         }
       }
     }
@@ -175,12 +175,12 @@ void Board::Print()
     std::cerr << y << " ";
     for (int x = 0; x < BOARD_WIDTH; x++)
     {
-      EState state = m_pCells[y][x]->state;
-      if (state == EState::WHITE)
+      EState eState = m_pCells[y][x]->eState;
+      if (eState == EState::WHITE)
       {
         std::cerr << "O ";
       }
-      else if (state == EState::BLACK)
+      else if (eState == EState::BLACK)
       {
         std::cerr << "# ";
       }
@@ -260,16 +260,16 @@ const std::list<std::shared_ptr<Turn>> Board::FindTurnsForNode(EState eMovingSta
   std::list<std::shared_ptr<Turn>> listPaikaTurns;
 
   // if we find a stone of my color
-  if (pNode->state == eMovingState)
+  if (pNode->eState == eMovingState)
   {
     // iterate over neighbors
     for (int i = 0; i < 8; i++)
     {
-      auto pNeighbour = pNode->neighbours[i];
+      auto pNeighbour = pNode->m_aNeighbours[i];
 
       // if the neighbor node is empty and the previous turn doesn't forbid this direction via the
       // rules
-      if ((pNeighbour != nullptr && pNeighbour->state == EState::EMPTY) &&
+      if ((pNeighbour != nullptr && pNeighbour->eState == EState::EMPTY) &&
           (pPreviousTurn == nullptr ||
            (!pPreviousTurn->NodeAlreadyVisited(pNeighbour) && pPreviousTurn->IsNewDirection(i))))
       {
@@ -279,9 +279,9 @@ const std::list<std::shared_ptr<Turn>> Board::FindTurnsForNode(EState eMovingSta
         auto pCaptureBackward = std::make_shared<Capture>(GetCapturesInDirection(*pMove, true));
 
         // FIXME: Duplication for forward and backward
-        auto pForwardTurn          = std::make_shared<Turn>(pMove, pCaptureForward);
-        pForwardTurn->previousTurn = pPreviousTurn;
-        if (pCaptureForward->capturedNodes.size() > 0)
+        auto pForwardTurn             = std::make_shared<Turn>(pMove, pCaptureForward);
+        pForwardTurn->m_pPreviousTurn = pPreviousTurn;
+        if (pCaptureForward->m_vecCaptureNodes.size() > 0)
         {
           std::list<std::shared_ptr<Turn>> listForwardTurns =
             GenerateTurnsWithFollowingTurns(pForwardTurn, eMovingState);
@@ -295,9 +295,9 @@ const std::list<std::shared_ptr<Turn>> Board::FindTurnsForNode(EState eMovingSta
           listPaikaTurns.emplace_back(pForwardTurn);
         }
 
-        auto pBackwardTurn          = std::make_shared<Turn>(pMove, pCaptureBackward);
-        pBackwardTurn->previousTurn = pPreviousTurn;
-        if (pCaptureBackward->capturedNodes.size() > 0)
+        auto pBackwardTurn             = std::make_shared<Turn>(pMove, pCaptureBackward);
+        pBackwardTurn->m_pPreviousTurn = pPreviousTurn;
+        if (pCaptureBackward->m_vecCaptureNodes.size() > 0)
         {
           std::list<std::shared_ptr<Turn>> listbackwardTurns =
             GenerateTurnsWithFollowingTurns(pBackwardTurn, eMovingState);
@@ -333,15 +333,15 @@ const std::list<std::shared_ptr<Turn>> Board::GenerateTurnsWithFollowingTurns(
   ApplyTurn(pStartTurn);
 
   std::list<std::shared_ptr<Turn>> listTurns =
-    FindTurnsForNode(ePieceColor, pStartTurn->move->To(), pStartTurn, false);
+    FindTurnsForNode(ePieceColor, pStartTurn->m_pMove->To(), pStartTurn, false);
   if (listTurns.size() > 0)
   {
     for (auto pTurn : listTurns)
     {
-      auto pNewTurn          = std::make_shared<Turn>(pStartTurn->move, pStartTurn->capture);
-      pNewTurn->previousTurn = pStartTurn->previousTurn;
-      pNewTurn->nextTurn     = pTurn;
-      pTurn->previousTurn    = pNewTurn;
+      auto pNewTurn = std::make_shared<Turn>(pStartTurn->m_pMove, pStartTurn->m_pCapture);
+      pNewTurn->m_pPreviousTurn = pStartTurn->m_pPreviousTurn;
+      pNewTurn->m_pNextTurn     = pTurn;
+      pTurn->m_pPreviousTurn    = pNewTurn;
       listGeneratedTurns.emplace_back(pNewTurn);
     }
   }
@@ -378,7 +378,7 @@ const std::list<std::shared_ptr<Turn>> Board::FindTurns(EState eMovingState)
       // and e.g. returning a flag for capturing or paika in FindTurnsForNode.
       for (const auto& pTurn : listPotentialTurns)
       {
-        if (pTurn->capture->capturedNodes.size() > 0)
+        if (pTurn->m_pCapture->m_vecCaptureNodes.size() > 0)
         {
           listCaptureTurns.emplace_back(pTurn); // TODO: Consider moving (splice)
         }
@@ -401,13 +401,13 @@ const std::list<std::shared_ptr<Turn>> Board::FindTurns(EState eMovingState)
 void Board::ApplyTurn(std::shared_ptr<Turn> pTurn)
 {
   // Remove captured
-  for (auto& pNode : pTurn->capture->capturedNodes)
+  for (auto& pNode : pTurn->m_pCapture->m_vecCaptureNodes)
   {
-    pNode->state = EState::EMPTY;
+    pNode->eState = EState::EMPTY;
   }
 
   // Make turn
-  std::swap(pTurn->move->To()->state, pTurn->move->From()->state);
+  std::swap(pTurn->m_pMove->To()->eState, pTurn->m_pMove->From()->eState);
 }
 
 // ////////////////////////////////////////////////////////////////////////
@@ -418,20 +418,20 @@ void Board::ApplyTurn(std::shared_ptr<Turn> pTurn)
 void Board::RollbackTurn(std::shared_ptr<Turn> pTurn)
 {
   // Reset turn
-  std::swap(pTurn->move->To()->state, pTurn->move->From()->state);
+  std::swap(pTurn->m_pMove->To()->eState, pTurn->m_pMove->From()->eState);
 
   // Put captured back
-  for (auto& pNode : pTurn->capture->capturedNodes)
+  for (auto& pNode : pTurn->m_pCapture->m_vecCaptureNodes)
   {
     // FIXME: Can we avoid this if-check? We just need the opposite color
-    // SUGGESTION: node->state = (EState)(2 * (int)(turn->move->From()->state) % 3);
-    if (pTurn->move->From()->state == EState::BLACK)
+    // SUGGESTION: node->eState = (EState)(2 * (int)(turn->move->From()->eState) % 3);
+    if (pTurn->m_pMove->From()->eState == EState::BLACK)
     {
-      pNode->state = EState::WHITE;
+      pNode->eState = EState::WHITE;
     }
     else
     {
-      pNode->state = EState::BLACK;
+      pNode->eState = EState::BLACK;
     }
   }
 }
@@ -449,7 +449,7 @@ void Board::ApplyTurnWithFollowing(std::shared_ptr<Turn> pTurn)
   while (pCurrentTurn != nullptr)
   {
     ApplyTurn(pTurn);
-    pCurrentTurn = pCurrentTurn->nextTurn;
+    pCurrentTurn = pCurrentTurn->m_pNextTurn;
   }
 }
 
@@ -464,9 +464,9 @@ void Board::RollbackTurnWithFollowing(std::shared_ptr<Turn> pTurn)
   // First, get the last turn
   std::shared_ptr<Turn> pLastTurn = pTurn;
 
-  while (pLastTurn->nextTurn != nullptr)
+  while (pLastTurn->m_pNextTurn != nullptr)
   {
-    pLastTurn = pLastTurn->nextTurn;
+    pLastTurn = pLastTurn->m_pNextTurn;
   }
 
   // Rollback in order
@@ -475,7 +475,7 @@ void Board::RollbackTurnWithFollowing(std::shared_ptr<Turn> pTurn)
   while (pCurrentTurn != nullptr)
   {
     RollbackTurn(pTurn);
-    pCurrentTurn = pCurrentTurn->previousTurn;
+    pCurrentTurn = pCurrentTurn->m_pPreviousTurn;
   }
 }
 
@@ -508,18 +508,18 @@ bool Board::IsPositionInBounds(int x, int y)
 
 int Board::DistanceToNearestEnemy(std::shared_ptr<Node> pNode)
 {
-  if (pNode->state == EState::EMPTY)
+  if (pNode->eState == EState::EMPTY)
   {
     return -1;
   }
-  EState eMyState  = pNode->state;
+  EState eMyState  = pNode->eState;
   int nMinDistance = INT_MAX;
   for (int y = 0; y < BOARD_HEIGHT; y++)
   {
     for (int x = 0; x < BOARD_WIDTH; x++)
     {
       std::shared_ptr<Node> pCurrentNode = GetCell(x, y);
-      if (pCurrentNode->state != eMyState && pCurrentNode->state != EState::EMPTY)
+      if (pCurrentNode->eState != eMyState && pCurrentNode->eState != EState::EMPTY)
       {
         int nDistance = DistanceBetweenNodes(pNode, pCurrentNode);
         nMinDistance  = nMinDistance > nDistance ? nDistance : nMinDistance;
@@ -546,7 +546,7 @@ int Board::DistanceBetweenNodes(std::shared_ptr<Node> pStart, std::shared_ptr<No
   while (nYCur != nYEnd || nXCur != nXEnd)
   {
     auto pCurrentNode = GetCell(nXCur, nYCur);
-    if (pCurrentNode->isDiagonalField && nYCur != nYEnd && nXCur != nXEnd)
+    if (pCurrentNode->m_bIsDiagonalField && nYCur != nYEnd && nXCur != nXEnd)
     {
       nXCur += nXDir;
       nYCur += nYDir;
@@ -578,30 +578,30 @@ const std::vector<std::shared_ptr<Node>> Board::GetCapturesInDirection(const Mov
 {
   std::vector<std::shared_ptr<Node>> vecCaptures;
 
-  EState eMyState = move.From()->state;
+  EState eMyState = move.From()->eState;
 
   int nDirection;
   std::shared_ptr<Node> pCurrentNeighbour;
 
   if (bReverseDirection)
   {
-    nDirection        = 7 - move.direction;
-    pCurrentNeighbour = move.From()->neighbours[nDirection];
+    nDirection        = 7 - move.m_nDirection;
+    pCurrentNeighbour = move.From()->m_aNeighbours[nDirection];
   }
   else
   {
-    nDirection        = move.direction;
-    pCurrentNeighbour = move.To()->neighbours[nDirection];
+    nDirection        = move.m_nDirection;
+    pCurrentNeighbour = move.To()->m_aNeighbours[nDirection];
   }
 
   // if there is a field, and on that field is a stone of the other color count up
-  while (pCurrentNeighbour != nullptr && pCurrentNeighbour->state != EState::EMPTY &&
-         pCurrentNeighbour->state != eMyState)
+  while (pCurrentNeighbour != nullptr && pCurrentNeighbour->eState != EState::EMPTY &&
+         pCurrentNeighbour->eState != eMyState)
   {
     vecCaptures.emplace_back(pCurrentNeighbour);
 
     // continue with next neighbor
-    pCurrentNeighbour = pCurrentNeighbour->neighbours[nDirection];
+    pCurrentNeighbour = pCurrentNeighbour->m_aNeighbours[nDirection];
   }
 
   return vecCaptures;
