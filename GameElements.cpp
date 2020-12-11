@@ -100,3 +100,8 @@ bool Turn::IsNewDirection(int direction) const
 {
   return move->direction != direction;
 }
+
+std::string Move::ToString() const
+{
+  return "From " + From()->ToString() + " to " + To()->ToString();
+}
