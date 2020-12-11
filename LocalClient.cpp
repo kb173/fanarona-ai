@@ -6,6 +6,10 @@
 #include "Board.h"
 #include "LocalClient.h"
 
+// ////////////////////////////////////////////////////////////////////////
+// LocalClient (Constructor)
+//
+
 LocalClient::LocalClient()
 {
   m_message_write_map.insert(std::make_pair("Exit\r\nPlease choose your mode [0-2]", "0"));
@@ -16,19 +20,33 @@ LocalClient::LocalClient()
   m_message_write_map.insert(std::make_pair("Do you want to surrender [Y/N]?", "N"));
 }
 
+// ////////////////////////////////////////////////////////////////////////
+// ~LocalClient (Destructor)
+//
+
 LocalClient::~LocalClient()
 {
 }
 
+// ////////////////////////////////////////////////////////////////////////
+// ReadString
+//
+// Reads a string over socat
+
 std::string LocalClient::ReadString()
 {
-  std::string s;
-  std::getline(std::cin >> std::ws, s);
-  return s + "\n";
+  std::string str;
+  std::getline(std::cin >> std::ws, str);
+  return str + "\n";
 }
 
-void LocalClient::WriteString(std::string input)
+// ////////////////////////////////////////////////////////////////////////
+// WriteString
+//
+// Sends a string over socat
+
+void LocalClient::WriteString(std::string strInput)
 {
-  std::cout << input << std::endl;
+  std::cout << strInput << std::endl;
   m_strRecv.clear();
 }
