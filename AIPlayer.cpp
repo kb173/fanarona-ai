@@ -12,10 +12,10 @@
 int AIPlayer::RateBoard(Board& board, EState currentPlayer)
 {
   // Get the number of our nodes minus the number of enemy nodes
-  int pieceAmountRating     = 0;
-  int middleFieldRating     = 0;
-  int diagonalFieldRating   = 0;
-  int distanceToEnemyRating = 0;
+  int nPieceAmountRating     = 0;
+  int nMiddleFieldRating     = 0;
+  int nDiagonalFieldRating   = 0;
+  int nDistanceToEnemyRating = 0;
 
   // int scatteredPiecesRating = 0;
 
@@ -30,27 +30,27 @@ int AIPlayer::RateBoard(Board& board, EState currentPlayer)
   {
     for (int x = 0; x < BOARD_WIDTH; x++)
     {
-      std::shared_ptr<Node> node = board.GetCell(x, y);
+      std::shared_ptr<Node> pNode = board.GetCell(x, y);
 
-      if (node->state == EState::WHITE)
+      if (pNode->state == EState::WHITE)
       {
-        pieceAmountRating++;
-        if (node->isDiagonalField)
+        nPieceAmountRating++;
+        if (pNode->isDiagonalField)
         {
-          diagonalFieldRating++;
+          nDiagonalFieldRating++;
         }
-        if (node->isMiddleField)
+        if (pNode->isMiddleField)
         {
-          middleFieldRating++;
+          nMiddleFieldRating++;
         }
 
-        if (board.DistanceToNearestEnemy(node) % 2 == 0)
+        if (board.DistanceToNearestEnemy(pNode) % 2 == 0)
         {
-          distanceToEnemyRating += currentPlayer == EState::WHITE ? 1 : -1;
+          nDistanceToEnemyRating += currentPlayer == EState::WHITE ? 1 : -1;
         }
         else
         {
-          distanceToEnemyRating += currentPlayer == EState::WHITE ? -1 : 1;
+          nDistanceToEnemyRating += currentPlayer == EState::WHITE ? -1 : 1;
         }
 
         // this takes way to long so were not going to use it
@@ -68,16 +68,16 @@ int AIPlayer::RateBoard(Board& board, EState currentPlayer)
         }
         scatteredPiecesRating += scattered;*/
       }
-      else if (node->state == EState::BLACK)
+      else if (pNode->state == EState::BLACK)
       {
-        pieceAmountRating--;
-        if (node->isDiagonalField)
+        nPieceAmountRating--;
+        if (pNode->isDiagonalField)
         {
-          diagonalFieldRating--;
+          nDiagonalFieldRating--;
         }
-        if (node->isMiddleField)
+        if (pNode->isMiddleField)
         {
-          middleFieldRating--;
+          nMiddleFieldRating--;
         }
 
         // this takes way to long so were not going to use it
@@ -98,17 +98,17 @@ int AIPlayer::RateBoard(Board& board, EState currentPlayer)
     }
   }
 
-  float rating = 0;
+  float fRating = 0;
 
   // tweak multipliers to change performance
-  rating += (1.0f * pieceAmountRating);
-  rating += (0.1f * middleFieldRating);
-  rating += (0.5f * diagonalFieldRating);
+  fRating += (1.0f * nPieceAmountRating);
+  fRating += (0.1f * nMiddleFieldRating);
+  fRating += (0.5f * nDiagonalFieldRating);
   // rating += (0.0f * moveAmountRating);
-  rating += (0.1f * distanceToEnemyRating);
+  fRating += (0.1f * nDistanceToEnemyRating);
   // rating += (0.05f * scatteredPiecesRating);
 
-  return rating;
+  return fRating;
 }
 
 // ////////////////////////////////////////////////////////////////////////
@@ -117,92 +117,92 @@ int AIPlayer::RateBoard(Board& board, EState currentPlayer)
 // Minimax algorithm that returns a score for a turn
 
 int AIPlayer::Minimax(Board& board,
-                      std::shared_ptr<Turn> currentTurn,
-                      int depth,
-                      int alpha,
-                      int beta,
-                      EState player)
+                      std::shared_ptr<Turn> pCurrentTurn,
+                      int nDepth,
+                      int nAlpha,
+                      int nBeta,
+                      EState ePlayer)
 {
-  board.ApplyTurnWithFollowing(currentTurn);
+  board.ApplyTurnWithFollowing(pCurrentTurn);
 
-  if (depth == 0)
+  if (nDepth == 0)
   {
-    int rating = RateBoard(board, player);
-    board.RollbackTurnWithFollowing(currentTurn);
-    return rating;
+    int nRating = RateBoard(board, ePlayer);
+    board.RollbackTurnWithFollowing(pCurrentTurn);
+    return nRating;
   }
 
-  if (player == EState::WHITE)
+  if (ePlayer == EState::WHITE)
   {
-    auto allTurns = board.FindTurns(EState::WHITE);
-    if (allTurns.size() == 0)
+    auto listAllTurns = board.FindTurns(EState::WHITE);
+    if (listAllTurns.size() == 0)
     {
-      int rating = RateBoard(board, player);
-      board.RollbackTurnWithFollowing(currentTurn);
-      return rating;
+      int nRating = RateBoard(board, ePlayer);
+      board.RollbackTurnWithFollowing(pCurrentTurn);
+      return nRating;
     }
 
     // Optimization: Sort turns in order to check the likely better turns first, making
     // alpha-beta-pruning quit earlier
-    SortTurns(allTurns);
+    SortTurns(listAllTurns);
 
-    int maxScore = INT_MIN;
-    for (auto& childTurn : allTurns)
+    int nMaxScore = INT_MIN;
+    for (auto& pChildTurn : listAllTurns)
     {
-      auto turnScore = Minimax(board, childTurn, depth - 1, alpha, beta, EState::BLACK);
-      if (turnScore > maxScore)
+      int nTurnScore = Minimax(board, pChildTurn, nDepth - 1, nAlpha, nBeta, EState::BLACK);
+      if (nTurnScore > nMaxScore)
       {
-        maxScore = turnScore;
+        nMaxScore = nTurnScore;
       }
 
-      if (turnScore > alpha)
+      if (nTurnScore > nAlpha)
       {
-        alpha = turnScore;
+        nAlpha = nTurnScore;
       }
-      if (beta <= alpha)
+      if (nBeta <= nAlpha)
       {
         break;
       }
     }
 
-    board.RollbackTurnWithFollowing(currentTurn);
-    return maxScore;
+    board.RollbackTurnWithFollowing(pCurrentTurn);
+    return nMaxScore;
   }
   else
   {
-    auto allTurns = board.FindTurns(EState::BLACK);
-    if (allTurns.size() == 0)
+    auto listAllTurns = board.FindTurns(EState::BLACK);
+    if (listAllTurns.size() == 0)
     {
-      int rating = RateBoard(board, player);
-      board.RollbackTurnWithFollowing(currentTurn);
-      return rating;
+      int nRating = RateBoard(board, ePlayer);
+      board.RollbackTurnWithFollowing(pCurrentTurn);
+      return nRating;
     }
 
     // Optimization: Sort turns in order to check the likely better turns first, making
     // alpha-beta-pruning quit earlier
-    SortTurns(allTurns);
+    SortTurns(listAllTurns);
 
-    int minScore = INT_MAX;
-    for (auto& childTurn : allTurns)
+    int nMinScore = INT_MAX;
+    for (auto& pChildTurn : listAllTurns)
     {
-      auto turnScore = Minimax(board, childTurn, depth - 1, alpha, beta, EState::WHITE);
-      if (turnScore < minScore)
+      int nTurnScore = Minimax(board, pChildTurn, nDepth - 1, nAlpha, nBeta, EState::WHITE);
+      if (nTurnScore < nMinScore)
       {
-        minScore = turnScore;
+        nMinScore = nTurnScore;
       }
 
-      if (turnScore < beta)
+      if (nTurnScore < nBeta)
       {
-        beta = turnScore;
+        nBeta = nTurnScore;
       }
-      if (beta <= alpha)
+      if (nBeta <= nAlpha)
       {
         break;
       }
     }
 
-    board.RollbackTurnWithFollowing(currentTurn);
-    return minScore;
+    board.RollbackTurnWithFollowing(pCurrentTurn);
+    return nMinScore;
   }
 }
 
@@ -212,9 +212,9 @@ int AIPlayer::Minimax(Board& board,
 // Sorts a list of turn according to a very simple heuristik, used to speed
 // up minimax
 
-void AIPlayer::SortTurns(std::list<std::shared_ptr<Turn>>& turns)
+void AIPlayer::SortTurns(std::list<std::shared_ptr<Turn>>& listTurns)
 {
-  turns.sort(TurnSmallerThan);
+  listTurns.sort(TurnSmallerThan);
 }
 
 // ////////////////////////////////////////////////////////////////////////
@@ -222,9 +222,9 @@ void AIPlayer::SortTurns(std::list<std::shared_ptr<Turn>>& turns)
 //
 // Comparision method used by SortTurns
 
-bool AIPlayer::TurnSmallerThan(std::shared_ptr<Turn> turn1, std::shared_ptr<Turn> turn2)
+bool AIPlayer::TurnSmallerThan(std::shared_ptr<Turn> pTurn1, std::shared_ptr<Turn> pTurn2)
 {
-  return RateTurn(turn1) > RateTurn(turn2);
+  return RateTurn(pTurn1) > RateTurn(pTurn2);
 }
 
 // ////////////////////////////////////////////////////////////////////////
@@ -233,9 +233,9 @@ bool AIPlayer::TurnSmallerThan(std::shared_ptr<Turn> turn1, std::shared_ptr<Turn
 // Rates a turn based on the captured nodes and follow up turns, used by
 // TurnSmallerThan
 
-int AIPlayer::RateTurn(std::shared_ptr<Turn> turn)
+int AIPlayer::RateTurn(std::shared_ptr<Turn> pTurn)
 {
-  return turn->capture->capturedNodes.size() + turn->GetTurnChainLength();
+  return pTurn->capture->capturedNodes.size() + pTurn->GetTurnChainLength();
 }
 
 // ////////////////////////////////////////////////////////////////////////
@@ -244,76 +244,76 @@ int AIPlayer::RateTurn(std::shared_ptr<Turn> turn)
 // return:  the best available move according to the ai in form of the string that has to be sent
 // to the server
 
-std::string AIPlayer::GetNextMove(Board& board, EMove move)
+std::string AIPlayer::GetNextMove(Board& board, EMove eMove)
 {
-  std::string input;
+  std::string strInput;
 
   if (m_bPotentiallyDone)
   {
     m_bPotentiallyDone = false;
 
-    if (move == EMove::DEST_X)
+    if (eMove == EMove::DEST_X)
     {
       // We're in a chain of turns, so just use the next one
-      m_turn_to_handle = m_turn_to_handle->nextTurn;
+      m_pTurnToHandle = m_pTurnToHandle->nextTurn;
     }
-    else if (move == EMove::ORIGIN_X)
+    else if (eMove == EMove::ORIGIN_X)
     {
       m_nTurnsPlayed++;
-      auto turns = board.FindTurns(EState::WHITE);
+      auto listTurns = board.FindTurns(EState::WHITE);
 
       // Get the optimal turn
-      int optimal_value = INT_MIN;
+      int nOptimalvalue = INT_MIN;
 
       int i = 0;
-      for (const auto& turn : turns)
+      for (const auto& pTurn : listTurns)
       {
         i++;
-        int score = Minimax(board, turn, m_nMinimaxDepth, INT_MIN, INT_MAX, EState::BLACK);
+        int nScore = Minimax(board, pTurn, m_nMinimaxDepth, INT_MIN, INT_MAX, EState::BLACK);
 #ifndef OMIT_OUTPUT
         std::cerr << i << ".Move: "
-                  << "Score: " << score << " " << turn->GetTurnChainLength()
-                  << "-Lenght-Chain: " << turn->ChainToString() << std::endl;
+                  << "Score: " << nScore << " " << pTurn->GetTurnChainLength()
+                  << "-Lenght-Chain: " << pTurn->ChainToString() << std::endl;
 #endif
-        if (score > optimal_value)
+        if (nScore > nOptimalvalue)
         {
-          m_turn_to_handle = turn;
-          optimal_value    = score;
+          m_pTurnToHandle = pTurn;
+          nOptimalvalue   = nScore;
         }
       }
 
 #ifndef OMIT_OUTPUT
-      std::cerr << "Best move: " << m_turn_to_handle->ChainToString() << " with score "
-                << optimal_value << std::endl;
+      std::cerr << "Best move: " << m_pTurnToHandle->ChainToString() << " with score "
+                << nOptimalvalue << std::endl;
 #endif
     }
   }
 
   // Check what the server is asking of us and output an appropriate message
-  if (move == EMove::ORIGIN_X)
+  if (eMove == EMove::ORIGIN_X)
   {
-    input = std::to_string(m_turn_to_handle->move->From()->x);
+    strInput = std::to_string(m_pTurnToHandle->move->From()->x);
   }
-  else if (move == EMove::ORIGIN_Y)
+  else if (eMove == EMove::ORIGIN_Y)
   {
-    input = std::to_string(m_turn_to_handle->move->From()->y);
+    strInput = std::to_string(m_pTurnToHandle->move->From()->y);
   }
-  else if (move == EMove::DEST_X)
+  else if (eMove == EMove::DEST_X)
   {
-    input = std::to_string(m_turn_to_handle->move->To()->x);
+    strInput = std::to_string(m_pTurnToHandle->move->To()->x);
   }
-  else if (move == EMove::DEST_Y)
+  else if (eMove == EMove::DEST_Y)
   {
-    input              = std::to_string(m_turn_to_handle->move->To()->y);
+    strInput           = std::to_string(m_pTurnToHandle->move->To()->y);
     m_bPotentiallyDone = true;
   }
-  else if (move == EMove::W_OR_A)
+  else if (eMove == EMove::W_OR_A)
   {
-    input              = m_turn_to_handle->IsWithdraw() ? "W" : "A";
+    strInput           = m_pTurnToHandle->IsWithdraw() ? "W" : "A";
     m_bPotentiallyDone = true;
   }
 
-  return input;
+  return strInput;
 }
 
 // ########################################################################
@@ -330,7 +330,7 @@ int AIPlayer::GetTurnsPlayed()
 // ////////////////////////////////////////////////////////////////////////
 // SetDepth (Setter for m_turnsPlayed)
 
-void AIPlayer::SetDepth(int depth)
+void AIPlayer::SetDepth(int nDepth)
 {
-  m_nMinimaxDepth = depth;
+  m_nMinimaxDepth = nDepth;
 }
