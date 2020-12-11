@@ -4,6 +4,11 @@
 #include <iostream>
 #include <limits.h> // for INT_MIN
 
+// ////////////////////////////////////////////////////////////////////////
+// RateBoard
+//
+// Rates the board using multiple heuristics
+
 int AIPlayer::RateBoard(Board& board, EState currentPlayer)
 {
   // Get the number of our nodes minus the number of enemy nodes
@@ -106,6 +111,11 @@ int AIPlayer::RateBoard(Board& board, EState currentPlayer)
   return rating;
 }
 
+// ////////////////////////////////////////////////////////////////////////
+// Minimax
+//
+// Minimax algorithm that returns a score for a turn
+
 int AIPlayer::Minimax(Board& board,
                       std::shared_ptr<Turn> currentTurn,
                       int depth,
@@ -196,28 +206,51 @@ int AIPlayer::Minimax(Board& board,
   }
 }
 
+// ////////////////////////////////////////////////////////////////////////
+// SortTurns
+//
+// Sorts a list of turn according to a very simple heuristik, used to speed
+// up minimax
+
 void AIPlayer::SortTurns(std::list<std::shared_ptr<Turn>>& turns)
 {
   turns.sort(TurnSmallerThan);
 }
+
+// ////////////////////////////////////////////////////////////////////////
+// TurnSmallerThan
+//
+// Comparision method used by SortTurns
 
 bool AIPlayer::TurnSmallerThan(std::shared_ptr<Turn> turn1, std::shared_ptr<Turn> turn2)
 {
   return RateTurn(turn1) > RateTurn(turn2);
 }
 
+// ////////////////////////////////////////////////////////////////////////
+// RateTurn
+//
+// Rates a turn based on the captured nodes and follow up turns, used by
+// TurnSmallerThan
+
 int AIPlayer::RateTurn(std::shared_ptr<Turn> turn)
 {
   return turn->capture->capturedNodes.size() + turn->GetTurnChainLength();
 }
 
+// ////////////////////////////////////////////////////////////////////////
+// GetNextMove
+//
+// return:  the best available move according to the ai in form of the string that has to be sent
+// to the server
+
 std::string AIPlayer::GetNextMove(Board& board, EMove move)
 {
   std::string input;
 
-  if (m_potentially_done)
+  if (m_bPotentiallyDone)
   {
-    m_potentially_done = false;
+    m_bPotentiallyDone = false;
 
     if (move == EMove::DEST_X)
     {
@@ -226,7 +259,7 @@ std::string AIPlayer::GetNextMove(Board& board, EMove move)
     }
     else if (move == EMove::ORIGIN_X)
     {
-      m_turnsPlayed++;
+      m_nTurnsPlayed++;
       auto turns = board.FindTurns(EState::WHITE);
 
       // Get the optimal turn
@@ -236,7 +269,7 @@ std::string AIPlayer::GetNextMove(Board& board, EMove move)
       for (const auto& turn : turns)
       {
         i++;
-        int score = Minimax(board, turn, m_minimax_depth, INT_MIN, INT_MAX, EState::BLACK);
+        int score = Minimax(board, turn, m_nMinimaxDepth, INT_MIN, INT_MAX, EState::BLACK);
 #ifndef OMIT_OUTPUT
         std::cerr << i << ".Move: "
                   << "Score: " << score << " " << turn->GetTurnChainLength()
@@ -272,23 +305,32 @@ std::string AIPlayer::GetNextMove(Board& board, EMove move)
   else if (move == EMove::DEST_Y)
   {
     input              = std::to_string(m_turn_to_handle->move->To()->y);
-    m_potentially_done = true;
+    m_bPotentiallyDone = true;
   }
   else if (move == EMove::W_OR_A)
   {
     input              = m_turn_to_handle->IsWithdraw() ? "W" : "A";
-    m_potentially_done = true;
+    m_bPotentiallyDone = true;
   }
 
   return input;
 }
 
-void AIPlayer::SetDepth(int depth)
-{
-  m_minimax_depth = depth;
-}
+// ########################################################################
+// Getter & Setter
+// ########################################################################
+
+// ////////////////////////////////////////////////////////////////////////
+// GetTurnsPlayed (Getter for m_turnsPlayed)
 
 int AIPlayer::GetTurnsPlayed()
 {
-  return m_turnsPlayed;
+  return m_nTurnsPlayed;
+}
+// ////////////////////////////////////////////////////////////////////////
+// SetDepth (Setter for m_turnsPlayed)
+
+void AIPlayer::SetDepth(int depth)
+{
+  m_nMinimaxDepth = depth;
 }
