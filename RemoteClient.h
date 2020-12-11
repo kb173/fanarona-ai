@@ -4,18 +4,50 @@
 #include <memory>
 #include <string>
 
-// Forward Declarations
+// ########################################################################
+// Enumerations & Constants
+// ########################################################################
+
 const int READ_DATA_SIZE = 2048;
 
 class RemoteClient : public Client
 {
-public:
-  RemoteClient(std::string ip, int port);
-  ~RemoteClient();
-  std::string ReadString();
-  void WriteString(std::string input);
-
 private:
-  int m_sock;
-  char m_buffer[READ_DATA_SIZE] = {0};
+  // ########################################################################
+  // Fields
+  // ########################################################################
+
+  int m_nSock;
+  char m_cBuffer[READ_DATA_SIZE] = {0};
+
+public:
+  // ########################################################################
+  // Methods
+  // ########################################################################
+
+  // ////////////////////////////////////////////////////////////////////////
+  // RemoteClient (Constructor)
+  //
+
+  RemoteClient(std::string strIp, int nPort);
+
+  // ////////////////////////////////////////////////////////////////////////
+  // ~RemoteClient (Destructor)
+  //
+
+  ~RemoteClient();
+
+  // ////////////////////////////////////////////////////////////////////////
+  // ReadString
+  //
+  // Reads a string from the server
+
+  std::string ReadString();
+
+  // ////////////////////////////////////////////////////////////////////////
+  // WriteString
+  //
+  // Sends a string to the server
+
+  void WriteString(std::string strInput);
 };

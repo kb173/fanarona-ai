@@ -23,7 +23,11 @@
 #include "Board.h"
 #include "RemoteClient.h"
 
-RemoteClient::RemoteClient(std::string ip, int port)
+// ////////////////////////////////////////////////////////////////////////
+// RemoteClient (Constructor)
+//
+
+RemoteClient::RemoteClient(std::string strIp, int nPort)
 {
   m_message_write_map.insert(std::make_pair("Exit\r\n\r\nPlease choose your mode [0-2]", "0"));
   m_message_write_map.insert(std::make_pair("User\r\n\r\nPlease choose your mode [0-2]", "1"));
@@ -32,7 +36,7 @@ RemoteClient::RemoteClient(std::string ip, int port)
   m_message_write_map.insert(std::make_pair("Do you want to continue with your turn [Y/N]?", "Y"));
   m_message_write_map.insert(std::make_pair("Do you want to surrender [Y/N]?", "N"));
 
-  std::cout << "init listening socket on " << ip << " port " << port << std::endl;
+  std::cout << "init listening socket on " << strIp << " nPort " << nPort << std::endl;
 
 #ifdef _WIN32
   WSAData wsaData;
@@ -44,70 +48,84 @@ RemoteClient::RemoteClient(std::string ip, int port)
 #endif
 
   struct sockaddr_in serv_addr;
-  if ((m_sock = (int)socket(AF_INET, SOCK_STREAM, 0)) < 0)
+  if ((m_nSock = (int)socket(AF_INET, SOCK_STREAM, 0)) < 0)
   {
-    std::cout << "Socket creation error: " << m_sock << std::endl;
+    std::cout << "Socket creation error: " << m_nSock << std::endl;
     throw "Socket creation error.";
   }
 
   serv_addr.sin_family = AF_INET;
-  serv_addr.sin_port   = htons(port); // NOLINT
+  serv_addr.sin_port   = htons(nPort); // NOLINT
 
   // Convert IPv4 and IPv6 addresses from text to binary form
-  int status = 0;
-  if ((status = inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr)) <= 0)
+  int nStatus = 0;
+  if ((nStatus = inet_pton(AF_INET, strIp.c_str(), &serv_addr.sin_addr)) <= 0)
   {
-    std::cout << "Invalid address/ Address not supported > status: " << status << std::endl;
+    std::cout << "Invalid address/ Address not supported > nStatus: " << nStatus << std::endl;
     throw "Invalid address/ Address not supported";
   }
 
-  if ((status = connect(m_sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))) < 0)
+  if ((nStatus = connect(m_nSock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))) < 0)
   {
-    std::cout << "Connection failed! > status: " << status << " errno: " << errno << std::endl;
+    std::cout << "Connection failed! > nStatus: " << nStatus << " errno: " << errno << std::endl;
     throw "Connection Failed";
   }
 
   std::cout << "Connected!" << std::endl;
 }
 
+// ////////////////////////////////////////////////////////////////////////
+// ~RemoteClient (Destructor)
+//
+
 RemoteClient::~RemoteClient()
 {
 #ifdef _WIN32
-  closesocket(m_sock);
+  closesocket(m_nSock);
 #else
-  close(m_sock);
+  close(m_nSock);
 #endif
 }
 
+// ////////////////////////////////////////////////////////////////////////
+// ReadString
+//
+// Reads a string from the server
+
 std::string RemoteClient::ReadString()
 {
-  memset(m_buffer, 0, READ_DATA_SIZE);
+  memset(m_cBuffer, 0, READ_DATA_SIZE);
 #ifdef _WIN32
-  if (recv(m_sock, m_buffer, READ_DATA_SIZE, 0) < 0)
+  if (recv(m_nSock, m_cBuffer, READ_DATA_SIZE, 0) < 0)
 #else
-  if (read(m_sock, m_buffer, READ_DATA_SIZE) < 0)
+  if (read(m_nSock, m_cBuffer, READ_DATA_SIZE) < 0)
 #endif
   {
     throw "Receive Failed";
   }
 #ifdef SHOW_RAW_MSG
-  std::cout << "<<< received RAW string:\r\n" << m_buffer << "\r\n ### end RAW ###\r\n";
+  std::cout << "<<< received RAW string:\r\n" << m_cBuffer << "\r\n ### end RAW ###\r\n";
 #endif
-  return std::string(m_buffer);
+  return std::string(m_cBuffer);
 }
 
-void RemoteClient::WriteString(std::string input)
+// ////////////////////////////////////////////////////////////////////////
+// WriteString
+//
+// Sends a string to the server
+
+void RemoteClient::WriteString(std::string strInput)
 {
   // Append newline if not present
-  if (input.rfind("\n") != input.length())
+  if (strInput.rfind("\n") != strInput.length())
   {
-    input.append("\n");
+    strInput.append("\n");
   }
 
 #ifdef SHOW_RAW_MSG
-  std::cout << ">>> sending string: " << input << "### end send ###\r\n";
+  std::cout << ">>> sending string: " << strInput << "### end send ###\r\n";
 #endif
-  if (send(m_sock, input.c_str(), (int)input.length(), 0) < 0)
+  if (send(m_nSock, strInput.c_str(), (int)strInput.length(), 0) < 0)
   {
     throw "Send Failed";
   }
